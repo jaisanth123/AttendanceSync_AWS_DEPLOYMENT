@@ -1,15 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const Student = require('../models/Student');
+const sample = require('../models/Student');
+// Fetch students by year, branch, and section
 
-// Get students by section
-router.get('/:section', async (req, res) => {
+router.get('/:year/:branch/:section', async (req, res) => {
+  const { year, branch, section } = req.params;
+
   try {
-    const students = await Student.find({ section: req.params.section });
-    res.json(students);
+      // Query to find students by yearOfStudy, branch, and section
+      const students = await sample.find({ year, branch, section });
+      res.json(students);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+      console.error("Error fetching students:", error);
+      res.status(500).json({ error: 'Failed to fetch students' });
   }
 });
-
 module.exports = router;

@@ -30,6 +30,6 @@ app.use('/api/students', studentRoutes);
 app.use('/api/attendance', attendanceRoutes);
 
 
-app.listen(8000,()=>{
+app.listen(5000,()=>{
   console.log('😁👍')
 })

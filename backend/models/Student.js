@@ -13,4 +13,4 @@ const studentSchema = new mongoose.Schema({
 }, { collection: 'sample' });
 
 // Export the model
-module.exports = mongoose.model('Student', studentSchema);
+module.exports = mongoose.model('sample', studentSchema);
