@@ -9,15 +9,27 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-mongoose.connect('mongodb://localhost:27017/attendanceDB', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+// Connect to MongoDB
+mongoose.connect(
+  'mongodb+srv://krrashmika2004:vppCejSTFgfm51dn@cluster0.9cpfc.mongodb.net/Attendence_Monitering?retryWrites=true&w=majority'
+);
+
+
+// Check for successful connection
+mongoose.connection.once('open', () => {
+  console.log('Connected to the database successfully');
 });
 
+// Handle connection errors
+mongoose.connection.on('error', (error) => {
+  console.error('Database connection error:', error);
+});
+
+// Routes
 app.use('/api/students', studentRoutes);
 app.use('/api/attendance', attendanceRoutes);
 
-const PORT = 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+
+app.listen(8000,()=>{
+  console.log('😁👍')
+})
