@@ -3,7 +3,7 @@ from pymongo import MongoClient
 import json
 
 # Load Excel file
-excel_file = "AIML_A_3rd_year.xlsx"
+excel_file = "AIDS-A_2nd_year.xls"
 data = pd.read_excel(excel_file)
 
 # Convert DataFrame to JSON
