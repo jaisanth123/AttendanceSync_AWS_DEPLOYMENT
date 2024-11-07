@@ -1,27 +1,65 @@
 const Student = require('../models/Student');
 const Attendance = require('../models/Attendance');
 
+
 // 1. Mark students as "On Duty"
 exports.markOnDuty = async (req, res) => {
   const { rollNumbers, date, yearOfStudy, branch, section } = req.body;
 
   try {
+    // Array to track roll numbers that are already marked
+    let alreadyMarkedRollNos = [];
+
+    // Iterate over each roll number
+    for (let rollNo of rollNumbers) {
+      // Check if any record exists for this roll number and date
+      const existingRecord = await Attendance.findOne({
+        rollNo,
+        date
+      });
+
+      if (existingRecord) {
+        // If a record exists, check if it's locked
+        if (existingRecord.locked === true) {
+          // If locked, prevent overwriting and return message
+          return res.status(400).json({
+            message: `Attendance for Roll No: ${rollNo} on ${date} is locked. Cannot overwrite.`
+          });
+        } else {
+          // If not locked, attendance is already marked for this roll number
+          alreadyMarkedRollNos.push(rollNo); // Add to already marked list
+        }
+      }
+    }
+
+    // If any roll numbers are already marked, return a response with those roll numbers
+    if (alreadyMarkedRollNos.length > 0) {
+      return res.status(400).json({
+        message: `Attendance is already marked for the following Roll Nos: ${alreadyMarkedRollNos.join(', ')}. Cannot mark as On Duty again.`
+      });
+    }
+
+    // Create new On Duty records for the roll numbers
     const attendanceRecords = rollNumbers.map(rollNo => ({
       rollNo,
       date,
       status: 'On Duty',
       yearOfStudy,
       branch,
-      section
+      section,
+      locked: false
     }));
 
+    // Insert the new "On Duty" records
     await Attendance.insertMany(attendanceRecords);
     res.json({ message: 'Marked as On Duty successfully' });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error marking as On Duty' });
   }
 };
+
 
 // 2. Fetch Remaining Students (those not marked as "On Duty")
 exports.fetchRemainingStudents = async (req, res) => {
@@ -59,22 +97,51 @@ exports.markAbsent = async (req, res) => {
   const { rollNumbers, date, yearOfStudy, branch, section } = req.body;
 
   try {
+    // Iterate over each roll number
+    for (let rollNo of rollNumbers) {
+      // Check if any record exists for this roll number and date
+      const existingRecord = await Attendance.findOne({
+        rollNo,
+        date
+      });
+
+      if (existingRecord) {
+        // If a record exists, check if it's locked
+        if (existingRecord.locked === true) {
+          // If locked, prevent overwriting and return message
+          return res.status(400).json({
+            message: `Attendance for Roll No: ${rollNo} on ${date} is locked. Cannot overwrite.`
+          });
+        } else {
+          // If not locked, attendance is already marked for this roll number
+          return res.status(400).json({
+            message: `Attendance for Roll No: ${rollNo} on ${date} is already marked. Cannot mark as Absent again.`
+          });
+        }
+      }
+    }
+
+    // Create new absent records for the roll numbers
     const absentRecords = rollNumbers.map(rollNo => ({
       rollNo,
       date,
       status: 'Absent',
       yearOfStudy,
       branch,
-      section
+      section,
+      locked: false
     }));
 
+    // Insert the new "Absent" records
     await Attendance.insertMany(absentRecords);
     res.json({ message: 'Marked as Absent successfully' });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error marking as Absent' });
   }
 };
+
 
 // 4. Mark remaining students as "Present"
 exports.markRemainingPresent = async (req, res) => {
@@ -84,13 +151,13 @@ exports.markRemainingPresent = async (req, res) => {
     // Fetch all students in the specified year, branch, and section
     const allStudents = await Student.find({ yearOfStudy, branch, section }).select('rollNo');
 
-    // Fetch roll numbers from attendance records marked as "Absent" or "On Duty"
+    // Fetch roll numbers from attendance records marked as "Absent", "On Duty", or "Present" already
     const markedAttendance = await Attendance.find({
       date,
       yearOfStudy,
       branch,
       section,
-      status: { $in: ['Absent', 'On Duty'] }
+      status: { $in: ['Absent', 'On Duty', 'Present'] }
     }).select('rollNo');
 
     // Extract roll numbers from marked attendance records
@@ -108,10 +175,41 @@ exports.markRemainingPresent = async (req, res) => {
       status: 'Present',
       yearOfStudy,
       branch,
-      section
+      section,
+      locked: false
     }));
 
-    // Insert "Present" records for the remaining students
+    // Array to track roll numbers with existing attendance
+    let alreadyMarkedRollNos = [];
+
+    // Check if any record already exists for these roll numbers for the same date
+    for (let record of presentRecords) {
+      const existingRecord = await Attendance.findOne({
+        rollNo: record.rollNo,
+        date: record.date
+      });
+
+      if (existingRecord) {
+        // If a record exists, check if it's locked
+        if (existingRecord.locked === true) {
+          // If locked, prevent overwriting and return message
+          return res.status(400).json({
+            message: `Attendance for Roll No: ${record.rollNo} on ${date} is locked. Cannot overwrite.`
+          });
+        } else {
+          // If not locked, attendance is already marked for this roll number
+          alreadyMarkedRollNos.push(record.rollNo); // Add to already marked list
+        }
+      }
+    }
+
+    if (alreadyMarkedRollNos.length > 0) {
+      return res.status(400).json({
+        message: `Attendance is already marked for the following Roll Nos: ${alreadyMarkedRollNos.join(', ')}. Cannot mark as Present again.`
+      });
+    }
+
+    // Insert the "Present" records for the remaining students
     await Attendance.insertMany(presentRecords);
     
     res.json({ message: 'Marked remaining students as Present', markedAsPresent: presentRecords.length });
@@ -120,3 +218,4 @@ exports.markRemainingPresent = async (req, res) => {
     res.status(500).json({ message: 'Error marking remaining students as Present' });
   }
 };
+

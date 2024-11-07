@@ -50,14 +50,22 @@ exports.generateAbsentStudentsMessage = async (req, res) => {
             details: absentDetails
         });
 
+        // Step 6: Lock the attendance for this date, year, branch, and section
+        await Attendance.updateMany(
+            { date, yearOfStudy, branch, section },
+            { locked: true }
+        );
+
+        console.log(`Attendance locked for ${yearOfStudy} ${branch} ${section} on ${date}`);
+
     } catch (error) {
         console.error("Error generating absent students message:", error);
         res.status(500).json({ message: "Error generating absent students message" });
     }
 };
 
-//Generate content for Hostel Gmail Report
 
+//Generate content for Hostel Gmail Report
 // Convert Roman numeral to integer
 const romanToInt = (roman) => {
     const romanNumerals = {
@@ -69,16 +77,35 @@ const romanToInt = (roman) => {
     return romanNumerals[roman] || 0; // Default to 0 if not a valid Roman numeral
 };
 
+// Function to check if all students have attendance marked
+const checkAllStudentsAttendance = async (yearOfStudy, date) => {
+    const allStudents = await Student.find({ yearOfStudy }).select('rollNo');
+    const attendanceRecords = await Attendance.find({ date, yearOfStudy }).select('rollNo');
+
+    const allStudentsRollNumbers = allStudents.map(student => student.rollNo);
+    const markedAttendanceRollNumbers = attendanceRecords.map(record => record.rollNo);
+
+    // Check if all students have an attendance record for the date
+    return allStudentsRollNumbers.every(rollNo => markedAttendanceRollNumbers.includes(rollNo));
+};
+
 // Controller to generate a list of absent male students
 exports.generateAbsentMaleStudents = async (req, res) => {
     const { yearOfStudy, hostellerDayScholar, date } = req.query;
 
     try {
+        // Check if all students of the specified year have attendance marked
+        const allStudentsAttendanceMarked = await checkAllStudentsAttendance(yearOfStudy, date);
+        if (!allStudentsAttendanceMarked) {
+            return res.status(400).json({ message: 'Not all students have their attendance marked for this date.' });
+        }
+
         // Fetch male students based on the criteria (hostellerDayScholar and yearOfStudy)
         const allStudents = await Student.find({
             yearOfStudy,
             gender: 'MALE',
-            hostellerDayScholar: 'HOSTELLER'
+            //hostellerDayScholar: 'HOSTELLER',
+            hostellerDayScholar: { $in: ['HOSTELLER', 'HOSTELER'] }
         }).select('rollNo name yearOfStudy gender hostellerDayScholar');
 
         // Fetch attendance records for the specified date and filter for 'Absent' status
@@ -129,11 +156,18 @@ exports.generateAbsentFemaleStudents = async (req, res) => {
     const { yearOfStudy, hostellerDayScholar, date } = req.query;
 
     try {
+        // Check if all students of the specified year have attendance marked
+        const allStudentsAttendanceMarked = await checkAllStudentsAttendance(yearOfStudy, date);
+        if (!allStudentsAttendanceMarked) {
+            return res.status(400).json({ message: 'Not all students have their attendance marked for this date.' });
+        }
+
         // Fetch female students based on the criteria (hostellerDayScholar and yearOfStudy)
         const allStudents = await Student.find({
             yearOfStudy,
             gender: 'FEMALE',
-            hostellerDayScholar: 'HOSTELLER'
+            //hostellerDayScholar: 'HOSTELLER',
+            hostellerDayScholar: { $in: ['HOSTELLER', 'HOSTELER'] }
         }).select('rollNo name yearOfStudy gender hostellerDayScholar');
 
         // Fetch attendance records for the specified date and filter for 'Absent' status
