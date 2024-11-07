@@ -1,5 +1,5 @@
+const Student = require('../models/Student');
 const Attendance = require('../models/Attendance');
-const Student = require('../models/Student'); // Assuming you have a Student model
 
 // 1. Mark students as "On Duty"
 exports.markOnDuty = async (req, res) => {
@@ -81,18 +81,29 @@ exports.markRemainingPresent = async (req, res) => {
   const { yearOfStudy, branch, section, date } = req.body;
 
   try {
+    // Fetch all students in the specified year, branch, and section
     const allStudents = await Student.find({ yearOfStudy, branch, section }).select('rollNo');
-    const markedRollNumbers = await Attendance.find({
+
+    // Fetch roll numbers from attendance records marked as "Absent" or "On Duty"
+    const markedAttendance = await Attendance.find({
       date,
-      status: { $in: ['On Duty', 'Absent'] }
+      yearOfStudy,
+      branch,
+      section,
+      status: { $in: ['Absent', 'On Duty'] }
     }).select('rollNo');
 
-    const remainingRollNumbers = allStudents.filter(student =>
-      !markedRollNumbers.some(record => record.rollNo === student.rollNo)
-    ).map(student => student.rollNo);
+    // Extract roll numbers from marked attendance records
+    const markedRollNumbers = markedAttendance.map(record => record.rollNo);
 
-    const presentRecords = remainingRollNumbers.map(rollNo => ({
-      rollNo,
+    // Filter students who are not in the marked roll numbers
+    const remainingStudents = allStudents.filter(student => 
+      !markedRollNumbers.includes(student.rollNo)
+    );
+
+    // Prepare attendance records to mark remaining students as "Present"
+    const presentRecords = remainingStudents.map(student => ({
+      rollNo: student.rollNo,
       date,
       status: 'Present',
       yearOfStudy,
@@ -100,10 +111,12 @@ exports.markRemainingPresent = async (req, res) => {
       section
     }));
 
+    // Insert "Present" records for the remaining students
     await Attendance.insertMany(presentRecords);
-    res.json({ message: 'Marked remaining students as Present' });
+    
+    res.json({ message: 'Marked remaining students as Present', markedAsPresent: presentRecords.length });
   } catch (error) {
-    console.error(error);
+    console.error("Error marking remaining students as Present:", error);
     res.status(500).json({ message: 'Error marking remaining students as Present' });
   }
 };
