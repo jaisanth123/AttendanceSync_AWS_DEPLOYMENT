@@ -1,0 +1,18 @@
+/* Add the necessary tailwind classes for responsiveness */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  font-family: 'Arial', sans-serif;
+}
+
+/* Optional: Make sure all elements are displayed correctly in full screen */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
