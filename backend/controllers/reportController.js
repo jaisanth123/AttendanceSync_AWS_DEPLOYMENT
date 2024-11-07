@@ -55,3 +55,126 @@ exports.generateAbsentStudentsMessage = async (req, res) => {
         res.status(500).json({ message: "Error generating absent students message" });
     }
 };
+
+//Generate content for Hostel Gmail Report
+
+// Convert Roman numeral to integer
+const romanToInt = (roman) => {
+    const romanNumerals = {
+        'I': 1,
+        'II': 2,
+        'III': 3,
+        'IV': 4
+    };
+    return romanNumerals[roman] || 0; // Default to 0 if not a valid Roman numeral
+};
+
+// Controller to generate a list of absent male students
+exports.generateAbsentMaleStudents = async (req, res) => {
+    const { yearOfStudy, hostellerDayScholar, date } = req.query;
+
+    try {
+        // Fetch male students based on the criteria (hostellerDayScholar and yearOfStudy)
+        const allStudents = await Student.find({
+            yearOfStudy,
+            gender: 'MALE',
+            hostellerDayScholar: 'HOSTELLER'
+        }).select('rollNo name yearOfStudy gender hostellerDayScholar');
+
+        // Fetch attendance records for the specified date and filter for 'Absent' status
+        const attendanceRecords = await Attendance.find({ date, status: 'Absent' }).select('rollNo');
+
+        // Filter out the students who are absent
+        const absentStudents = allStudents.filter(student =>
+            attendanceRecords.some(record => record.rollNo === student.rollNo)
+        );
+
+        // Sort the students by yearOfStudy and rollNo
+        absentStudents.sort((a, b) => {
+            const numA = romanToInt(a.yearOfStudy);
+            const numB = romanToInt(b.yearOfStudy);
+
+            if (numA === numB) {
+                const rollNoA = parseInt(a.rollNo.replace(/\D/g, ''));
+                const rollNoB = parseInt(b.rollNo.replace(/\D/g, ''));
+                return rollNoA - rollNoB;
+            }
+            return numA - numB;
+        });
+
+        // Prepare the response message with roll number, name, and year of study
+        const absentDetails = absentStudents.map(student => ({
+            rollNo: student.rollNo,
+            name: student.name,
+            yearOfStudy: student.yearOfStudy
+        }));
+
+        if (absentStudents.length === 0) {
+            return res.status(404).json({ message: 'No absent male students found for the specified criteria.' });
+        }
+
+        res.json({
+            message: `Absent male students for ${date} based on criteria (Hosteller: HOSTELLER):`,
+            absentStudents: absentDetails
+        });
+
+    } catch (error) {
+        console.error("Error generating absent male students list:", error);
+        res.status(500).json({ message: 'Error generating absent students list' });
+    }
+};
+
+// Controller to generate a list of absent female students
+exports.generateAbsentFemaleStudents = async (req, res) => {
+    const { yearOfStudy, hostellerDayScholar, date } = req.query;
+
+    try {
+        // Fetch female students based on the criteria (hostellerDayScholar and yearOfStudy)
+        const allStudents = await Student.find({
+            yearOfStudy,
+            gender: 'FEMALE',
+            hostellerDayScholar: 'HOSTELLER'
+        }).select('rollNo name yearOfStudy gender hostellerDayScholar');
+
+        // Fetch attendance records for the specified date and filter for 'Absent' status
+        const attendanceRecords = await Attendance.find({ date, status: 'Absent' }).select('rollNo');
+
+        // Filter out the students who are absent
+        const absentStudents = allStudents.filter(student =>
+            attendanceRecords.some(record => record.rollNo === student.rollNo)
+        );
+
+        // Sort the students by yearOfStudy and rollNo
+        absentStudents.sort((a, b) => {
+            const numA = romanToInt(a.yearOfStudy);
+            const numB = romanToInt(b.yearOfStudy);
+
+            if (numA === numB) {
+                const rollNoA = parseInt(a.rollNo.replace(/\D/g, ''));
+                const rollNoB = parseInt(b.rollNo.replace(/\D/g, ''));
+                return rollNoA - rollNoB;
+            }
+            return numA - numB;
+        });
+
+        // Prepare the response message with roll number, name, and year of study
+        const absentDetails = absentStudents.map(student => ({
+            rollNo: student.rollNo,
+            name: student.name,
+            yearOfStudy: student.yearOfStudy
+        }));
+
+        if (absentStudents.length === 0) {
+            return res.status(404).json({ message: 'No absent female students found for the specified criteria.' });
+        }
+
+        res.json({
+            message: `Absent female students for ${date} based on criteria (Hosteller: HOSTELLER):`,
+            absentStudents: absentDetails
+        });
+
+    } catch (error) {
+        console.error("Error generating absent female students list:", error);
+        res.status(500).json({ message: 'Error generating absent students list' });
+    }
+};
