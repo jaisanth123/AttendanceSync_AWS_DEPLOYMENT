@@ -12,8 +12,10 @@ app.use(express.json());
 
 // Routes
 const studentRoutes = require('./routes/studentRoutes');
-app.use('/api/students', studentRoutes);
+const attendanceRoutes = require('./routes/attendanceRoutes');
 
+app.use('/api/students', studentRoutes);
+app.use('/api/attendance',attendanceRoutes);
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
