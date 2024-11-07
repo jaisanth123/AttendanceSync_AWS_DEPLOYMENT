@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const attendanceController = require('../controllers/attendanceController');
-console.log('attendanceRoutes.js loaded');  // Log to confirm if file is being loaded
+//console.log('attendanceRoutes.js loaded');  // Log to confirm if file is being loaded
 
 // Route to mark students as "On Duty"
 router.post('/onDuty', attendanceController.markOnDuty);
