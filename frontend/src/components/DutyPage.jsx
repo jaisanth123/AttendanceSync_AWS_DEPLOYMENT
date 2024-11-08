@@ -11,7 +11,17 @@ function DutyPage({ selectedCourse }) {
   }, [selectedCourse]);
 
   const handleIncrement = () => setCounter(counter + 1);
-  const handleDecrement = () => setCounter(counter > 0 ? counter - 1 : 0);
+  const handleDecrement = () => {
+    if (counter > 0) {
+      const newCounter = counter - 1;
+      setCounter(newCounter);
+      
+      // Remove selections that are out of the new counter range
+      setSelectedBoxes((prevSelected) =>
+        prevSelected.filter((index) => index < newCounter)
+      );
+    }
+  };
 
   const toggleSelection = (index) => {
     setSelectedBoxes((prevSelected) =>
@@ -50,7 +60,7 @@ function DutyPage({ selectedCourse }) {
           <div
             key={index}
             onClick={() => toggleSelection(index)}
-            className={`flex items-center justify-center p-6 text-white rounded-lg shadow-md cursor-pointer 
+            className={`flex items-center justify-center p-6 duration-300 hover:bg-blue-600 hover:scale-110 text-white rounded-lg shadow-md cursor-pointer 
               ${selectedBoxes.includes(index) ? "bg-blue-600" : "bg-gray-700"}`}
           >
             <h3 className="text-xl font-semibold">

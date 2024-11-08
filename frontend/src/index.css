@@ -1,12 +1,11 @@
-/* Add the necessary tailwind classes for responsiveness */
+@import url('https://fonts.googleapis.com/css2?family=Gentium+Basic&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Gentium+Basic&display=swap');
 html, body {
   font-family: 'Gentium Basic', serif;
-
 }
 
 /* Optional: Make sure all elements are displayed correctly in full screen */
