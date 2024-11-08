@@ -1,15 +1,18 @@
 const express = require('express');
-const { generateAbsentStudentsMessage,generateAbsentMaleStudents,generateAbsentFemaleStudents } = require('../controllers/reportController');
+const {handleAbsentStudentsReport, generateAbsentStudentsMessage } = require('../controllers/reportController');
 
 const router = express.Router();
 
 // Define the route to generate the absent students' message
 router.get('/absentStudents', generateAbsentStudentsMessage);
 
-// Route to get absent male students
-router.get('/absent/male', generateAbsentMaleStudents);
+// Route for generating report for male students
+router.get('/report/absent/male', (req, res) => {
+    handleAbsentStudentsReport('MALE', req, res);
+});
 
-// Route to get absent female students
-router.get('/absent/female', generateAbsentFemaleStudents);
-
+// Route for generating report for female students
+router.get('/report/absent/female', (req, res) => {
+    handleAbsentStudentsReport('FEMALE', req, res);
+});
 module.exports = router;

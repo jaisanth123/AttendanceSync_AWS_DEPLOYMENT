@@ -77,8 +77,34 @@ const romanToInt = (roman) => {
     return romanNumerals[roman] || 0; // Default to 0 if not a valid Roman numeral
 };
 
-const xlsx = require('xlsx');
+async function checkAllStudentsAttendance(yearOfStudy, date) {
+    try {
+        // Fetch all students in the specified year
+        const allStudents = await Student.find({ yearOfStudy }).select('rollNo');
 
+        // Fetch attendance records for the specified date
+        const attendanceRecords = await Attendance.find({ date }).select('rollNo');
+
+        // Check if all students have an attendance record for the date
+        const allStudentsMarked = allStudents.every(student =>
+            attendanceRecords.some(record => record.rollNo === student.rollNo)
+        );
+
+        return allStudentsMarked;
+    } catch (error) {
+        console.error("Error in checkAllStudentsAttendance:", error);
+        throw error;
+    }
+}
+
+const xlsx = require('xlsx');
+const path = require('path');
+const fs = require('fs');
+
+const reportDir = path.join(__dirname, 'reports');
+if (!fs.existsSync(reportDir)) {
+  fs.mkdirSync(reportDir);
+}
 // Helper function to generate Excel file with absent students data
 const generateExcelReport = (absentStudentsByYear, fileName) => {
     const workbook = xlsx.utils.book_new();
@@ -98,12 +124,17 @@ const generateExcelReport = (absentStudentsByYear, fileName) => {
         xlsx.utils.book_append_sheet(workbook, worksheet, `Year ${year}`);
     });
 
-    // Write the workbook to an Excel file
-    xlsx.writeFile(workbook, fileName);
+    // Define the path to save the Excel file
+    const filePath = path.join(__dirname, '..', 'reports', fileName);
+
+    // Write the workbook to the file
+    if (Object.keys(absentStudentsByYear).length > 0) {
+        xlsx.writeFile(workbook, filePath);
+    }
 };
 
 // Controller to print and generate Excel report for absent students
-const handleAbsentStudentsReport = async (gender, req, res, fileGender) => {
+exports.handleAbsentStudentsReport = async (gender, req, res) => {
     const { yearOfStudy, hostellerDayScholar, date } = req.query;
 
     try {
@@ -124,6 +155,11 @@ const handleAbsentStudentsReport = async (gender, req, res, fileGender) => {
             attendanceRecords.some(record => record.rollNo === student.rollNo)
         );
 
+        if (absentStudents.length === 0) {
+            // If no absent students, return a message and skip report generation
+            return res.status(404).json({ message: `No absent ${gender.toLowerCase()} students found for the specified criteria.` });
+        }
+
         absentStudents.sort((a, b) => {
             const numA = romanToInt(a.yearOfStudy);
             const numB = romanToInt(b.yearOfStudy);
@@ -143,7 +179,6 @@ const handleAbsentStudentsReport = async (gender, req, res, fileGender) => {
             section: student.section
         }));
 
-        // Print to console
         console.log(`Absent ${gender.toLowerCase()} students for ${date}:`);
         absentDetails.forEach((student, index) => {
             console.log(`${index + 1}. Roll No: ${student.rollNo}, Name: ${student.name}, Year: ${student.yearOfStudy}, Branch: ${student.branch}-${student.section}`);
@@ -156,30 +191,21 @@ const handleAbsentStudentsReport = async (gender, req, res, fileGender) => {
             return acc;
         }, {});
 
-        // Use the fileGender parameter for the filename (e.g., "BOYS" or "GIRLS")
-        generateExcelReport(absentStudentsByYear, `${fileGender}_Absent_Students_${date}.xlsx`);
+        // Adjust file name based on gender
+        const fileName = gender === 'MALE' ? `BOYS_Absent_Students_${date}.xlsx` : `GIRLS_Absent_Students_${date}.xlsx`;
 
-        if (absentStudents.length === 0) {
-            return res.status(404).json({ message: `No absent ${gender.toLowerCase()} students found for the specified criteria.` });
-        }
+        // Generate the Excel report
+        generateExcelReport(absentStudentsByYear, fileName);
 
+        // Return a response with the link to download the Excel report
         res.json({
             message: `Absent ${gender.toLowerCase()} students for ${date} based on criteria (Hosteller: HOSTELLER):`,
-            absentStudents: absentDetails
+            absentStudents: absentDetails,
+            reportLink: `/reports/${fileName}`
         });
 
     } catch (error) {
         console.error(`Error generating absent ${gender.toLowerCase()} students list:`, error);
         res.status(500).json({ message: 'Error generating absent students list' });
     }
-};
-
-// Controller to generate a list of absent male students with the filename as BOYS_Absent_Students_<date>.xlsx
-exports.generateAbsentMaleStudents = async (req, res) => {
-    await handleAbsentStudentsReport('MALE', req, res, 'BOYS');
-};
-
-// Controller to generate a list of absent female students with the filename as GIRLS_Absent_Students_<date>.xlsx
-exports.generateAbsentFemaleStudents = async (req, res) => {
-    await handleAbsentStudentsReport('FEMALE', req, res, 'GIRLS');
 };
