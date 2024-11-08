@@ -1,54 +1,42 @@
 import React, { useState, useEffect, useRef } from "react";
-import Navbar from "./Navbar";
-import Sidebar from "./Sidebar";
-import DutyPage from "./DutyPage"; // Import the new DutyPage component
-import HomePage from "./HomePage"; // Import the HomePage component
+import Navbar from "./components/Navbar";
+import Sidebar from "./components/Sidebar";
+import HomePage from "./components/HomePage";
+import DutyPage from "./components/DutyPage"; 
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null); // Initially, no course is selected
-
+  const [selectedItem, setSelectedItem] = useState(null);
   const sidebarRef = useRef(null);
-  const mainContentRef = useRef(null); // Reference to the main content
 
-  // Close sidebar if click is outside of sidebar or main content
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prevState) => !prevState);
+  };
+
+  const handleItemSelection = (item) => {
+    setSelectedItem(item);
+    setIsSidebarOpen(false);
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        sidebarRef.current && !sidebarRef.current.contains(event.target) && 
-        mainContentRef.current && !mainContentRef.current.contains(event.target)
-      ) {
-        setIsSidebarOpen(false); // Close sidebar when clicked outside
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+        setIsSidebarOpen(false);
       }
     };
 
-    // Add event listener for clicks
     document.addEventListener("click", handleClickOutside);
 
-    // Clean up event listener on component unmount
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
   }, []);
 
-  // Prevent click event propagation inside the sidebar
-  const handleSidebarClick = (event) => {
-    event.stopPropagation(); // Prevent the click from bubbling up to the document
-  };
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const handleItemSelection = (item) => {
-    setSelectedItem(item); // Update selected item when a dropdown element is clicked
-  };
-
   return (
     <div className="flex flex-col h-screen">
       <Navbar toggleSidebar={toggleSidebar} />
 
-      {/* Overlay for sidebar on small screens */}
+      {/* Sidebar background overlay */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 transition-opacity duration-300 bg-black opacity-50 md:hidden"
@@ -56,9 +44,8 @@ function App() {
         ></div>
       )}
 
-      {/* Main Content */}
-      <div ref={mainContentRef} className="flex-1">
-        {/* Show the course name and status if a course is selected */}
+      <div className="flex-1 mt-20 md:mt-24"> {/* Added margin-top here */}
+        {/* Display selected item title when selected */}
         {selectedItem && (
           <div className="p-4 text-center text-black">
             <h1 className="text-4xl font-semibold">{selectedItem}</h1>
@@ -66,22 +53,23 @@ function App() {
           </div>
         )}
 
+        {/* Conditional rendering of HomePage or DutyPage */}
         {selectedItem === null ? (
-          // Show HomePage if no course is selected
           <HomePage toggleSidebar={toggleSidebar} />
         ) : (
-          // Show DutyPage when a course is selected
-          <DutyPage selectedItem={selectedItem} />
+          <div className="pt-16">
+            {/* Add padding-top for content below navbar */}
+            <DutyPage selectedCourse={selectedItem} />
+          </div>
         )}
       </div>
 
-      {/* Sidebar */}
+      {/* Sidebar component */}
       {isSidebarOpen && (
         <Sidebar
-          ref={sidebarRef}
+          ref={sidebarRef} // Pass the ref to Sidebar
           closeSidebar={() => setIsSidebarOpen(false)}
-          handleSidebarClick={handleSidebarClick}
-          handleItemSelection={handleItemSelection} // Pass the selection handler
+          handleItemSelection={handleItemSelection}
         />
       )}
     </div>
