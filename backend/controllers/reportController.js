@@ -77,140 +77,109 @@ const romanToInt = (roman) => {
     return romanNumerals[roman] || 0; // Default to 0 if not a valid Roman numeral
 };
 
-// Function to check if all students have attendance marked
-const checkAllStudentsAttendance = async (yearOfStudy, date) => {
-    const allStudents = await Student.find({ yearOfStudy }).select('rollNo');
-    const attendanceRecords = await Attendance.find({ date, yearOfStudy }).select('rollNo');
+const xlsx = require('xlsx');
 
-    const allStudentsRollNumbers = allStudents.map(student => student.rollNo);
-    const markedAttendanceRollNumbers = attendanceRecords.map(record => record.rollNo);
+// Helper function to generate Excel file with absent students data
+const generateExcelReport = (absentStudentsByYear, fileName) => {
+    const workbook = xlsx.utils.book_new();
 
-    // Check if all students have an attendance record for the date
-    return allStudentsRollNumbers.every(rollNo => markedAttendanceRollNumbers.includes(rollNo));
+    Object.keys(absentStudentsByYear).forEach(year => {
+        const students = absentStudentsByYear[year];
+        const data = students.map((student, index) => ({
+            'S.No': index + 1,
+            'Roll No': student.rollNo,
+            'Student Name': student.name,
+            'Year': student.yearOfStudy,
+            'Branch': `${student.branch}-${student.section}`
+        }));
+
+        // Create a worksheet for each year and add it to the workbook
+        const worksheet = xlsx.utils.json_to_sheet(data);
+        xlsx.utils.book_append_sheet(workbook, worksheet, `Year ${year}`);
+    });
+
+    // Write the workbook to an Excel file
+    xlsx.writeFile(workbook, fileName);
 };
 
-// Controller to generate a list of absent male students
+// Controller to print and generate Excel report for absent students
+const handleAbsentStudentsReport = async (gender, req, res, fileGender) => {
+    const { yearOfStudy, hostellerDayScholar, date } = req.query;
+
+    try {
+        const allStudentsAttendanceMarked = await checkAllStudentsAttendance(yearOfStudy, date);
+        if (!allStudentsAttendanceMarked) {
+            return res.status(400).json({ message: 'Not all students have their attendance marked for this date.' });
+        }
+
+        const allStudents = await Student.find({
+            yearOfStudy,
+            gender,
+            hostellerDayScholar: { $in: ['HOSTELLER', 'HOSTELER'] }
+        }).select('rollNo name yearOfStudy gender hostellerDayScholar branch section');
+
+        const attendanceRecords = await Attendance.find({ date, status: 'Absent' }).select('rollNo');
+
+        const absentStudents = allStudents.filter(student =>
+            attendanceRecords.some(record => record.rollNo === student.rollNo)
+        );
+
+        absentStudents.sort((a, b) => {
+            const numA = romanToInt(a.yearOfStudy);
+            const numB = romanToInt(b.yearOfStudy);
+            if (numA === numB) {
+                const rollNoA = parseInt(a.rollNo.replace(/\D/g, ''));
+                const rollNoB = parseInt(b.rollNo.replace(/\D/g, ''));
+                return rollNoA - rollNoB;
+            }
+            return numA - numB;
+        });
+
+        const absentDetails = absentStudents.map(student => ({
+            rollNo: student.rollNo,
+            name: student.name,
+            yearOfStudy: student.yearOfStudy,
+            branch: student.branch,
+            section: student.section
+        }));
+
+        // Print to console
+        console.log(`Absent ${gender.toLowerCase()} students for ${date}:`);
+        absentDetails.forEach((student, index) => {
+            console.log(`${index + 1}. Roll No: ${student.rollNo}, Name: ${student.name}, Year: ${student.yearOfStudy}, Branch: ${student.branch}-${student.section}`);
+        });
+
+        // Organize data by year for Excel report
+        const absentStudentsByYear = absentStudents.reduce((acc, student) => {
+            if (!acc[student.yearOfStudy]) acc[student.yearOfStudy] = [];
+            acc[student.yearOfStudy].push(student);
+            return acc;
+        }, {});
+
+        // Use the fileGender parameter for the filename (e.g., "BOYS" or "GIRLS")
+        generateExcelReport(absentStudentsByYear, `${fileGender}_Absent_Students_${date}.xlsx`);
+
+        if (absentStudents.length === 0) {
+            return res.status(404).json({ message: `No absent ${gender.toLowerCase()} students found for the specified criteria.` });
+        }
+
+        res.json({
+            message: `Absent ${gender.toLowerCase()} students for ${date} based on criteria (Hosteller: HOSTELLER):`,
+            absentStudents: absentDetails
+        });
+
+    } catch (error) {
+        console.error(`Error generating absent ${gender.toLowerCase()} students list:`, error);
+        res.status(500).json({ message: 'Error generating absent students list' });
+    }
+};
+
+// Controller to generate a list of absent male students with the filename as BOYS_Absent_Students_<date>.xlsx
 exports.generateAbsentMaleStudents = async (req, res) => {
-    const { yearOfStudy, hostellerDayScholar, date } = req.query;
-
-    try {
-        // Check if all students of the specified year have attendance marked
-        const allStudentsAttendanceMarked = await checkAllStudentsAttendance(yearOfStudy, date);
-        if (!allStudentsAttendanceMarked) {
-            return res.status(400).json({ message: 'Not all students have their attendance marked for this date.' });
-        }
-
-        // Fetch male students based on the criteria (hostellerDayScholar and yearOfStudy)
-        const allStudents = await Student.find({
-            yearOfStudy,
-            gender: 'MALE',
-            //hostellerDayScholar: 'HOSTELLER',
-            hostellerDayScholar: { $in: ['HOSTELLER', 'HOSTELER'] }
-        }).select('rollNo name yearOfStudy gender hostellerDayScholar');
-
-        // Fetch attendance records for the specified date and filter for 'Absent' status
-        const attendanceRecords = await Attendance.find({ date, status: 'Absent' }).select('rollNo');
-
-        // Filter out the students who are absent
-        const absentStudents = allStudents.filter(student =>
-            attendanceRecords.some(record => record.rollNo === student.rollNo)
-        );
-
-        // Sort the students by yearOfStudy and rollNo
-        absentStudents.sort((a, b) => {
-            const numA = romanToInt(a.yearOfStudy);
-            const numB = romanToInt(b.yearOfStudy);
-
-            if (numA === numB) {
-                const rollNoA = parseInt(a.rollNo.replace(/\D/g, ''));
-                const rollNoB = parseInt(b.rollNo.replace(/\D/g, ''));
-                return rollNoA - rollNoB;
-            }
-            return numA - numB;
-        });
-
-        // Prepare the response message with roll number, name, and year of study
-        const absentDetails = absentStudents.map(student => ({
-            rollNo: student.rollNo,
-            name: student.name,
-            yearOfStudy: student.yearOfStudy
-        }));
-
-        if (absentStudents.length === 0) {
-            return res.status(404).json({ message: 'No absent male students found for the specified criteria.' });
-        }
-
-        res.json({
-            message: `Absent male students for ${date} based on criteria (Hosteller: HOSTELLER):`,
-            absentStudents: absentDetails
-        });
-
-    } catch (error) {
-        console.error("Error generating absent male students list:", error);
-        res.status(500).json({ message: 'Error generating absent students list' });
-    }
+    await handleAbsentStudentsReport('MALE', req, res, 'BOYS');
 };
 
-// Controller to generate a list of absent female students
+// Controller to generate a list of absent female students with the filename as GIRLS_Absent_Students_<date>.xlsx
 exports.generateAbsentFemaleStudents = async (req, res) => {
-    const { yearOfStudy, hostellerDayScholar, date } = req.query;
-
-    try {
-        // Check if all students of the specified year have attendance marked
-        const allStudentsAttendanceMarked = await checkAllStudentsAttendance(yearOfStudy, date);
-        if (!allStudentsAttendanceMarked) {
-            return res.status(400).json({ message: 'Not all students have their attendance marked for this date.' });
-        }
-
-        // Fetch female students based on the criteria (hostellerDayScholar and yearOfStudy)
-        const allStudents = await Student.find({
-            yearOfStudy,
-            gender: 'FEMALE',
-            //hostellerDayScholar: 'HOSTELLER',
-            hostellerDayScholar: { $in: ['HOSTELLER', 'HOSTELER'] }
-        }).select('rollNo name yearOfStudy gender hostellerDayScholar');
-
-        // Fetch attendance records for the specified date and filter for 'Absent' status
-        const attendanceRecords = await Attendance.find({ date, status: 'Absent' }).select('rollNo');
-
-        // Filter out the students who are absent
-        const absentStudents = allStudents.filter(student =>
-            attendanceRecords.some(record => record.rollNo === student.rollNo)
-        );
-
-        // Sort the students by yearOfStudy and rollNo
-        absentStudents.sort((a, b) => {
-            const numA = romanToInt(a.yearOfStudy);
-            const numB = romanToInt(b.yearOfStudy);
-
-            if (numA === numB) {
-                const rollNoA = parseInt(a.rollNo.replace(/\D/g, ''));
-                const rollNoB = parseInt(b.rollNo.replace(/\D/g, ''));
-                return rollNoA - rollNoB;
-            }
-            return numA - numB;
-        });
-
-        // Prepare the response message with roll number, name, and year of study
-        const absentDetails = absentStudents.map(student => ({
-            rollNo: student.rollNo,
-            name: student.name,
-            yearOfStudy: student.yearOfStudy
-        }));
-
-        if (absentStudents.length === 0) {
-            return res.status(404).json({ message: 'No absent female students found for the specified criteria.' });
-        }
-
-        res.json({
-            message: `Absent female students for ${date} based on criteria (Hosteller: HOSTELLER):`,
-            absentStudents: absentDetails
-        });
-
-    } catch (error) {
-        console.error("Error generating absent female students list:", error);
-        res.status(500).json({ message: 'Error generating absent students list' });
-    }
+    await handleAbsentStudentsReport('FEMALE', req, res, 'GIRLS');
 };
-
-
