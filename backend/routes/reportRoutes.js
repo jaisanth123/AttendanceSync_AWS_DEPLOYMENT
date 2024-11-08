@@ -15,4 +15,4 @@ router.get('/report/absent/male', (req, res) => {
 router.get('/report/absent/female', (req, res) => {
     handleAbsentStudentsReport('FEMALE', req, res);
 });
-module.exports = router;
+module.exports = router;// Route for generating report for female students

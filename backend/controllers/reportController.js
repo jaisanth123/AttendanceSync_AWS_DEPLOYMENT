@@ -67,6 +67,7 @@ exports.generateAbsentStudentsMessage = async (req, res) => {
 
 //Generate content for Hostel Gmail Report
 // Convert Roman numeral to integer
+// Helper function to convert Roman numerals to integers for sorting
 const romanToInt = (roman) => {
     const romanNumerals = {
         'I': 1,
@@ -74,138 +75,106 @@ const romanToInt = (roman) => {
         'III': 3,
         'IV': 4
     };
-    return romanNumerals[roman] || 0; // Default to 0 if not a valid Roman numeral
+    return romanNumerals[roman] || 0; // Return 0 if invalid Roman numeral
 };
 
-async function checkAllStudentsAttendance(yearOfStudy, date) {
+const fs = require('fs');
+const path = require('path');
+const xlsx = require('xlsx');
+
+const reportDir = path.join(__dirname,'..', 'reports'); // Adjust the path if needed
+
+// Ensure the directory exists
+if (!fs.existsSync(reportDir)) {
+    console.log('Report directory does not exist. Creating directory:', reportDir);
+    fs.mkdirSync(reportDir);
+} else {
+    console.log('Report directory already exists:', reportDir);
+}
+
+// Controller to generate the absent students report
+exports.handleAbsentStudentsReport = async (gender, req, res) => {
+    const { date } = req.query; // Extract date from query parameters
+    console.log('Request received to generate report for gender:', gender, 'and date:', date);
+
     try {
-        // Fetch all students in the specified year
-        const allStudents = await Student.find({ yearOfStudy }).select('rollNo');
+        // Fetch all students of the specified gender
+        console.log('Fetching all students with gender:', gender);
+        const allStudents = await Student.find({ gender }).select('rollNo name yearOfStudy branch section');
+        console.log('Total students fetched:', allStudents.length);
 
-        // Fetch attendance records for the specified date
-        const attendanceRecords = await Attendance.find({ date }).select('rollNo');
+        // Fetch attendance records for the specified date (only absent students)
+        console.log('Fetching attendance records for date:', date);
+        const attendanceRecords = await Attendance.find({ date, status: 'Absent' }).select('rollNo');
+        console.log('Total attendance records fetched for absent students:', attendanceRecords.length);
 
-        // Check if all students have an attendance record for the date
-        const allStudentsMarked = allStudents.every(student =>
+        // Filter students who were absent on the given date
+        const absentStudents = allStudents.filter(student =>
             attendanceRecords.some(record => record.rollNo === student.rollNo)
         );
+        console.log('Absent Students:', absentStudents);
 
-        return allStudentsMarked;
-    } catch (error) {
-        console.error("Error in checkAllStudentsAttendance:", error);
-        throw error;
-    }
-}
+        // If no absent students found, return a 404 error
+        if (absentStudents.length === 0) {
+            console.log(`No absent ${gender.toLowerCase()} students found for ${date}.`);
+            return res.status(404).json({ message: `No absent ${gender.toLowerCase()} students found for ${date}.` });
+        }
 
-const xlsx = require('xlsx');
-const path = require('path');
-const fs = require('fs');
+        // Sort absent students by yearOfStudy (Roman numeral order) and then by rollNo
+        console.log('Sorting absent students by yearOfStudy and rollNo');
+        absentStudents.sort((a, b) => {
+            const yearA = romanToInt(a.yearOfStudy);
+            const yearB = romanToInt(b.yearOfStudy);
+            if (yearA === yearB) {
+                const rollNoA = parseInt(a.rollNo.replace(/\D/g, '')); // Extract numeric part of rollNo
+                const rollNoB = parseInt(b.rollNo.replace(/\D/g, ''));
+                return rollNoA - rollNoB; // Sort by rollNo if yearOfStudy is the same
+            }
+            return yearA - yearB; // Sort by yearOfStudy if different
+        });
+        console.log('Absent students sorted successfully');
 
-const reportDir = path.join(__dirname, 'reports');
-if (!fs.existsSync(reportDir)) {
-  fs.mkdirSync(reportDir);
-}
-// Helper function to generate Excel file with absent students data
-const generateExcelReport = (absentStudentsByYear, fileName) => {
-    const workbook = xlsx.utils.book_new();
-
-    Object.keys(absentStudentsByYear).forEach(year => {
-        const students = absentStudentsByYear[year];
-        const data = students.map((student, index) => ({
+        // Prepare data for the Excel report
+        const reportData = absentStudents.map((student, index) => ({
             'S.No': index + 1,
             'Roll No': student.rollNo,
             'Student Name': student.name,
             'Year': student.yearOfStudy,
             'Branch': `${student.branch}-${student.section}`
         }));
+        console.log('Report data prepared:', reportData);
 
-        // Create a worksheet for each year and add it to the workbook
-        const worksheet = xlsx.utils.json_to_sheet(data);
-        xlsx.utils.book_append_sheet(workbook, worksheet, `Year ${year}`);
-    });
+        // Generate Excel file
+        const workbook = xlsx.utils.book_new();
+        const worksheet = xlsx.utils.json_to_sheet(reportData);
+        xlsx.utils.book_append_sheet(workbook, worksheet, 'Absent Students');
+        console.log('Excel workbook created');
 
-    // Define the path to save the Excel file
-    const filePath = path.join(__dirname, '..', 'reports', fileName);
+        // Define file path and name
+        const fileName = `${gender}_Absent_Students_${date}.xlsx`;
+        const filePath = path.join(reportDir, fileName);
 
-    // Write the workbook to the file
-    if (Object.keys(absentStudentsByYear).length > 0) {
-        xlsx.writeFile(workbook, filePath);
-    }
-};
+        // Log the file path to verify
+        console.log('File path where Excel will be saved:', filePath);
 
-// Controller to print and generate Excel report for absent students
-exports.handleAbsentStudentsReport = async (gender, req, res) => {
-    const { yearOfStudy, hostellerDayScholar, date } = req.query;
-
-    try {
-        const allStudentsAttendanceMarked = await checkAllStudentsAttendance(yearOfStudy, date);
-        if (!allStudentsAttendanceMarked) {
-            return res.status(400).json({ message: 'Not all students have their attendance marked for this date.' });
+        // Write the workbook to the file and check for errors
+        try {
+            xlsx.writeFile(workbook, filePath);
+            console.log('Excel file created successfully:', filePath);
+        } catch (writeError) {
+            console.error('Error writing the Excel file:', writeError);
+            return res.status(500).json({ message: 'Failed to create the Excel report.' });
         }
 
-        const allStudents = await Student.find({
-            yearOfStudy,
-            gender,
-            hostellerDayScholar: { $in: ['HOSTELLER', 'HOSTELER'] }
-        }).select('rollNo name yearOfStudy gender hostellerDayScholar branch section');
-
-        const attendanceRecords = await Attendance.find({ date, status: 'Absent' }).select('rollNo');
-
-        const absentStudents = allStudents.filter(student =>
-            attendanceRecords.some(record => record.rollNo === student.rollNo)
-        );
-
-        if (absentStudents.length === 0) {
-            // If no absent students, return a message and skip report generation
-            return res.status(404).json({ message: `No absent ${gender.toLowerCase()} students found for the specified criteria.` });
-        }
-
-        absentStudents.sort((a, b) => {
-            const numA = romanToInt(a.yearOfStudy);
-            const numB = romanToInt(b.yearOfStudy);
-            if (numA === numB) {
-                const rollNoA = parseInt(a.rollNo.replace(/\D/g, ''));
-                const rollNoB = parseInt(b.rollNo.replace(/\D/g, ''));
-                return rollNoA - rollNoB;
-            }
-            return numA - numB;
-        });
-
-        const absentDetails = absentStudents.map(student => ({
-            rollNo: student.rollNo,
-            name: student.name,
-            yearOfStudy: student.yearOfStudy,
-            branch: student.branch,
-            section: student.section
-        }));
-
-        console.log(`Absent ${gender.toLowerCase()} students for ${date}:`);
-        absentDetails.forEach((student, index) => {
-            console.log(`${index + 1}. Roll No: ${student.rollNo}, Name: ${student.name}, Year: ${student.yearOfStudy}, Branch: ${student.branch}-${student.section}`);
-        });
-
-        // Organize data by year for Excel report
-        const absentStudentsByYear = absentStudents.reduce((acc, student) => {
-            if (!acc[student.yearOfStudy]) acc[student.yearOfStudy] = [];
-            acc[student.yearOfStudy].push(student);
-            return acc;
-        }, {});
-
-        // Adjust file name based on gender
-        const fileName = gender === 'MALE' ? `BOYS_Absent_Students_${date}.xlsx` : `GIRLS_Absent_Students_${date}.xlsx`;
-
-        // Generate the Excel report
-        generateExcelReport(absentStudentsByYear, fileName);
-
-        // Return a response with the link to download the Excel report
+        // Return the response with a link to download the report
+        console.log(`Absent ${gender.toLowerCase()} students report for ${date} is ready.`);
         res.json({
-            message: `Absent ${gender.toLowerCase()} students for ${date} based on criteria (Hosteller: HOSTELLER):`,
-            absentStudents: absentDetails,
+            message: `Absent ${gender.toLowerCase()} students report for ${date} is ready.`,
             reportLink: `/reports/${fileName}`
         });
 
     } catch (error) {
-        console.error(`Error generating absent ${gender.toLowerCase()} students list:`, error);
-        res.status(500).json({ message: 'Error generating absent students list' });
+        console.error("Error generating report:", error);
+        res.status(500).json({ message: 'Error generating absent students report' });
     }
 };
