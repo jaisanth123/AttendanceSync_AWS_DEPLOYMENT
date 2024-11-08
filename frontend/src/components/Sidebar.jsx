@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { AiOutlineHome } from "react-icons/ai";
 import { BsFillTriangleFill } from "react-icons/bs";
 import { MdClose } from "react-icons/md"; // Import close icon
+import { useNavigate } from "react-router-dom"; // Import useNavigate hook
 
 const YearSection = ({
   year,
@@ -31,7 +32,7 @@ const YearSection = ({
           <p
             key={index}
             className="p-2 transition-all duration-300 rounded-lg cursor-pointer hover:scale-110 hover:bg-gray-700 hover:text-gray-100"
-            onClick={() => handleItemSelection(course, year)}
+            onClick={() => handleItemSelection(course)} // Call handleItemSelection
             role="button"
             aria-label={`Select ${course} course`}
           >
@@ -45,9 +46,16 @@ const YearSection = ({
 
 function Sidebar({ closeSidebar, handleItemSelection, handleHomeClick }) {
   const [expandedYear, setExpandedYear] = useState(null);
+  const navigate = useNavigate(); // Use the useNavigate hook
 
   const toggleYear = (year) => {
     setExpandedYear((prevYear) => (prevYear === year ? null : year));
+  };
+
+  const handleCourseSelection = (course) => {
+    closeSidebar(); // Close sidebar after selection
+    handleItemSelection(course); // Optionally update parent state with selected course
+    navigate("/duty", { state: { selectedCourse: course } }); // Navigate to DutyPage with selected course
   };
 
   return (
@@ -60,7 +68,7 @@ function Sidebar({ closeSidebar, handleItemSelection, handleHomeClick }) {
 
       <div
         className="fixed inset-y-0 left-0 w-64 p-6 text-white transition-transform duration-300 ease-out transform shadow-lg bg-gradient-to-b from-gray-900 to-gray-800 md:w-80"
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the sidebar
       >
         <div className="flex items-center justify-between mb-6">
           <div
@@ -80,6 +88,7 @@ function Sidebar({ closeSidebar, handleItemSelection, handleHomeClick }) {
           />
         </div>
 
+        {/* Year Sections */}
         <YearSection
           year="2nd"
           expandedYear={expandedYear}
@@ -91,7 +100,7 @@ function Sidebar({ closeSidebar, handleItemSelection, handleHomeClick }) {
             "II - AIML - A",
             "II - AIML - B",
           ]}
-          handleItemSelection={handleItemSelection}
+          handleItemSelection={handleCourseSelection} // Use the updated function for navigation
         />
 
         <YearSection
@@ -104,7 +113,7 @@ function Sidebar({ closeSidebar, handleItemSelection, handleHomeClick }) {
             "III - AIML - A",
             "III - AIML - B",
           ]}
-          handleItemSelection={handleItemSelection}
+          handleItemSelection={handleCourseSelection} // Use the updated function for navigation
         />
 
         <YearSection
@@ -112,7 +121,7 @@ function Sidebar({ closeSidebar, handleItemSelection, handleHomeClick }) {
           expandedYear={expandedYear}
           toggleYear={toggleYear}
           courses={["IV - AIDS", "IV - AIML"]}
-          handleItemSelection={handleItemSelection}
+          handleItemSelection={handleCourseSelection} // Use the updated function for navigation
         />
       </div>
     </div>
