@@ -14,10 +14,13 @@ app.use(express.json());
 const studentRoutes = require('./routes/studentRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+//const excelReportRoutes = require('./routes/excelReportRoutes');
+
 
 app.use('/api/students', studentRoutes);
 app.use('/api/attendance',attendanceRoutes);
 app.use('/api/report', reportRoutes);
+//app.use('/api/excel', excelReportRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 5000;

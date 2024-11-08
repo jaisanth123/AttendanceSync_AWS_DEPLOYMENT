@@ -67,7 +67,7 @@ exports.fetchRemainingStudents = async (req, res) => {
 
   try {
     // Fetch all students in the specified year, branch, and section
-    const allStudents = await Student.find({ yearOfStudy, branch, section }).select('rollNo name');
+    const allStudents = await Student.find({ yearOfStudy, branch, section }).select('rollNo name -_id');
     
     // Fetch roll numbers of students marked as "On Duty" on the specified date
     const onDutyRollNumbers = await Attendance.find({ date, status: 'On Duty', yearOfStudy, branch, section }).select('rollNo');
@@ -84,13 +84,14 @@ exports.fetchRemainingStudents = async (req, res) => {
       return numA - numB;
     });
 
-    // Respond with the sorted remaining students
+    // Respond with the sorted remaining students including both rollNo and name
     res.json({ students: remainingStudents });
   } catch (error) {
     console.error("Error fetching remaining students:", error);
     res.status(500).json({ message: 'Error fetching remaining students' });
   }
 };
+
 
 // 3. Mark students as "Absent"
 exports.markAbsent = async (req, res) => {
