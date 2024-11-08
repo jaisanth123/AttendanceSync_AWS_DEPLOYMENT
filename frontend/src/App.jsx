@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import HomePage from "./components/HomePage";
-import DutyPage from "./components/DutyPage"; 
+import DutyPage from "./components/DutyPage";
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -16,6 +16,11 @@ function App() {
   const handleItemSelection = (item) => {
     setSelectedItem(item);
     setIsSidebarOpen(false);
+  };
+
+  const handleHomeClick = () => {
+    setSelectedItem(null); // Redirect to HomePage
+    setIsSidebarOpen(false); // Close sidebar
   };
 
   useEffect(() => {
@@ -36,7 +41,6 @@ function App() {
     <div className="flex flex-col h-screen">
       <Navbar toggleSidebar={toggleSidebar} />
 
-      {/* Sidebar background overlay */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 transition-opacity duration-300 bg-black opacity-50 md:hidden"
@@ -44,8 +48,7 @@ function App() {
         ></div>
       )}
 
-      <div className="flex-1 mt-20 md:mt-24"> {/* Added margin-top here */}
-        {/* Display selected item title when selected */}
+      <div className="flex-1 mt-20 md:mt-24">
         {selectedItem && (
           <div className="p-4 text-center text-black">
             <h1 className="text-4xl font-semibold">{selectedItem}</h1>
@@ -53,23 +56,21 @@ function App() {
           </div>
         )}
 
-        {/* Conditional rendering of HomePage or DutyPage */}
         {selectedItem === null ? (
           <HomePage toggleSidebar={toggleSidebar} />
         ) : (
           <div className="pt-16">
-            {/* Add padding-top for content below navbar */}
             <DutyPage selectedCourse={selectedItem} />
           </div>
         )}
       </div>
 
-      {/* Sidebar component */}
       {isSidebarOpen && (
         <Sidebar
-          ref={sidebarRef} // Pass the ref to Sidebar
+          ref={sidebarRef}
           closeSidebar={() => setIsSidebarOpen(false)}
           handleItemSelection={handleItemSelection}
+          handleHomeClick={handleHomeClick} // Pass handleHomeClick to Sidebar
         />
       )}
     </div>

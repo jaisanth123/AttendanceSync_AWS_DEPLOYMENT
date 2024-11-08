@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { AiOutlineHome } from "react-icons/ai";
 import { BsFillTriangleFill } from "react-icons/bs";
-import { useNavigate } from "react-router-dom";
+import { MdClose } from "react-icons/md"; // Import close icon
 
-// YearSection Component to handle the individual year sections
 const YearSection = ({
   year,
   expandedYear,
@@ -23,7 +22,7 @@ const YearSection = ({
       <BsFillTriangleFill
         className={`transition-transform duration-300 ${
           expandedYear === year ? "rotate-0" : "-rotate-180"
-        } text-sm`}  // Add 'text-sm' for smaller icon size
+        } text-sm`}
       />
     </div>
     {expandedYear === year && (
@@ -44,7 +43,7 @@ const YearSection = ({
   </div>
 );
 
-function Sidebar({ closeSidebar, handleItemSelection }) {
+function Sidebar({ closeSidebar, handleItemSelection, handleHomeClick }) {
   const [expandedYear, setExpandedYear] = useState(null);
 
   const toggleYear = (year) => {
@@ -63,16 +62,24 @@ function Sidebar({ closeSidebar, handleItemSelection }) {
         className="fixed inset-y-0 left-0 w-64 p-6 text-white transition-transform duration-300 ease-out transform shadow-lg bg-gradient-to-b from-gray-900 to-gray-800 md:w-80"
         onClick={(e) => e.stopPropagation()}
       >
-        <div
-          className="flex items-center mb-6 cursor-pointer"
-          onClick={closeSidebar}
-          aria-label="Close Sidebar"
-        >
-          <AiOutlineHome className="text-2xl transition-all duration-300 hover:text-gray-300" />
-          <span className="ml-2 text-xl font-semibold hover:scale-110 hover:text-gray-300">Home</span>
+        <div className="flex items-center justify-between mb-6">
+          <div
+            className="flex items-center cursor-pointer"
+            onClick={handleHomeClick} // Redirect to HomePage
+            aria-label="Go to Home Page"
+          >
+            <AiOutlineHome className="text-2xl transition-all duration-300 hover:text-gray-300" />
+            <span className="ml-2 text-xl font-semibold hover:scale-110 hover:text-gray-300">
+              Home
+            </span>
+          </div>
+          <MdClose
+            className="text-2xl cursor-pointer hover:text-gray-300"
+            onClick={closeSidebar} // Close the sidebar
+            aria-label="Close Sidebar"
+          />
         </div>
 
-        {/* Year Sections */}
         <YearSection
           year="2nd"
           expandedYear={expandedYear}

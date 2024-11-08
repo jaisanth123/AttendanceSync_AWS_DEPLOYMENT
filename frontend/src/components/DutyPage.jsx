@@ -3,11 +3,13 @@ import React, { useState, useEffect } from "react";
 function DutyPage({ selectedCourse }) {
   const [counter, setCounter] = useState(0);
   const [selectedBoxes, setSelectedBoxes] = useState([]);
+  const [deselectedIndex, setDeselectedIndex] = useState(null);
 
   // Reset state when selectedCourse changes
   useEffect(() => {
     setCounter(0);
     setSelectedBoxes([]);
+    setDeselectedIndex(null);
   }, [selectedCourse]);
 
   const handleIncrement = () => setCounter(counter + 1);
@@ -15,7 +17,7 @@ function DutyPage({ selectedCourse }) {
     if (counter > 0) {
       const newCounter = counter - 1;
       setCounter(newCounter);
-      
+
       // Remove selections that are out of the new counter range
       setSelectedBoxes((prevSelected) =>
         prevSelected.filter((index) => index < newCounter)
@@ -24,11 +26,16 @@ function DutyPage({ selectedCourse }) {
   };
 
   const toggleSelection = (index) => {
-    setSelectedBoxes((prevSelected) =>
-      prevSelected.includes(index)
-        ? prevSelected.filter((i) => i !== index)
-        : [...prevSelected, index]
-    );
+    setSelectedBoxes((prevSelected) => {
+      if (prevSelected.includes(index)) {
+        // Apply deselection effect and clear after animation ends
+        setDeselectedIndex(index);
+        setTimeout(() => setDeselectedIndex(null), 500);
+        return prevSelected.filter((i) => i !== index);
+      } else {
+        return [...prevSelected, index];
+      }
+    });
   };
 
   const handleConfirmSelection = () => {
@@ -39,7 +46,7 @@ function DutyPage({ selectedCourse }) {
     <div className="flex flex-col items-center flex-1 p-6 md:p-8 lg:p-12">
       <div className="flex flex-col items-center mt-6 space-y-4">
         <div className="flex flex-col items-center space-x-0 space-y-4 md:flex-row md:space-x-4 md:space-y-0">
-        <button
+          <button
             onClick={handleIncrement}
             className="w-full px-6 py-3 text-white transition-all duration-300 bg-green-500 rounded-lg shadow-md md:w-auto hover:bg-green-600"
           >
@@ -53,7 +60,6 @@ function DutyPage({ selectedCourse }) {
           >
             Decrement
           </button>
-
         </div>
       </div>
 
@@ -62,8 +68,10 @@ function DutyPage({ selectedCourse }) {
           <div
             key={index}
             onClick={() => toggleSelection(index)}
-            className={`flex items-center justify-center p-6 duration-300 hover:bg-blue-600 hover:scale-110 text-white rounded-lg shadow-md cursor-pointer 
-              ${selectedBoxes.includes(index) ? "bg-blue-600" : "bg-gray-700"}`}
+            className={`flex items-center justify-center p-6 text-white transition-all duration-300 transform rounded-lg shadow-md cursor-pointer 
+              ${selectedBoxes.includes(index) ? "bg-blue-600" : "bg-gray-700"} 
+              ${!selectedBoxes.includes(index) && deselectedIndex !== index ? "hover:scale-110 hover:bg-blue-600" : ""}
+              ${deselectedIndex === index ? "animate-shake" : ""}`}
           >
             <h3 className="text-xl font-semibold">
               {index < 9
