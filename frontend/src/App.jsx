@@ -21,8 +21,10 @@ function App() {
   };
 
   const handleHomeClick = () => {
-    setSelectedItem(null); // Redirect to HomePage
-    setIsSidebarOpen(false); // Close sidebar
+    if (window.location.pathname !== '/absentees') {
+      setSelectedItem(null); // Reset selectedItem only if not on /absentees
+    }
+    setIsSidebarOpen(false);
   };
 
   useEffect(() => {
@@ -61,7 +63,7 @@ function App() {
               path="/duty"
               element={<DutyPage selectedCourse={selectedItem} />}
             />
-            <Route path="/absentees" element={<Absentees />} />
+            <Route path="/absentees" element={<Absentees selectedCourse={selectedItem}  />} />
           </Routes>
         </div>
 
