@@ -1,15 +1,14 @@
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
 
-const Absentees = () => {
+const Absentees = ({ selectedCourse }) => {
   const location = useLocation();
-  const { selectedCourse, nonSelectedBoxes } = location.state || {};
-
+  const { nonSelectedBoxes } = location.state || {}; // Only destructuring nonSelectedBoxes
   const [selectedBoxes, setSelectedBoxes] = useState([]);
   const [clickedIndex, setClickedIndex] = useState(null);
-  const [isPopupVisible, setIsPopupVisible] = useState(false); // Controls visibility of the custom popup
-  const [isConfirmed, setIsConfirmed] = useState(false); // Enables "Mark Present" button
-  const [popupType, setPopupType] = useState(""); // Track which button triggered the popup
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [popupType, setPopupType] = useState("");
 
   const toggleSelection = (index) => {
     setSelectedBoxes((prevSelectedBoxes) =>
@@ -41,14 +40,15 @@ const Absentees = () => {
   };
 
   return (
+    
     <div className="flex flex-col items-center flex-1 p-6 md:p-8 lg:p-12">
-      {selectedCourse && (
+    
         <div className="p-4 text-center text-black">
           <h1 className="text-4xl font-semibold">{selectedCourse}</h1>
           <h3 className="text-2xl font-semibold">ABSENTEES</h3>
         </div>
-      )}
-
+    
+    
       <div className="grid w-full grid-cols-2 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
         {nonSelectedBoxes && nonSelectedBoxes.length > 0 ? (
           nonSelectedBoxes.map((boxName, index) => (
@@ -121,7 +121,7 @@ const Absentees = () => {
             <p className="mb-6 text-center text-white">
               {popupType === "confirm"
                 ? "Are you sure you want to mark them as absent?"
-                : "Are you sure you want to mark selected as present?"}
+                : "Are you sure you want to mark Remaining as present?"}
             </p>
             <div className="flex justify-center space-x-4">
               <button

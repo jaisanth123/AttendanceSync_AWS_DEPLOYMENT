@@ -61,7 +61,7 @@ function App() {
             />
             <Route
               path="/duty"
-              element={<DutyPage selectedCourse={selectedItem} />}
+              element={<DutyPage selectedCourse={selectedItem}/>}
             />
             <Route path="/absentees" element={<Absentees selectedCourse={selectedItem}  />} />
           </Routes>

@@ -1,128 +1,80 @@
-import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom"; // Import useNavigate hook for navigation
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function DutyPage() {
-  const location = useLocation(); // Get location data
-  const navigate = useNavigate(); // Hook for navigating to another page
-  const { selectedCourse } = location.state || {}; // Retrieve selected course from the state passed by the sidebar
+  const location = useLocation();
+  const navigate = useNavigate();
 
+  const [selectedCourse, setSelectedCourse] = useState(location.state?.selectedCourse || "Select a course");
   const [counter, setCounter] = useState(0);
   const [selectedBoxes, setSelectedBoxes] = useState([]);
-  const [clickedIndex, setClickedIndex] = useState(null);
 
-  // Increment function to increase the count
-  const handleIncrement = () => setCounter(counter + 1);
-
-  // Decrement function to decrease the count (if greater than 0)
-  const handleDecrement = () => {
-    if (counter > 0) {
-      const newCounter = counter - 1;
-      setCounter(newCounter);
-      setSelectedBoxes((prevSelected) =>
-        prevSelected.filter((index) => index < newCounter)
-      );
+  // Reset state when selectedCourse changes
+  useEffect(() => {
+    if (location.state?.selectedCourse) {
+      setSelectedCourse(location.state.selectedCourse);
+      setCounter(0);           // Reset counter
+      setSelectedBoxes([]);     // Clear selected boxes
     }
-  };
+  }, [location.state?.selectedCourse]);
 
-  // Toggle the selection of a specific box by index
+  const handleIncrement = () => setCounter(counter + 1);
+  const handleDecrement = () => setCounter(Math.max(counter - 1, 0));
+
   const toggleSelection = (index) => {
-    setClickedIndex(index);
     setSelectedBoxes((prevSelected) =>
       prevSelected.includes(index)
         ? prevSelected.filter((i) => i !== index)
         : [...prevSelected, index]
     );
-    setTimeout(() => setClickedIndex(null), 300); // Reset clicked index after a short delay
   };
 
-  // Handle confirm selection and redirect to Absentees component with non-selected boxes
   const handleConfirmSelection = () => {
-    // Get all boxes
-    const allBoxes = [...Array(counter)].map((_, index) => index);
-
-    // Filter out selected boxes to get non-selected boxes
-    const nonSelectedBoxes = allBoxes.filter((index) => !selectedBoxes.includes(index));
-
-    // Navigate to Absentees page with the non-selected boxes in the state
+    const allBoxes = Array.from({ length: counter }, (_, i) => i);
+    const nonSelectedBoxes = allBoxes.filter((i) => !selectedBoxes.includes(i));
     navigate("/absentees", { state: { nonSelectedBoxes } });
   };
 
   return (
     <div className="flex flex-col items-center flex-1 p-6 md:p-8 lg:p-12">
-      {/* Display the selected course */}
-      {selectedCourse && (
-        <div className="p-4 text-center text-black">
-          <h1 className="text-4xl font-semibold">{selectedCourse}</h1>
-          <h3 className="text-2xl font-semibold">ON DUTY</h3>
-        </div>
-      )}
-
-      {/* Counter section */}
-      <div className="flex flex-col items-center mt-6 space-y-4">
-        <div className="flex flex-col items-center space-x-0 space-y-4 md:flex-row md:space-x-4 md:space-y-0">
-          <button
-            onClick={handleIncrement}
-            className="w-full px-6 py-3 text-white transition-all duration-300 bg-green-500 rounded-lg shadow-md md:w-auto hover:bg-green-600"
-          >
-            Increment
-          </button>
-
-          <span className="text-2xl font-semibold">{counter}</span>
-          <button
-            onClick={handleDecrement}
-            className="w-full px-6 py-3 text-white transition-all duration-300 bg-red-500 rounded-lg shadow-md md:w-auto hover:bg-red-600"
-          >
-            Decrement
-          </button>
-        </div>
+      {/* Selected Course Display */}
+      <div className="p-4 text-center text-black">
+        <h1 className="text-4xl font-semibold">{selectedCourse}</h1>
+        <h3 className="text-2xl font-semibold">ON DUTY</h3>
       </div>
 
-      {/* Box grid section */}
+      {/* Counter Section */}
+      <div className="flex items-center mt-6 space-x-4">
+        <button onClick={handleIncrement} className="px-6 py-3 text-white bg-green-500 rounded-lg hover:bg-green-600">Increment</button>
+        <span className="text-2xl font-semibold">{counter}</span>
+        <button onClick={handleDecrement} className="px-6 py-3 text-white bg-red-500 rounded-lg hover:bg-red-600">Decrement</button>
+      </div>
+
+      {/* Box Grid */}
       <div className="grid w-full grid-cols-2 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
-        {[...Array(counter)].map((_, index) => (
+        {Array.from({ length: counter }, (_, i) => (
           <div
-  key={index}
-  onClick={() => toggleSelection(index)}
-  className={`flex items-center justify-center p-6 text-white transition-all duration-300 transform rounded-lg shadow-md cursor-pointer 
-    ${selectedBoxes.includes(index) ? "bg-blue-600" : "bg-gray-700"} 
-    ${clickedIndex === index ? "scale-110" : ""}
-    hover:scale-110`} // Add hover effect to scale on hover
->
-  <h3 className="text-xl font-semibold">
-    {index < 9
-      ? `23ADR00${index + 1}`
-      : index < 99
-      ? `23ADR0${index + 1}`
-      : `23ADR${index + 1}`}
-  </h3>
-</div>
+            key={i}
+            onClick={() => toggleSelection(i)}
+            className={`p-6 text-white transition-transform transform rounded-lg cursor-pointer shadow-md
+              ${selectedBoxes.includes(i) ? "bg-blue-600" : "bg-gray-700"} hover:scale-110`}
+          >
+            {`23ADR${i < 9 ? "00" : i < 99 ? "0" : ""}${i + 1}`}
+          </div>
         ))}
       </div>
 
-      {/* Display selected boxes in a grid */}
+      {/* Selected Boxes */}
       {selectedBoxes.length > 0 && (
         <div className="grid w-full gap-4 mt-6 text-2xl font-semibold text-gray-800 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
           {selectedBoxes.map((index) => (
-            <div key={index} className="flex justify-center">
-              {index < 9
-                ? `23ADR00${index + 1}`
-                : index < 99
-                ? `23ADR0${index + 1}`
-                : `23ADR${index + 1}`}
-            </div>
+            <div key={index}>{`23ADR${index < 9 ? "00" : index < 99 ? "0" : ""}${index + 1}`}</div>
           ))}
         </div>
       )}
 
-      {/* Confirm button */}
-      <div className="flex flex-col items-center space-x-0 space-y-4 md:flex-row md:space-x-4 md:space-y-0">
-        <button
-          onClick={handleConfirmSelection}
-          className="w-full px-6 py-3 mt-10 text-white transition-all duration-300 bg-red-500 rounded-lg shadow-md md:w-auto hover:bg-red-600"
-        >
-          Confirm
-        </button>
-      </div>
+      {/* Confirm Button */}
+      <button onClick={handleConfirmSelection} className="px-6 py-3 mt-10 text-white bg-red-500 rounded-lg hover:bg-red-600">Confirm</button>
     </div>
   );
 }
