@@ -2,14 +2,14 @@ import { useLocation } from "react-router-dom";
 import { useState } from "react";
 
 const Absentees = () => {
-
   const location = useLocation();
   const { selectedCourse, nonSelectedBoxes } = location.state || {};
 
   const [selectedBoxes, setSelectedBoxes] = useState([]);
   const [clickedIndex, setClickedIndex] = useState(null);
-  const [isPopupVisible, setIsPopupVisible] = useState(false); // Controls the visibility of the custom popup
+  const [isPopupVisible, setIsPopupVisible] = useState(false); // Controls visibility of the custom popup
   const [isConfirmed, setIsConfirmed] = useState(false); // Enables "Mark Present" button
+  const [popupType, setPopupType] = useState(""); // Track which button triggered the popup
 
   const toggleSelection = (index) => {
     setSelectedBoxes((prevSelectedBoxes) =>
@@ -20,17 +20,20 @@ const Absentees = () => {
     setClickedIndex(index);
   };
 
-  const handleConfirmClick = () => {
-    setIsPopupVisible(true); // Show popup when Confirm is clicked
+  const showPopup = (type) => {
+    setPopupType(type); // Set type of popup ("confirm" or "attendance")
+    setIsPopupVisible(true); // Show popup
   };
 
   const handlePopupOk = () => {
-    setIsPopupVisible(false); // Close the popup
-    setIsConfirmed(true); // Enable "Mark Present" button
+    setIsPopupVisible(false); // Close popup
+    if (popupType === "confirm") {
+      setIsConfirmed(true); // Enable "Mark Present" button for confirmation
+    }
   };
 
   const handlePopupCancel = () => {
-    setIsPopupVisible(false); // Close the popup without enabling "Mark Present"
+    setIsPopupVisible(false); // Close popup without action
   };
 
   const handleMarkPresent = () => {
@@ -45,8 +48,6 @@ const Absentees = () => {
           <h3 className="text-2xl font-semibold">ABSENTEES</h3>
         </div>
       )}
-
-
 
       <div className="grid w-full grid-cols-2 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
         {nonSelectedBoxes && nonSelectedBoxes.length > 0 ? (
@@ -68,7 +69,7 @@ const Absentees = () => {
             </div>
           ))
         ) : (
-          <p>No non-selected boxes</p>
+      ""
         )}
       </div>
 
@@ -92,13 +93,13 @@ const Absentees = () => {
 
       <div className="flex flex-col items-center mt-8 space-y-4">
         <button
-          onClick={handleConfirmClick}
+          onClick={() => showPopup("confirm")}
           className="px-6 py-2 text-white bg-yellow-600 rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-4 focus:ring-yellow-300"
         >
           Confirm
         </button>
         <button
-          onClick={handleMarkPresent}
+          onClick={() => showPopup("attendance")}
           className={`px-6 py-2 text-white rounded-lg focus:outline-none focus:ring-4 ${
             isConfirmed
               ? "bg-blue-600 hover:bg-blue-700 focus:ring-blue-300 cursor-pointer"
@@ -110,15 +111,17 @@ const Absentees = () => {
         </button>
       </div>
 
-      {/* Custom Popup for Confirmation */}
+      {/* Animated Custom Popup */}
       {isPopupVisible && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="p-8 bg-white rounded-lg shadow-lg">
-            <h2 className="mb-4 text-2xl font-semibold text-center text-gray-800">
-              Confirm Submission
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fadeIn">
+          <div className="p-8 transition-all duration-500 transform scale-90 bg-gray-800 rounded-lg shadow-lg animate-slideDown">
+            <h2 className="mb-4 text-2xl font-semibold text-center text-white">
+              {popupType === "confirm" ? "Confirm Selection" : "Mark Attendance"}
             </h2>
-            <p className="mb-6 text-center text-gray-600">
-              Are you sure you want to mark them as absent?
+            <p className="mb-6 text-center text-white">
+              {popupType === "confirm"
+                ? "Are you sure you want to mark them as absent?"
+                : "Are you sure you want to mark selected as present?"}
             </p>
             <div className="flex justify-center space-x-4">
               <button
