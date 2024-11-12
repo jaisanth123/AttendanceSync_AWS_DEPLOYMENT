@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { AiOutlineHome } from "react-icons/ai";
 import { BsFillTriangleFill } from "react-icons/bs";
-import { MdClose } from "react-icons/md"; // Import close icon
-import { useNavigate } from "react-router-dom"; // Import useNavigate hook
+import { MdClose } from "react-icons/md"; 
+import { useNavigate } from "react-router-dom"; 
 
 const YearSection = ({
   year,
   expandedYear,
   toggleYear,
   courses,
-  handleItemSelection,
+  handleItemSelection
 }) => (
   <div>
     <div
@@ -32,7 +32,7 @@ const YearSection = ({
           <p
             key={index}
             className="p-2 transition-all duration-300 rounded-lg cursor-pointer hover:scale-110 hover:bg-gray-700 hover:text-gray-100"
-            onClick={() => handleItemSelection(course)} // Call handleItemSelection
+            onClick={() => handleItemSelection(course)}
             role="button"
             aria-label={`Select ${course} course`}
           >
@@ -44,18 +44,24 @@ const YearSection = ({
   </div>
 );
 
-function Sidebar({ closeSidebar, handleItemSelection, handleHomeClick }) {
+function Sidebar({ closeSidebar, handleItemSelection }) {
   const [expandedYear, setExpandedYear] = useState(null);
-  const navigate = useNavigate(); // Use the useNavigate hook
+  const navigate = useNavigate();
 
   const toggleYear = (year) => {
     setExpandedYear((prevYear) => (prevYear === year ? null : year));
   };
 
+  const handleHomeClick = () => {
+    console.log("Navigating to Home");
+    closeSidebar(); // Close sidebar
+    navigate("/"); // Navigate to HomePage
+  };
+  
   const handleCourseSelection = (course) => {
-    closeSidebar(); // Close sidebar after selection
-    handleItemSelection(course); // Optionally update parent state with selected course
-    navigate("/duty", { state: { selectedCourse: course } }); // Navigate to DutyPage with selected course
+    closeSidebar();
+    handleItemSelection(course);
+    navigate("/duty", { state: { selectedCourse: course } });
   };
 
   return (
@@ -68,12 +74,12 @@ function Sidebar({ closeSidebar, handleItemSelection, handleHomeClick }) {
 
       <div
         className="fixed inset-y-0 left-0 w-64 p-6 text-white transition-transform duration-300 ease-out transform shadow-lg bg-gradient-to-b from-gray-900 to-gray-800 md:w-80"
-        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the sidebar
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
           <div
             className="flex items-center cursor-pointer"
-            onClick={handleHomeClick} // Redirect to HomePage
+            onClick={handleHomeClick} // Trigger navigation on Home click
             aria-label="Go to Home Page"
           >
             <AiOutlineHome className="text-2xl transition-all duration-300 hover:text-gray-300" />
@@ -83,7 +89,7 @@ function Sidebar({ closeSidebar, handleItemSelection, handleHomeClick }) {
           </div>
           <MdClose
             className="text-2xl cursor-pointer hover:text-gray-300"
-            onClick={closeSidebar} // Close the sidebar
+            onClick={closeSidebar}
             aria-label="Close Sidebar"
           />
         </div>
@@ -100,7 +106,7 @@ function Sidebar({ closeSidebar, handleItemSelection, handleHomeClick }) {
             "II - AIML - A",
             "II - AIML - B",
           ]}
-          handleItemSelection={handleCourseSelection} // Use the updated function for navigation
+          handleItemSelection={handleCourseSelection}
         />
 
         <YearSection
@@ -113,7 +119,7 @@ function Sidebar({ closeSidebar, handleItemSelection, handleHomeClick }) {
             "III - AIML - A",
             "III - AIML - B",
           ]}
-          handleItemSelection={handleCourseSelection} // Use the updated function for navigation
+          handleItemSelection={handleCourseSelection}
         />
 
         <YearSection
@@ -121,7 +127,7 @@ function Sidebar({ closeSidebar, handleItemSelection, handleHomeClick }) {
           expandedYear={expandedYear}
           toggleYear={toggleYear}
           courses={["IV - AIDS", "IV - AIML"]}
-          handleItemSelection={handleCourseSelection} // Use the updated function for navigation
+          handleItemSelection={handleCourseSelection}
         />
       </div>
     </div>

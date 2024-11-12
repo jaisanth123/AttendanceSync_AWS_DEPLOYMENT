@@ -118,7 +118,7 @@ const Absentees = () => {
               Confirm Submission
             </h2>
             <p className="mb-6 text-center text-gray-600">
-              Are you sure you want to confirm this selection?
+              Are you sure you want to mark them as absent?
             </p>
             <div className="flex justify-center space-x-4">
               <button
