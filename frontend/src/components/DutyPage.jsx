@@ -56,7 +56,7 @@ function DutyPage() {
           <div
             key={i}
             onClick={() => toggleSelection(i)}
-            className={`p-6 text-white transition-transform transform rounded-lg cursor-pointer shadow-md
+            className={`flex items-center justify-center p-6 text-white transition-transform transform text-xl font-semibold rounded-lg cursor-pointer shadow-md
               ${selectedBoxes.includes(i) ? "bg-blue-600" : "bg-gray-700"} hover:scale-110`}
           >
             {`23ADR${i < 9 ? "00" : i < 99 ? "0" : ""}${i + 1}`}

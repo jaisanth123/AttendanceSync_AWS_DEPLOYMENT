@@ -16,38 +16,43 @@ function Navbar({ toggleSidebar }) {
         <button
           onClick={toggleSidebar}
           className="text-xl sm:text-2xl"
+          aria-label="Toggle sidebar"
         >
           &#9776;
         </button>
 
-        {/* Title (centered for large screens, stay in one line) */}
-        <div className="flex-1 ml-48 overflow-hidden text-xl font-semibold text-center whitespace-nowrap">
+        {/* Title centered for large screens */}
+        <div className="flex-1 text-xl font-semibold text-center whitespace-nowrap">
           ATTENDANCE AI DEPARTMENT
         </div>
 
-        {/* Date (on large screens, moves below if there's not enough space) */}
-        <div className="hidden text-lg sm:block lg:text-xl sm:mt-2">
+        {/* Date */}
+        <div className="text-lg sm:block lg:text-xl sm:mt-2">
           {today}
         </div>
       </div>
 
-      {/* For small screens (mobile): menu icon and title on the same row, date below */}
+      {/* For small screens */}
       <div className="px-4 py-2 text-white sm:hidden">
-        {/* Menu icon and title in one row */}
-        <div className="flex items-center justify-between">
+        {/* Icon and Title in one row */}
+        <div className="flex items-center">
+          {/* Sidebar Toggle Icon (positioned in the middle of the left side) */}
           <button
             onClick={toggleSidebar}
-            className="text-xl sm:text-2xl"
+            className="flex items-center h-10 mr-2 text-xl sm:text-2xl"
+            aria-label="Toggle sidebar"
           >
             &#9776;
           </button>
-          <div className="w-full text-lg font-semibold text-center">
+
+          {/* Title centered in one line */}
+          <div className="flex-grow text-lg font-semibold text-center">
             ATTENDANCE AI DEPARTMENT
           </div>
         </div>
 
-        {/* Date in a separate row below */}
-        <div className="mt-2 text-sm text-center">
+        {/* Date on a separate row below */}
+        <div className="mt-1 text-sm text-center">
           {today}
         </div>
       </div>
