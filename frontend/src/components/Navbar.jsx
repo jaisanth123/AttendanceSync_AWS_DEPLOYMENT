@@ -22,7 +22,7 @@ function Navbar({ toggleSidebar }) {
         </button>
 
         {/* Title centered for large screens */}
-        <div className="flex-1 text-xl font-semibold text-center whitespace-nowrap">
+        <div className="flex-1 ml-40 text-xl font-semibold text-center whitespace-nowrap">
           ATTENDANCE AI DEPARTMENT
         </div>
 
