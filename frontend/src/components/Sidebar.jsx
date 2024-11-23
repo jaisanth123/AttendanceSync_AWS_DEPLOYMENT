@@ -44,6 +44,8 @@ function Sidebar({ closeSidebar, handleItemSelection }) {
     closeSidebar();
     handleItemSelection(course);
     navigate("/duty", { state: { selectedCourse: course } });
+    window.location.reload();
+    
   };
 
   return (
