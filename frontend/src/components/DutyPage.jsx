@@ -8,18 +8,12 @@ function DutyPage() {
 
   // Default selected course from state or fallback to "Select a course"
   const [selectedCourse, setSelectedCourse] = useState(location.state?.selectedCourse || "Select a course");
-  
   // Default date set from state if available, or an empty string
   const [date, setDate] = useState(location.state?.selectedDate || "");
-  
   const [rollNumbers, setRollNumbers] = useState([]);
-<<<<<<< HEAD
-  const [isConfirmed, setIsConfirmed] = useState(false); // State for the confirmation popup
-=======
-  const [date, setDate] = useState(""); // State to store the selected date
   const [message, setMessage] = useState(""); // State to store informational messages
+  const [isConfirmed, setIsConfirmed] = useState(false); // State for the confirmation popup
 
-  // Utility function to format the date
   const formatDate = (dateString) => {
     const dateObj = new Date(dateString);
     const day = String(dateObj.getDate()).padStart(2, "0");
@@ -27,8 +21,8 @@ function DutyPage() {
     const year = dateObj.getFullYear();
     return `${day}-${month}-${year}`;
   };
->>>>>>> 48e137bdd8320f03488b99ff4ae5b26a2e54d863
 
+  
   useEffect(() => {
     if (selectedCourse && date) {
       fetchRollNumbers(selectedCourse, date);
@@ -42,11 +36,7 @@ function DutyPage() {
 
     try {
       const response = await axios.get(url);
-<<<<<<< HEAD
-      const fetchedRollNumbers = response.data.students.map((student) => ({
-=======
       const { students, totalStudents } = response.data;
-
       const formattedDate = formatDate(selectedDate);
 
       // Handle cases based on the response
@@ -67,19 +57,14 @@ function DutyPage() {
 
       // Add 'isSelected' property to each roll number
       const fetchedRollNumbers = students.map((student) => ({
->>>>>>> 48e137bdd8320f03488b99ff4ae5b26a2e54d863
         rollNo: student,
         isSelected: false,
       }));
       setRollNumbers(fetchedRollNumbers);
     } catch (error) {
       console.error("Error fetching roll numbers:", error);
-<<<<<<< HEAD
-      setRollNumbers([]);
-=======
       setMessage("An error occurred while fetching roll numbers. Please try again later.");
       setRollNumbers([]); // Handle error gracefully
->>>>>>> 48e137bdd8320f03488b99ff4ae5b26a2e54d863
     }
   };
 
@@ -129,21 +114,6 @@ function DutyPage() {
         />
       </div>
 
-<<<<<<< HEAD
-      <div className="grid w-full grid-cols-2 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
-        {rollNumbers.map((rollNumber, index) => (
-          <div
-            key={index}
-            onClick={() => toggleSelection(index)}
-            className={`flex items-center justify-center p-6 text-white transition-transform transform text-xl font-semibold rounded-lg cursor-pointer shadow-md
-              ${rollNumber.isSelected ? "bg-blue-600" : "bg-gray-700"} hover:scale-110`}
-          >
-            {rollNumber.rollNo}
-          </div>
-        ))}
-      </div>
-
-=======
       {/* Display Message */}
       {message && (
         <div className="w-full max-w-lg p-4 mt-6 text-lg text-center text-red-500">
@@ -168,7 +138,6 @@ function DutyPage() {
       )}
 
       {/* Confirm Button */}
->>>>>>> 48e137bdd8320f03488b99ff4ae5b26a2e54d863
       <button
         onClick={handleConfirm}
         className="px-6 py-3 mt-10 text-white bg-red-500 rounded-lg hover:bg-red-600"
