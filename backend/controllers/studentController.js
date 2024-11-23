@@ -1,43 +1,59 @@
 const Student = require('../models/Student');
+const Attendance = require('../models/Attendance');
 
+// Controller function to fetch students without attendance on a specified date
+exports.getStudentsWithoutAttendance = async (req, res) => {
+    const { yearOfStudy, branch, section, date } = req.query;
 
-// Controller function to get roll numbers and names by year, branch, and section
-exports.getRollNumbersByCriteria = async (req, res) => {
-    const { yearOfStudy, branch, section } = req.query;
-
-    // Ensure that all query parameters are provided
-    if (!yearOfStudy || !branch || !section) {
-        return res.status(400).json({ message: "Please provide yearOfStudy, branch, and section" });
+    // Ensure all required query parameters are provided
+    if (!yearOfStudy || !branch || !section || !date) {
+        return res.status(400).json({ message: "Please provide yearOfStudy, branch, section, and date" });
     }
 
-    console.log("Query Parameters:", { yearOfStudy, branch, section });
+    console.log("Query Parameters:", { yearOfStudy, branch, section, date });
 
     try {
-        // Query the database for students that match the criteria
-        const students = await Student.find({
-            yearOfStudy: yearOfStudy,   // Ensure this matches the field name in the DB
-            branch: branch,      // Ensure this matches the field name in the DB
-            section: section     // Ensure this matches the field name in the DB
-        }).select('rollNo name -_id');   // Retrieve rollNo and name fields, excluding _id
+        // Fetch all students in the specified year, branch, and section
+        const allStudents = await Student.find({
+            yearOfStudy,
+            branch,
+            section
+        }).select('rollNo name -_id'); // Retrieve rollNo and name fields, excluding _id
 
-        console.log("Students Found:", students);
+        console.log("All Students Found:", allStudents);
 
-        if (students.length === 0) {
-            return res.status(404).json({ message: "No students found matching the criteria" });
-        }
+        // Fetch students who have an attendance record for the specified date
+        const attendanceRecords = await Attendance.find({
+            date,
+            yearOfStudy,
+            branch,
+            section
+        }).select('rollNo'); // Retrieve only the roll numbers of students with attendance records
 
-        // Sort students by roll number based on the numeric part (ignoring prefix if any)
-        students.sort((a, b) => {
+        console.log("Attendance Records Found:", attendanceRecords);
+
+        // Extract roll numbers of students with attendance records
+        const attendedRollNumbers = attendanceRecords.map(record => record.rollNo);
+
+        // Filter students who do not have an attendance record for the specified date
+        const studentsWithoutAttendance = allStudents.filter(student =>
+            !attendedRollNumbers.includes(student.rollNo)
+        );
+
+        // Sort the resulting students by roll number (numeric part only)
+        studentsWithoutAttendance.sort((a, b) => {
             const numA = parseInt(a.rollNo.replace(/[^0-9]/g, ''), 10);
             const numB = parseInt(b.rollNo.replace(/[^0-9]/g, ''), 10);
             return numA - numB;
         });
 
-        // Return the sorted list of students with both roll numbers and names
-        res.json({ students });
+        // Send the filtered roll numbers and the total count of all students
+        res.json({
+            students: studentsWithoutAttendance.map(student => student.rollNo), // Only send roll numbers
+            totalStudents: allStudents.length // Send the total count of students found
+        });
     } catch (error) {
-        console.error("Error retrieving roll numbers and names:", error);
+        console.error("Error retrieving students without attendance:", error);
         res.status(500).json({ message: "Server error" });
     }
 };
-

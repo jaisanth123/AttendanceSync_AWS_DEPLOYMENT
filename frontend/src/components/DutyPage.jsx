@@ -7,26 +7,26 @@ function DutyPage() {
   const navigate = useNavigate();
 
   const [selectedCourse, setSelectedCourse] = useState(location.state?.selectedCourse || "Select a course");
-  const [rollNumbers, setRollNumbers] = useState([]); // State to store roll numbers with additional properties
+  const [rollNumbers, setRollNumbers] = useState([]);
+  const [date, setDate] = useState(""); // State to store the selected date
 
-  // Fetch roll numbers when selectedCourse changes
+  // Fetch roll numbers when selectedCourse or date changes
   useEffect(() => {
-    if (location.state?.selectedCourse) {
-      setSelectedCourse(location.state.selectedCourse);
-      fetchRollNumbers(location.state.selectedCourse);
+    if (selectedCourse && date) {
+      fetchRollNumbers(selectedCourse, date);
     }
-  }, [location.state?.selectedCourse]);
+  }, [selectedCourse, date]);
 
-  // Fetch roll numbers from the server
-  const fetchRollNumbers = async (course) => {
+  // Fetch students without attendance from the server
+  const fetchRollNumbers = async (course, selectedDate) => {
     const [yearOfStudy, branch, section] = course.split(" - ");
-    const url = `http://localhost:5000/api/students/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}`;
+    const url = `http://localhost:5000/api/students/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
     try {
       const response = await axios.get(url);
 
       // Add 'isSelected' property to each roll number
       const fetchedRollNumbers = response.data.students.map((student) => ({
-        rollNo: student.rollNo,
+        rollNo: student,
         isSelected: false, // Default state for each roll number
       }));
 
@@ -54,7 +54,7 @@ function DutyPage() {
       .map((rollNumber, index) => (!rollNumber.isSelected ? index : null))
       .filter((index) => index !== null);
 
-    navigate("/absentees", { state: { nonSelectedBoxes } });
+    navigate("/absentees", { state: { nonSelectedBoxes, date, selectedCourse } });
   };
 
   return (
@@ -63,6 +63,20 @@ function DutyPage() {
       <div className="p-4 text-center text-black">
         <h1 className="text-4xl font-semibold">{selectedCourse}</h1>
         <h3 className="text-2xl font-semibold">ON DUTY</h3>
+      </div>
+
+      {/* Date Picker */}
+      <div className="w-full max-w-sm mt-4">
+        <label htmlFor="date" className="block mb-2 text-lg font-medium">
+          Select Date:
+        </label>
+        <input
+          type="date"
+          id="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+        />
       </div>
 
       {/* Roll Number Buttons */}
@@ -94,6 +108,7 @@ function DutyPage() {
       <button
         onClick={handleConfirmSelection}
         className="px-6 py-3 mt-10 text-white bg-red-500 rounded-lg hover:bg-red-600"
+        disabled={!date} // Disable button if no date is selected
       >
         Confirm
       </button>
