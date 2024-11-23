@@ -9,6 +9,16 @@ function DutyPage() {
   const [selectedCourse, setSelectedCourse] = useState(location.state?.selectedCourse || "Select a course");
   const [rollNumbers, setRollNumbers] = useState([]);
   const [date, setDate] = useState(""); // State to store the selected date
+  const [message, setMessage] = useState(""); // State to store informational messages
+
+  // Utility function to format the date
+  const formatDate = (dateString) => {
+    const dateObj = new Date(dateString);
+    const day = String(dateObj.getDate()).padStart(2, "0");
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
+    const year = dateObj.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
 
   // Fetch roll numbers when selectedCourse or date changes
   useEffect(() => {
@@ -21,11 +31,31 @@ function DutyPage() {
   const fetchRollNumbers = async (course, selectedDate) => {
     const [yearOfStudy, branch, section] = course.split(" - ");
     const url = `http://localhost:5000/api/students/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
+
     try {
       const response = await axios.get(url);
+      const { students, totalStudents } = response.data;
+
+      const formattedDate = formatDate(selectedDate);
+
+      // Handle cases based on the response
+      if (totalStudents === 0) {
+        setMessage(`No record found for ${yearOfStudy} - ${branch} - ${section}.`);
+        setRollNumbers([]); // Clear roll numbers
+        return;
+      }
+
+      if (students.length === 0) {
+        setMessage(`For ${yearOfStudy} - ${branch} - ${section}, students' attendance for ${formattedDate} has already been marked.`);
+        setRollNumbers([]); // Clear roll numbers
+        return;
+      }
+
+      // Reset the message if everything is okay
+      setMessage("");
 
       // Add 'isSelected' property to each roll number
-      const fetchedRollNumbers = response.data.students.map((student) => ({
+      const fetchedRollNumbers = students.map((student) => ({
         rollNo: student,
         isSelected: false, // Default state for each roll number
       }));
@@ -33,6 +63,7 @@ function DutyPage() {
       setRollNumbers(fetchedRollNumbers);
     } catch (error) {
       console.error("Error fetching roll numbers:", error);
+      setMessage("An error occurred while fetching roll numbers. Please try again later.");
       setRollNumbers([]); // Handle error gracefully
     }
   };
@@ -79,28 +110,26 @@ function DutyPage() {
         />
       </div>
 
-      {/* Roll Number Buttons */}
-      <div className="grid w-full grid-cols-2 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
-        {rollNumbers.map((rollNumber, index) => (
-          <div
-            key={index}
-            onClick={() => toggleSelection(index)}
-            className={`flex items-center justify-center p-6 text-white transition-transform transform text-xl font-semibold rounded-lg cursor-pointer shadow-md
-              ${rollNumber.isSelected ? "bg-blue-600" : "bg-gray-700"} hover:scale-110`}
-          >
-            {rollNumber.rollNo}
-          </div>
-        ))}
-      </div>
+      {/* Display Message */}
+      {message && (
+        <div className="w-full max-w-lg p-4 mt-6 text-lg text-center text-red-500">
+          {message}
+        </div>
+      )}
 
-      {/* Selected Roll Numbers */}
-      {rollNumbers.some((rollNumber) => rollNumber.isSelected) && (
-        <div className="grid w-full gap-4 mt-6 text-2xl font-semibold text-gray-800 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-          {rollNumbers
-            .filter((rollNumber) => rollNumber.isSelected)
-            .map((rollNumber, index) => (
-              <div key={index}>{rollNumber.rollNo}</div>
-            ))}
+      {/* Roll Number Buttons */}
+      {rollNumbers.length > 0 && (
+        <div className="grid w-full grid-cols-2 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
+          {rollNumbers.map((rollNumber, index) => (
+            <div
+              key={index}
+              onClick={() => toggleSelection(index)}
+              className={`flex items-center justify-center p-6 text-white transition-transform transform text-xl font-semibold rounded-lg cursor-pointer shadow-md
+              ${rollNumber.isSelected ? "bg-blue-600" : "bg-gray-700"} hover:scale-110`}
+            >
+              {rollNumber.rollNo}
+            </div>
+          ))}
         </div>
       )}
 
