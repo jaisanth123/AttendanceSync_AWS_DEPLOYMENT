@@ -77,12 +77,43 @@ function Absentees() {
     setShowBackPopup(true); // Show Back button confirmation pop-up
   };
 
-  // Confirm action for "Mark Present"
-  const handleMarkPresentConfirm = () => {
-    // Logic to mark the selected roll numbers as present
-    console.log("Marking selected students as present");
-    setShowMarkPresentPopup(false); // Close the "Mark Present" confirmation pop-up
-  };
+  const handleMarkPresentConfirm = async () => {
+    // Prepare the data to be sent in the request
+    const [yearOfStudy, branch, section] = selectedCourse.split(" - ");
+    
+    // The body of the POST request
+    const data = {
+      yearOfStudy,
+      branch,
+      section,
+      date,
+    };
+  
+    try {
+      // Sending a POST request to the server
+      const response = await axios.post(
+        "http://localhost:5000/api/attendance/mark-remaining-present",
+        data
+      );
+      
+      // Handle the response (e.g., display success message)
+      console.log("Marked remaining students as present:", response.data);
+      
+      // Close the "Mark Present" confirmation pop-up
+      setShowMarkPresentPopup(false);
+      
+      // Optionally, show a success message
+      setPopupMessage("Successfully marked remaining students as present.");
+      setPopupColor("bg-green-600");
+      setShowConfirmationPopup(true); // Show success confirmation pop-up
+    } catch (error) {
+      // Handle error (e.g., display error message)
+      console.error("Error marking remaining students as present:", error);
+      setPopupMessage("Error marking remaining students as present. Please try again.");
+      setPopupColor("bg-red-600");
+      setShowConfirmationPopup(true); // Show error confirmation pop-up
+    }
+  };  
 
   // Navigate back to the Duty Page
   const handleBackConfirm = () => {

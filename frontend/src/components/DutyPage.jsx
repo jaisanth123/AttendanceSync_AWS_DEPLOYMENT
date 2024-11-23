@@ -43,7 +43,7 @@ function DutyPage() {
       }
 
       if (students.length === 0) {
-        setMessage(`For ${yearOfStudy} - ${branch} - ${section}, students' attendance for ${formattedDate} has already been marked.`);
+        setMessage(`For ${yearOfStudy} - ${branch} - ${section}, students attendance for ${formattedDate} has already been marked.`);
         setRollNumbers([]);
         return;
       }
