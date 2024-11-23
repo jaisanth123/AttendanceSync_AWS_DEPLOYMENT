@@ -69,12 +69,18 @@ exports.fetchRemainingStudents = async (req, res) => {
     // Fetch all students in the specified year, branch, and section
     const allStudents = await Student.find({ yearOfStudy, branch, section }).select('rollNo name -_id');
     
-    // Fetch roll numbers of students marked as "On Duty" on the specified date
-    const onDutyRollNumbers = await Attendance.find({ date, status: 'On Duty', yearOfStudy, branch, section }).select('rollNo');
+    // Fetch roll numbers of students marked as either "On Duty" or "Absent" on the specified date
+    const excludedRollNumbers = await Attendance.find({ 
+      date, 
+      status: { $in: ['On Duty', 'Absent'] },  // Only fetch those who are marked as "On Duty" or "Absent"
+      yearOfStudy, 
+      branch, 
+      section 
+    }).select('rollNo');
 
-    // Filter to get students not marked as "On Duty"
+    // Filter out students who are marked as "On Duty" or "Absent"
     const remainingStudents = allStudents.filter(student =>
-      !onDutyRollNumbers.some(record => record.rollNo === student.rollNo)
+      !excludedRollNumbers.some(record => record.rollNo === student.rollNo)
     );
 
     // Sort the remaining students by roll number in ascending order (numeric part only)

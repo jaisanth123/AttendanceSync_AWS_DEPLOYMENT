@@ -49,8 +49,11 @@ exports.getStudentsWithoutAttendance = async (req, res) => {
 
         // Send the filtered roll numbers and the total count of all students
         res.json({
-            students: studentsWithoutAttendance.map(student => student.rollNo), // Only send roll numbers
-            totalStudents: allStudents.length // Send the total count of students found
+            students: studentsWithoutAttendance.map(student => ({
+                rollNo: student.rollNo,
+                name: student.name
+            })), // Send both rollNo and name
+                        totalStudents: allStudents.length // Send the total count of students found
         });
     } catch (error) {
         console.error("Error retrieving students without attendance:", error);

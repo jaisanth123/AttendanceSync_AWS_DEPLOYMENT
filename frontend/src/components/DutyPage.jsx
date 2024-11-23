@@ -51,7 +51,8 @@ function DutyPage() {
       setMessage("");
 
       const fetchedRollNumbers = students.map((student) => ({
-        rollNo: student,
+        rollNo: student.rollNo,
+        name:student.name,
         isSelected: false,
       }));
       setRollNumbers(fetchedRollNumbers);

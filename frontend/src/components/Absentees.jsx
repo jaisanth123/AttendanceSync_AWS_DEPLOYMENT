@@ -16,6 +16,7 @@ function Absentees() {
   const [showMarkPresentPopup, setShowMarkPresentPopup] = useState(false); // For Mark Present button confirmation popup
   const [popupMessage, setPopupMessage] = useState(""); // To dynamically update popup messages
   const [popupColor, setPopupColor] = useState(""); // To dynamically update popup colors
+  const [selectedRollNos, setSelectedRollNos] = useState([]); // To keep track of selected roll numbers
 
   useEffect(() => {
     if (selectedCourse && date) {
@@ -42,13 +43,16 @@ function Absentees() {
 
   // Toggle selection of roll numbers
   const toggleSelection = (index) => {
-    setRollNumbers((prevRollNumbers) =>
-      prevRollNumbers.map((rollNumber, i) =>
+    setRollNumbers((prevRollNumbers) => {
+      const newRollNumbers = prevRollNumbers.map((rollNumber, i) =>
         i === index
           ? { ...rollNumber, isSelected: !rollNumber.isSelected }
           : rollNumber
-      )
-    );
+      );
+      // Update selectedRollNos array
+      setSelectedRollNos(newRollNumbers.filter(rollNumber => rollNumber.isSelected).map(rollNumber => rollNumber.rollNo));
+      return newRollNumbers;
+    });
   };
 
   // Handle confirming the absentee list
@@ -93,8 +97,21 @@ function Absentees() {
   };
 
   // Handle the "OK" click in the confirmation popup
-  const handleConfirmationPopupOk = () => {
-    setShowConfirmationPopup(false); // Close the confirmation popup
+  const handleConfirmationPopupOk = async () => {
+    try {
+      // Make the API request to mark the absentees
+      const [yearOfStudy, branch, section] = selectedCourse.split(" - ");
+      await axios.post("http://localhost:5000/api/attendance/absent", {
+        rollNumbers: selectedRollNos,
+        date,
+        yearOfStudy,
+        branch,
+        section,
+      });
+      setShowConfirmationPopup(false); // Close the confirmation popup
+    } catch (error) {
+      console.error("Error marking absentees:", error);
+    }
   };
 
   return (
@@ -120,6 +137,16 @@ function Absentees() {
         ))}
       </div>
 
+      {/* Selected Roll Numbers */}
+      <div className="mt-8 text-xl font-semibold text-black">
+        <h3>Selected Roll Numbers:</h3>
+        <ul>
+          {selectedRollNos.map((rollNo, index) => (
+            <li key={index}>{rollNo}</li>
+          ))}
+        </ul>
+      </div>
+
       {/* Action Buttons */}
       <div className="flex flex-col items-center mt-8 space-y-4">
         {/* Back Button */}
@@ -136,7 +163,6 @@ function Absentees() {
           className="w-full max-w-xs px-6 py-3 text-white transition-all duration-300 ease-in-out transform bg-red-600 rounded-lg hover:bg-red-700 hover:scale-110"
         >
           Mark Absent
-          
         </button>
 
         {/* Mark Present Button */}
@@ -179,38 +205,12 @@ function Absentees() {
         </div>
       )}
 
-      {/* Animated Custom Popup for Back Button Confirmation */}
-      {showBackPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fadeIn">
-          <div className="p-8 transition-all duration-500 transform scale-90 bg-gray-800 rounded-lg shadow-lg animate-slideDown">
-            <h2 className="mb-4 text-2xl font-semibold text-center text-white">
-              Confirm Going Back
-            </h2>
-            <p className="mb-6 text-center text-white">{popupMessage}</p>
-            <div className="flex justify-center space-x-6">
-              <button
-                onClick={handleBackConfirm}
-                className="px-6 py-3 text-lg font-semibold text-white transition-all bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
-              >
-                Yes
-              </button>
-              <button
-                onClick={handleBackCancel}
-                className="px-6 py-3 text-lg font-semibold text-white transition-all bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Animated Custom Popup for Mark Present Confirmation */}
+      {/* Mark Present Confirmation Popup */}
       {showMarkPresentPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fadeIn">
           <div className="p-8 transition-all duration-500 transform scale-90 bg-gray-800 rounded-lg shadow-lg animate-slideDown">
             <h2 className="mb-4 text-2xl font-semibold text-center text-white">
-              Confirm Marking Present
+              Confirm Marking as Present
             </h2>
             <p className="mb-6 text-center text-white">{popupMessage}</p>
             <div className="flex justify-center space-x-6">
@@ -230,8 +230,35 @@ function Absentees() {
           </div>
         </div>
       )}
+
+      {/* Back Button Confirmation Popup */}
+      {showBackPopup && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fadeIn">
+          <div className="p-8 transition-all duration-500 transform scale-90 bg-gray-800 rounded-lg shadow-lg animate-slideDown">
+            <h2 className="mb-4 text-2xl font-semibold text-center text-white">
+              Confirm Back Action
+            </h2>
+            <p className="mb-6 text-center text-white">{popupMessage}</p>
+            <div className="flex justify-center space-x-6">
+              <button
+                onClick={handleBackConfirm}
+                className="px-6 py-3 text-lg font-semibold text-white transition-all bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300"
+              >
+                Yes
+              </button>
+              <button
+                onClick={handleBackCancel}
+                className="px-6 py-3 text-lg font-semibold text-white transition-all bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 export default Absentees;
+
