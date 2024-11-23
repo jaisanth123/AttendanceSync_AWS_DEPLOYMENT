@@ -1,6 +1,7 @@
 // app.js
 const express = require('express');
 const connectDB = require('./dbConnection'); // Import the database connection function
+const cors = require('cors'); // Import the CORS middleware
 
 const app = express();
 
@@ -8,6 +9,7 @@ const app = express();
 connectDB();
 
 // Middleware
+app.use(cors()); // Enable CORS for all routes
 app.use(express.json());
 
 // Routes
@@ -16,9 +18,8 @@ const attendanceRoutes = require('./routes/attendanceRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 //const excelReportRoutes = require('./routes/excelReportRoutes');
 
-
 app.use('/api/students', studentRoutes);
-app.use('/api/attendance',attendanceRoutes);
+app.use('/api/attendance', attendanceRoutes);
 app.use('/api/report', reportRoutes);
 //app.use('/api/excel', excelReportRoutes);
 
