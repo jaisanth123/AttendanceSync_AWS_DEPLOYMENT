@@ -13,7 +13,21 @@ function DutyPage() {
   const [date, setDate] = useState(location.state?.selectedDate || "");
   
   const [rollNumbers, setRollNumbers] = useState([]);
+<<<<<<< HEAD
   const [isConfirmed, setIsConfirmed] = useState(false); // State for the confirmation popup
+=======
+  const [date, setDate] = useState(""); // State to store the selected date
+  const [message, setMessage] = useState(""); // State to store informational messages
+
+  // Utility function to format the date
+  const formatDate = (dateString) => {
+    const dateObj = new Date(dateString);
+    const day = String(dateObj.getDate()).padStart(2, "0");
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
+    const year = dateObj.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+>>>>>>> 48e137bdd8320f03488b99ff4ae5b26a2e54d863
 
   useEffect(() => {
     if (selectedCourse && date) {
@@ -25,16 +39,47 @@ function DutyPage() {
   const fetchRollNumbers = async (course, selectedDate) => {
     const [yearOfStudy, branch, section] = course.split(" - ");
     const url = `http://localhost:5000/api/students/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
+
     try {
       const response = await axios.get(url);
+<<<<<<< HEAD
       const fetchedRollNumbers = response.data.students.map((student) => ({
+=======
+      const { students, totalStudents } = response.data;
+
+      const formattedDate = formatDate(selectedDate);
+
+      // Handle cases based on the response
+      if (totalStudents === 0) {
+        setMessage(`No record found for ${yearOfStudy} - ${branch} - ${section}.`);
+        setRollNumbers([]); // Clear roll numbers
+        return;
+      }
+
+      if (students.length === 0) {
+        setMessage(`For ${yearOfStudy} - ${branch} - ${section}, students' attendance for ${formattedDate} has already been marked.`);
+        setRollNumbers([]); // Clear roll numbers
+        return;
+      }
+
+      // Reset the message if everything is okay
+      setMessage("");
+
+      // Add 'isSelected' property to each roll number
+      const fetchedRollNumbers = students.map((student) => ({
+>>>>>>> 48e137bdd8320f03488b99ff4ae5b26a2e54d863
         rollNo: student,
         isSelected: false,
       }));
       setRollNumbers(fetchedRollNumbers);
     } catch (error) {
       console.error("Error fetching roll numbers:", error);
+<<<<<<< HEAD
       setRollNumbers([]);
+=======
+      setMessage("An error occurred while fetching roll numbers. Please try again later.");
+      setRollNumbers([]); // Handle error gracefully
+>>>>>>> 48e137bdd8320f03488b99ff4ae5b26a2e54d863
     }
   };
 
@@ -84,6 +129,7 @@ function DutyPage() {
         />
       </div>
 
+<<<<<<< HEAD
       <div className="grid w-full grid-cols-2 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
         {rollNumbers.map((rollNumber, index) => (
           <div
@@ -97,6 +143,32 @@ function DutyPage() {
         ))}
       </div>
 
+=======
+      {/* Display Message */}
+      {message && (
+        <div className="w-full max-w-lg p-4 mt-6 text-lg text-center text-red-500">
+          {message}
+        </div>
+      )}
+
+      {/* Roll Number Buttons */}
+      {rollNumbers.length > 0 && (
+        <div className="grid w-full grid-cols-2 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
+          {rollNumbers.map((rollNumber, index) => (
+            <div
+              key={index}
+              onClick={() => toggleSelection(index)}
+              className={`flex items-center justify-center p-6 text-white transition-transform transform text-xl font-semibold rounded-lg cursor-pointer shadow-md
+              ${rollNumber.isSelected ? "bg-blue-600" : "bg-gray-700"} hover:scale-110`}
+            >
+              {rollNumber.rollNo}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Confirm Button */}
+>>>>>>> 48e137bdd8320f03488b99ff4ae5b26a2e54d863
       <button
         onClick={handleConfirm}
         className="px-6 py-3 mt-10 text-white bg-red-500 rounded-lg hover:bg-red-600"
