@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-function AbsenteesPage() {
+function Absentees() {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -26,11 +26,11 @@ function AbsenteesPage() {
   // Fetch roll numbers when selectedCourse or date changes
   const fetchRollNumbers = async (course, selectedDate) => {
     const [yearOfStudy, branch, section] = course.split(" - ");
-    const url = `http://localhost:5000/api/students/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
+    const url = `http://localhost:5000/api/attendance/remaining?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
     try {
       const response = await axios.get(url);
       const fetchedRollNumbers = response.data.students.map((student) => ({
-        rollNo: student,
+        rollNo: student.rollNo,
         isSelected: false,
       }));
       setRollNumbers(fetchedRollNumbers);
@@ -234,4 +234,4 @@ function AbsenteesPage() {
   );
 }
 
-export default AbsenteesPage;
+export default Absentees;
