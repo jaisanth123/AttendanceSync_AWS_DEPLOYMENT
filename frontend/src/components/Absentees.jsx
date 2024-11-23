@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 function Absentees() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -101,17 +104,15 @@ function Absentees() {
       
       // Close the "Mark Present" confirmation pop-up
       setShowMarkPresentPopup(false);
+      toast.success("Successfully marked remaining students as present.");
+
       
-      // Optionally, show a success message
-      setPopupMessage("Successfully marked remaining students as present.");
-      setPopupColor("bg-green-600");
-      setShowConfirmationPopup(true); // Show success confirmation pop-up
+       // Show success confirmation pop-up
     } catch (error) {
       // Handle error (e.g., display error message)
       console.error("Error marking remaining students as present:", error);
-      setPopupMessage("Error marking remaining students as present. Please try again.");
-      setPopupColor("bg-red-600");
-      setShowConfirmationPopup(true); // Show error confirmation pop-up
+      toast.error("Error marking remaining students as present. Please try again.");
+      // Show error confirmation pop-up
     }
   };  
 
@@ -287,6 +288,26 @@ function Absentees() {
           </div>
         </div>
       )}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        toastStyle={{
+          borderRadius: '8px',
+          fontSize: '16px',
+          padding: '12px',
+          fontFamily: 'Gentium Basic, sans-serif', // Using custom font
+          fontWeight: 'bold',              // Bold text
+        }}
+      />
+
+
     </div>
   );
 }
