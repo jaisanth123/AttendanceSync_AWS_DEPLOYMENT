@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import CSS for Toastify
 
 function DutyPage() {
   const location = useLocation();
@@ -10,7 +12,7 @@ function DutyPage() {
   const [date, setDate] = useState(location.state?.selectedDate || "");
   const [rollNumbers, setRollNumbers] = useState([]);
   const [message, setMessage] = useState("");
-  const [selectedRollNumbers, setSelectedRollNumbers] = useState([]); // Track selected roll numbers
+  const [selectedRollNumbers, setSelectedRollNumbers] = useState([]);
   const [isConfirmed, setIsConfirmed] = useState(false);
 
   const formatDate = (dateString) => {
@@ -52,7 +54,7 @@ function DutyPage() {
 
       const fetchedRollNumbers = students.map((student) => ({
         rollNo: student.rollNo,
-        name:student.name,
+        name: student.name,
         isSelected: false,
       }));
       setRollNumbers(fetchedRollNumbers);
@@ -60,6 +62,9 @@ function DutyPage() {
       console.error("Error fetching roll numbers:", error);
       setMessage("An error occurred while fetching roll numbers. Please try again later.");
       setRollNumbers([]);
+      toast.error("Error fetching roll numbers. Please try again later.", {
+        autoClose: 800,
+      });
     }
   };
 
@@ -69,30 +74,41 @@ function DutyPage() {
       prevRollNumbers.map((rollNumber, i) => {
         if (i === index) {
           const updatedSelection = !rollNumber.isSelected;
-          
-          // If selecting, add to selectedRollNumbers; if deselecting, remove from it
+
           setSelectedRollNumbers((prevSelected) => {
             if (updatedSelection) {
-              // Add roll number if not already present
               if (!prevSelected.includes(rollNo)) {
                 return [...prevSelected, rollNo];
               }
             } else {
-              // Remove roll number if deselecting
               return prevSelected.filter((rollNoItem) => rollNoItem !== rollNo);
             }
             return prevSelected;
           });
-  
+
           return { ...rollNumber, isSelected: updatedSelection };
         }
         return rollNumber;
       })
     );
   };
-  
 
   const handleConfirm = async () => {
+    if (selectedRollNumbers.length === 0) {
+      toast.info("0 Students are Marked as On Duty", {
+        position: "top-right",
+        autoClose: 800,
+      })
+
+      // Wait for toast to finish before redirecting
+      setTimeout(() => {
+        navigate("/absentees", {
+          state: { selectedCourse, selectedDate: date },
+        });
+      }, 800); // Delay the redirection after 3 seconds (toast duration)
+      return;
+    }
+
     const [yearOfStudy, branch, section] = selectedCourse.split(" - ");
     const payload = {
       rollNumbers: selectedRollNumbers,
@@ -105,13 +121,27 @@ function DutyPage() {
     try {
       const response = await axios.post("http://localhost:5000/api/attendance/onDuty", payload);
       if (response.status === 200) {
-        navigate("/absentees", {
-          state: { selectedCourse, selectedDate: date },
+        // Display success toast
+        toast.success(`${selectedRollNumbers.length} students marked as On Duty`, {
+          autoClose: 800,
         });
+
+        // Show success and navigate after a delay
+        setTimeout(() => {
+          navigate("/absentees", {
+            state: { selectedCourse, selectedDate: date },
+          });
+        }, 2000);
       } else {
+        toast.error("Failed to mark OD. Please try again.", {
+          autoClose: 800,
+        });
       }
     } catch (error) {
       console.error("Error submitting attendance:", error);
+      toast.error("Error submitting OD. Please try again.", {
+        autoClose: 800,
+      });
     }
   };
 
@@ -160,16 +190,13 @@ function DutyPage() {
           ))}
         </div>
       )}
+
 {selectedRollNumbers.length > 0 && (
   <div className="w-full p-4 mt-6 text-lg text-black">
     <h4 className="mb-10 text-3xl font-semibold text-center">Selected Roll Numbers:</h4>
     <div className="grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-6">
       {selectedRollNumbers.map((rollNumber, index) => (
-        <span 
-          key={index} 
-          className="text-xl font-bold ">
-          {rollNumber}
-                </span>
+        <span key={index} className="text-xl font-bold ">{rollNumber}</span>
       ))}
     </div>
   </div>
@@ -179,37 +206,40 @@ function DutyPage() {
       <button
         onClick={() => setIsConfirmed(true)}
         className="px-6 py-3 mt-10 text-white bg-red-500 rounded-lg hover:bg-red-600"
-        disabled={!date || selectedRollNumbers.length === 0}
       >
-        CONFIRM
+        MARK OD
       </button>
 
       {isConfirmed && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fadeIn">
-          <div className="p-8 transition-all duration-500 transform scale-90 bg-gray-800 rounded-lg shadow-lg animate-slideDown">
+          <div className="p-8 transition-all duration-500 transform scale-90 bg-gray-800 rounded-lg shadow-lg animate-slideDown w-96">
             <h2 className="mb-4 text-2xl font-semibold text-center text-white">
-              Confirm Submission
+              Confirm Action
             </h2>
             <p className="mb-6 text-center text-white">
-              Are you sure you want to mark the selected students as absent?
+              {selectedRollNumbers.length > 0
+                ? ` ${selectedRollNumbers.length} students are marked as On Duty`
+                : "0 Students are marked as On Duty"}
             </p>
             <div className="flex justify-center space-x-4">
               <button
                 onClick={handleConfirm}
-                className="px-4 py-2 font-semibold text-white transition-all bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300"
+                className="w-32 px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
               >
-                Confirm
+                Yes
               </button>
               <button
                 onClick={handleClosePopup}
-                className="px-4 py-2 font-semibold text-white transition-all bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
+                className="w-32 px-6 py-3 text-white bg-gray-500 rounded-lg hover:bg-gray-600"
               >
-                Cancel
+                No
               </button>
             </div>
           </div>
         </div>
       )}
+
+      <ToastContainer />
     </div>
   );
 }
