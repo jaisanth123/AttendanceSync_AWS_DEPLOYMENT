@@ -105,16 +105,13 @@ function DutyPage() {
     try {
       const response = await axios.post("http://localhost:5000/api/attendance/onDuty", payload);
       if (response.status === 200) {
-        alert("Attendance marked successfully!");
         navigate("/absentees", {
           state: { selectedCourse, selectedDate: date },
         });
       } else {
-        alert("Failed to mark attendance. Please try again.");
       }
     } catch (error) {
       console.error("Error submitting attendance:", error);
-      alert("An error occurred while submitting attendance. Please try again.");
     }
   };
 
