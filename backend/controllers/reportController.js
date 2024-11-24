@@ -1,16 +1,13 @@
 const Student = require('../models/Student');
 const Attendance = require('../models/Attendance');
-
+const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const [year, month, day] = dateString.split("-");
+    return `${day}-${month}-${year}`;
+};
 // Controller to generate message of absent students
 exports.generateAbsentStudentsMessage = async (req, res) => {
     const { yearOfStudy, branch, section, date } = req.query;
-
-    // Function to format date from YYYY-MM-DD to DD-MM-YYYY
-    const formatDate = (dateString) => {
-        if (!dateString) return "";
-        const [year, month, day] = dateString.split("-");
-        return `${day}-${month}-${year}`;
-    };
 
     try {
         // Step 1: Fetch all students in the specified year, branch, and section
@@ -49,6 +46,7 @@ exports.generateAbsentStudentsMessage = async (req, res) => {
 
         // Step 5: Format the date before using it in the message
         const formattedDate = formatDate(date);
+
 
         // Step 6: Generate and send the message
         let messageHeader = `Year / Branch / Section : ${yearOfStudy} year ${branch}-${section}\nDate : ${formattedDate}\nTHE FOLLOWING STUDENTS ARE ABSENT`;
@@ -149,6 +147,7 @@ exports.handleAbsentStudentsReport = async (gender, req, res) => {
         });
 
         console.log('Absent students sorted successfully');
+        const formattedDate = formatDate(date);
 
         // Determine Hostel type based on gender (Boys or Girls)
         const hostelType = gender === 'MALE' ? 'Boys' : 'Girls';
@@ -157,7 +156,7 @@ exports.handleAbsentStudentsReport = async (gender, req, res) => {
         const reportData = [
             ['Kongu Engineering College'],
             ['Department of Artificial Intelligence'],
-            [`${hostelType} Hostel Students Absentees List - ${date}`],
+            [`${hostelType} Hostel Students Absentees List - ${formattedDate}`],
             ['S.No', 'Roll No', 'Student Name', 'Year', 'Branch']
         ];
 
@@ -230,7 +229,7 @@ exports.handleAbsentStudentsReport = async (gender, req, res) => {
         console.log('Header merged and centered successfully.');
 
         // Define file path and name
-        const fileName = `${hostelType}_Absent_Students_${date}.xlsx`;
+        const fileName = `${hostelType}_Absent_Students_${formattedDate}.xlsx`;
         const filePath = path.join(reportDir, fileName);
 
         // Write the workbook to the file
@@ -244,7 +243,7 @@ exports.handleAbsentStudentsReport = async (gender, req, res) => {
 
         // Return the response with a link to download the report
         res.json({
-            message: `Absent ${gender.toLowerCase()} students report for ${date} is ready.`,
+            message: `Absent ${gender.toLowerCase()} students report for ${formattedDate} is ready.`,
             reportLink: `/reports/${fileName}`
         });
 
