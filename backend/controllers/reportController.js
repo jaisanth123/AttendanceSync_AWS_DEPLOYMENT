@@ -41,7 +41,7 @@ exports.generateAbsentStudentsMessage = async (req, res) => {
             .map(record => {
                 const student = allStudents.find(student => student.rollNo === record.rollNo);
                 const hostellerOrDayScholar = student.hostellerDayScholar === 'HOSTELLER' ? '(Hostel)' : '(Day Scholar)';
-                return `Roll No: ${record.rollNo}-${student.name} ${hostellerOrDayScholar}`;
+                return ` ${record.rollNo}-${student.name} ${hostellerOrDayScholar}`;
             });
 
 

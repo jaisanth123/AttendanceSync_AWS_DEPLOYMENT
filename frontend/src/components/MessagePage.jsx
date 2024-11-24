@@ -147,7 +147,7 @@ const MessagePage = ({ toggleSidebar }) => {
           onClick={toggleSidebar}
           className="px-6 py-2 mt-4 font-semibold text-white bg-gray-800 rounded-lg shadow-lg hover:bg-gray-500 focus:outline-none focus:ring focus:ring-blue-300"
         >
-          Side Bar
+          ATTENDENCE
         </button>
       </div>
       <ToastContainer />
