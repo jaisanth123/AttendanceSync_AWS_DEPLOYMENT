@@ -21,7 +21,7 @@ function Absentees() {
   const [selectedRollNos, setSelectedRollNos] = useState([]); // To keep track of selected roll numbers
   const [markPresentDisabled, setMarkPresentDisabled] = useState(true); // Disable Mark Present button initially
   const [markPresentVisible, setMarkPresentVisible] = useState(false);
-  
+  const [showGenerateMessageButton, setShowGenerateMessageButton] = useState(false);
 
 
   useEffect(() => {
@@ -96,41 +96,35 @@ function Absentees() {
   const handleMarkPresentConfirm = async () => {
     const [yearOfStudy, branch, section] = selectedCourse.split(" - ");
     const data = { yearOfStudy, branch, section, date };
- 
+  
     try {
       const response = await axios.post(
         "http://localhost:5000/api/attendance/mark-remaining-present",
         data
       );
- 
+  
       console.log("Response data:", response.data);
- 
+  
       if (response.data.markedAsPresent === 0) {
-        toast.info("Attendance is already marked for all students.",{
-          autoClose: 800, 
+        toast.info("Attendance is already marked for all students.", {
+          autoClose: 800,
         });
-        setTimeout(() => {
-          navigate("/message", {
-            state: { selectedCourse, selectedDate: date },
-          });
-        }, 2000);
       } else {
-        toast.success("Successfully marked remaining students as present.",{
-          autoClose: 800, 
+        toast.success("Successfully marked remaining students as present.", {
+          autoClose: 800,
         });
-        setTimeout(() => {
-      navigate("/message", {
-        state: { selectedCourse, selectedDate: date },
-      });
-    }, 2000);
-    }
- 
+      }
+  
       setShowMarkPresentPopup(false);
+      setShowGenerateMessageButton(true); // Show the Generate Message button
     } catch (error) {
       console.error("Error marking remaining students as present:", error);
-      toast.error("Error marking remaining students as present. Please try again.",{
-        autoClose: 800, 
-      });
+      toast.error(
+        "Error marking remaining students as present. Please try again.",
+        {
+          autoClose: 800,
+        }
+      );
     }
   };
 
@@ -277,6 +271,20 @@ function Absentees() {
             Mark Present
           </button>
         )}
+
+        
+        {showGenerateMessageButton && (
+  <button
+    onClick={() =>
+      navigate("/message", {
+        state: { selectedCourse, selectedDate: date },
+      })
+    }
+    className="w-full px-8 py-4 mt-2 text-xl font-semibold text-white bg-gray-800 rounded-lg hover:bg-gray-700"
+  >
+    Generate Message
+  </button>
+)}
 
 <button
           onClick={handleBackButton}

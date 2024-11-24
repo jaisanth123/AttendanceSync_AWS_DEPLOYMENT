@@ -47,11 +47,20 @@ exports.generateAbsentStudentsMessage = async (req, res) => {
                 return `Roll No: ${record.rollNo}-${student.name} ${hostellerOrDayScholar}`;
             });
 
-        // Step 5: Format the date before using it in the message
+
+            // Step 5: Format the date before using it in the message
         const formattedDate = formatDate(date);
+        let mHeader = `${yearOfStudy} year ${branch}-${section}\nDate : ${formattedDate}\n`;
+
+        if (absentStudents.length === 0) {
+            return res.json({ 
+                
+                message: mHeader,
+                details: "NIL ABSENTEES"});
+        }
 
         // Step 6: Generate and send the message
-        let messageHeader = `Year / Branch / Section : ${yearOfStudy} year ${branch}-${section}\nDate : ${formattedDate}\nTHE FOLLOWING STUDENTS ARE ABSENT`;
+        let messageHeader = ` ${yearOfStudy} year ${branch}-${section}\nDate : ${formattedDate}\nTHE FOLLOWING STUDENTS ARE ABSENT`;
 
         let absentDetails = absentStudents.join('\n');
 

@@ -64,7 +64,7 @@ function App() {
               element={<DutyPage selectedCourse={selectedItem}/>}
             />
             <Route path="/absentees" element={<Absentees selectedCourse={selectedItem}  />} />
-            <Route path="/message" element={<MessagePage selectedCourse={selectedItem}  />} />
+            <Route path="/message" element={<MessagePage selectedCourse={selectedItem} toggleSidebar={toggleSidebar} />} />
 
           </Routes>
         </div>
