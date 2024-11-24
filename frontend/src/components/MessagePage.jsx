@@ -50,6 +50,11 @@ const MessagePage = () => {
     selection.removeAllRanges();
   };
 
+  // Function to replace \n with <br /> tags
+  const formatTextWithLineBreaks = (text) => {
+    return text.replace(/\n/g, "<br />");
+  };
+
   // API call function
   const getAbsentStudents = async (course, date) => {
     const [yearOfStudy, branch, section] = course.split(" - ");
@@ -102,17 +107,17 @@ const MessagePage = () => {
 
       {/* Display all the contents inside a single card */}
       {showCard && (message || details.length > 0 || missingStudents.length > 0 || errorMessage) && (
-        <div className="mt-6 bg-white shadow-lg rounded-lg p-6 border-2 border-gray-300 w-96 h-96 mx-auto">
+        <div className="mt-6 bg-white shadow-lg rounded-lg p-6 border-2 border-gray-300 w-[520px] h-104 mx-auto">
           {/* Content that will be copied */}
           <div id="cardContent">
-            {/* Display message */}
+            {/* Display message with formatted line breaks */}
             {message && (
               <div className="mt-4">
-                <p className="font-semibold text-gray-800">{message}</p>
+                <p className="font-semibold text-gray-800" dangerouslySetInnerHTML={{ __html: formatTextWithLineBreaks(message) }} />
               </div>
             )}
 
-            {/* Display details */}
+            {/* Display details with formatted line breaks */}
             {Array.isArray(details) && details.length > 0 && (
               <div className="mt-4">
                 <ul className="list-none space-y-2 mt-2 text-gray-700">

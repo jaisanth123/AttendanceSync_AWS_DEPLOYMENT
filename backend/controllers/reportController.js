@@ -5,9 +5,16 @@ const Attendance = require('../models/Attendance');
 exports.generateAbsentStudentsMessage = async (req, res) => {
     const { yearOfStudy, branch, section, date } = req.query;
 
+    // Function to format date from YYYY-MM-DD to DD-MM-YYYY
+    const formatDate = (dateString) => {
+        if (!dateString) return "";
+        const [year, month, day] = dateString.split("-");
+        return `${day}-${month}-${year}`;
+    };
+
     try {
         // Step 1: Fetch all students in the specified year, branch, and section
-        const allStudents = await Student.find({ yearOfStudy, branch, section }).select('rollNo name');
+        const allStudents = await Student.find({ yearOfStudy, branch, section }).select('rollNo name hostellerDayScholar');
 
         // Step 2: Fetch attendance records for the specified date, year, branch, and section
         const attendanceRecords = await Attendance.find({ date, yearOfStudy, branch, section });
@@ -36,33 +43,38 @@ exports.generateAbsentStudentsMessage = async (req, res) => {
             .filter(record => record.status === 'Absent')
             .map(record => {
                 const student = allStudents.find(student => student.rollNo === record.rollNo);
-                return { rollNo: record.rollNo, name: student.name };
+                const hostellerOrDayScholar = student.hostellerDayScholar === 'Hostel' ? '(Hostel)' : '(Day Scholar)';
+                return `Roll No: ${record.rollNo}-${student.name} ${hostellerOrDayScholar}`;
             });
 
-        // Step 5: Generate and send the message
-        // Prepare the message header and student details for the response
-        let messageHeader = `Absent students for ${date} in ${yearOfStudy} ${branch} ${section}:`;
-        let absentDetails = absentStudents.map(student => `Roll No: ${student.rollNo}, Name: ${student.name}`).join('\n');
+        // Step 5: Format the date before using it in the message
+        const formattedDate = formatDate(date);
 
-        // Send the response with message and details
+        // Step 6: Generate and send the message
+        let messageHeader = `Year / Branch / Section : ${yearOfStudy} year ${branch}-${section}\nDate : ${formattedDate}\nTHE FOLLOWING STUDENTS ARE ABSENT`;
+
+        let absentDetails = absentStudents.join('\n');
+
+        // Send the response with the formatted message and details
         res.json({
             message: messageHeader,
             details: absentDetails
         });
 
-        // Step 6: Lock the attendance for this date, year, branch, and section
+        // Step 7: Lock the attendance for this date, year, branch, and section
         await Attendance.updateMany(
             { date, yearOfStudy, branch, section },
             { locked: true }
         );
 
-        console.log(`Attendance locked for ${yearOfStudy} ${branch} ${section} on ${date}`);
+        console.log(`Attendance locked for ${yearOfStudy} ${branch} ${section} on ${formattedDate}`);
 
     } catch (error) {
         console.error("Error generating absent students message:", error);
         res.status(500).json({ message: "Error generating absent students message" });
     }
 };
+
 
 
 //Generate content for Hostel Gmail Report
