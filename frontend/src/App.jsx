@@ -5,7 +5,7 @@ import Sidebar from "./components/Sidebar";
 import HomePage from "./components/HomePage";
 import DutyPage from "./components/DutyPage";
 import Absentees from "./components/Absentees"; // Import Absentees component
-
+import MessagePage from "./components/MessagePage";
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -64,6 +64,8 @@ function App() {
               element={<DutyPage selectedCourse={selectedItem}/>}
             />
             <Route path="/absentees" element={<Absentees selectedCourse={selectedItem}  />} />
+            <Route path="/message" element={<MessagePage selectedCourse={selectedItem}  />} />
+
           </Routes>
         </div>
 

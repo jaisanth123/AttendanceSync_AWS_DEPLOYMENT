@@ -109,7 +109,10 @@ function Absentees() {
         toast.success("Successfully marked remaining students as present.",{
           autoClose: 800, 
         });
-      }
+      navigate("/message", {
+        state: { selectedCourse, selectedDate: date },
+      });
+    }
  
       setShowMarkPresentPopup(false);
     } catch (error) {
