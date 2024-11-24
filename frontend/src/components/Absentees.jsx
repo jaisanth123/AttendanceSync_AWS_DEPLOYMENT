@@ -46,7 +46,11 @@ function Absentees() {
       setRollNumbers([]);
     }
   };
-
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const [year, month, day] = dateString.split("-");
+    return `${day}-${month}-${year}`;
+  };
   // Toggle selection of roll numbers
   const toggleSelection = (index) => {
     setRollNumbers((prevRollNumbers) => {
@@ -105,13 +109,20 @@ function Absentees() {
         toast.info("Attendance is already marked for all students.",{
           autoClose: 800, 
         });
+        setTimeout(() => {
+          navigate("/message", {
+            state: { selectedCourse, selectedDate: date },
+          });
+        }, 2000);
       } else {
         toast.success("Successfully marked remaining students as present.",{
           autoClose: 800, 
         });
+        setTimeout(() => {
       navigate("/message", {
         state: { selectedCourse, selectedDate: date },
       });
+    }, 2000);
     }
  
       setShowMarkPresentPopup(false);
@@ -222,7 +233,7 @@ function Absentees() {
       <div className="p-4 text-center text-black">
         <h1 className="text-4xl font-semibold">{selectedCourse}</h1>
         <h3 className="text-2xl font-semibold">Absentees Page</h3>
-        <h3 className="mt-2 text-xl font-semibold">{date}</h3>
+        <h3 className="mt-2 text-xl font-semibold">{formatDate(date)}</h3>
       </div>
 
       <div className="grid w-full grid-cols-2 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
