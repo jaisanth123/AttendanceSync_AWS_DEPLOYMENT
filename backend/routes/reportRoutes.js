@@ -7,12 +7,12 @@ const router = express.Router();
 router.get('/absentStudents', generateAbsentStudentsMessage);
 
 // Route for generating report for male students
-router.get('/report/absent/male', (req, res) => {
+router.get('/reportabsent/male', (req, res) => {
     handleAbsentStudentsReport('MALE', req, res);
 });
 
 // Route for generating report for female students
-router.get('/report/absent/female', (req, res) => {
+router.get('/reportabsent/female', (req, res) => {
     handleAbsentStudentsReport('FEMALE', req, res);
 });
 module.exports = router;// Route for generating report for female students
