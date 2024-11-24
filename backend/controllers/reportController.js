@@ -111,7 +111,7 @@ exports.handleAbsentStudentsReport = async (gender, req, res) => {
 
     try {
         // Fetch all students of the specified gender
-        const allStudents = await Student.find({ gender }).select('rollNo name yearOfStudy branch section');
+        const allStudents = await Student.find({ gender }).select('rollNo name yearOfStudy branch section hostellerDayScholar');
         console.log('Total students fetched:', allStudents.length);
 
         // Fetch attendance records for the specified date (only absent students)
@@ -122,15 +122,22 @@ exports.handleAbsentStudentsReport = async (gender, req, res) => {
         const absentStudents = allStudents.filter(student =>
             attendanceRecords.some(record => record.rollNo === student.rollNo)
         );
-        console.log('Absent Students:', absentStudents);
+        console.log('Absent Students before hostel filter:', absentStudents);
 
-        if (absentStudents.length === 0) {
+        // Filter absent students to include only HOSTELLER or HOSTELER
+        const filteredAbsentStudents = absentStudents.filter(student =>
+            student.hostellerDayScholar && 
+            (student.hostellerDayScholar.toUpperCase() === 'HOSTELLER' || student.hostellerDayScholar.toUpperCase() === 'HOSTELER')
+        );
+        console.log('Filtered Absent Students:', filteredAbsentStudents);
+
+        if (filteredAbsentStudents.length === 0) {
             console.log(`No absent ${gender.toLowerCase()} students found for ${date}.`);
             return res.status(404).json({ message: `No absent ${gender.toLowerCase()} students found for ${date}.` });
         }
 
         // Sort absent students by yearOfStudy (Roman numeral order) and then by rollNo
-        absentStudents.sort((a, b) => {
+        filteredAbsentStudents.sort((a, b) => {
             const yearA = romanToInt(a.yearOfStudy);
             const yearB = romanToInt(b.yearOfStudy);
             if (yearA === yearB) {
@@ -155,7 +162,7 @@ exports.handleAbsentStudentsReport = async (gender, req, res) => {
         ];
 
         // Add the absent students' data
-        absentStudents.forEach((student, index) => {
+        filteredAbsentStudents.forEach((student, index) => {
             reportData.push([
                 index + 1,
                 student.rollNo,
@@ -176,7 +183,7 @@ exports.handleAbsentStudentsReport = async (gender, req, res) => {
         worksheet.getRow(1).height = 25; // First header row
         worksheet.getRow(2).height = 25; // Second header row
         worksheet.getRow(3).height = 25; // Third header row
-        worksheet.getRow(4).height = 20; // Column headers row
+        worksheet.getRow(4).height = 25; // Column headers row
         for (let row = 5; row <= reportData.length; row++) {
             worksheet.getRow(row).height = 25; // Data rows
         }
@@ -193,9 +200,7 @@ exports.handleAbsentStudentsReport = async (gender, req, res) => {
         for (let col = 1; col <= 5; col++) {
             worksheet.getCell(4, col).border = borderStyle;
             worksheet.getCell(4, col).alignment = { horizontal: 'center', vertical: 'middle' }; // Center-align
-            worksheet.getCell(4, col).font = { bold: true }; // Bold text
             worksheet.getCell(4, col).font = { bold: true, name: 'Times New Roman', size: 12 };
-
         }
 
         // Apply borders for each row with student data (starting from row 5)
@@ -204,7 +209,6 @@ exports.handleAbsentStudentsReport = async (gender, req, res) => {
                 worksheet.getCell(row, col).border = borderStyle;
                 worksheet.getCell(row, col).alignment = { horizontal: 'center', vertical: 'middle' }; // Center-align
                 worksheet.getCell(row, col).font = { name: 'Times New Roman', size: 12 };
-
             }
         }
 
@@ -216,7 +220,6 @@ exports.handleAbsentStudentsReport = async (gender, req, res) => {
         worksheet.mergeCells('A3:E3'); // Merging the third header row
 
         // Set header cell alignment to center
-        worksheet.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' };
         worksheet.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' };
         worksheet.getCell('A1').font = { name: 'Times New Roman', size: 12, bold: true };
         worksheet.getCell('A2').alignment = { horizontal: 'center', vertical: 'middle' };
@@ -250,3 +253,4 @@ exports.handleAbsentStudentsReport = async (gender, req, res) => {
         res.status(500).json({ message: 'Error generating absent students report' });
     }
 };
+
