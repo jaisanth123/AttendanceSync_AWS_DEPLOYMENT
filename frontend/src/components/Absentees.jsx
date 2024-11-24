@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -20,6 +19,8 @@ function Absentees() {
   const [popupMessage, setPopupMessage] = useState(""); // To dynamically update popup messages
   const [popupColor, setPopupColor] = useState(""); // To dynamically update popup colors
   const [selectedRollNos, setSelectedRollNos] = useState([]); // To keep track of selected roll numbers
+  const [markPresentDisabled, setMarkPresentDisabled] = useState(true); // Disable Mark Present button initially
+  const [markPresentVisible, setMarkPresentVisible] = useState(false);
 
   useEffect(() => {
     if (selectedCourse && date) {
@@ -53,24 +54,29 @@ function Absentees() {
           : rollNumber
       );
       // Update selectedRollNos array
-      setSelectedRollNos(newRollNumbers.filter(rollNumber => rollNumber.isSelected).map(rollNumber => rollNumber.rollNo));
+      const selected = newRollNumbers.filter(rollNumber => rollNumber.isSelected);
+      setSelectedRollNos(selected.map(rollNumber => rollNumber.rollNo));
+      // If any roll numbers are selected, enable Mark Present button
+      setMarkPresentDisabled(selected.length === 0);
       return newRollNumbers;
     });
   };
 
   // Handle confirming the absentee list
   const handleConfirm = () => {
-    setIsConfirmed(true);
-    setPopupMessage("Are you sure you want to confirm the attendance?");
-    setPopupColor("bg-red-600"); // Red for Confirm button
-    setShowConfirmationPopup(true); // Show confirmation pop-up
-  };
+    const numSelected = selectedRollNos.length;
 
-  // Handle the "Mark Present" action
-  const handleMarkPresent = () => {
-    setPopupMessage("Are you sure you want to mark the selected students as present?");
-    setPopupColor("bg-gray-600"); // Default color for Mark Present
-    setShowMarkPresentPopup(true); // Show Mark Present confirmation pop-up
+    if (numSelected === 0) {
+      // Case 1: No roll numbers selected
+      setPopupMessage("No one marked absent. Click confirm to proceed.");
+      setPopupColor("bg-red-600"); // Red for confirmation popup
+      setShowConfirmationPopup(true); // Show confirmation popup
+    } else {
+      // Case 2: Roll numbers are selected
+      setPopupMessage(`${numSelected} students selected to be marked absent. Click confirm to proceed.`);
+      setPopupColor("bg-red-600");
+      setShowConfirmationPopup(true);
+    }
   };
 
   // Handle the "Back" button action
@@ -81,81 +87,97 @@ function Absentees() {
   };
 
   const handleMarkPresentConfirm = async () => {
-    // Prepare the data to be sent in the request
     const [yearOfStudy, branch, section] = selectedCourse.split(" - ");
-    
-    // The body of the POST request
-    const data = {
-      yearOfStudy,
-      branch,
-      section,
-      date,
-    };
-  
+    const data = { yearOfStudy, branch, section, date };
+
     try {
-      // Sending a POST request to the server
       const response = await axios.post(
         "http://localhost:5000/api/attendance/mark-remaining-present",
         data
       );
-      
-      // Handle the response (e.g., display success message)
+
       console.log("Marked remaining students as present:", response.data);
-      
-      // Close the "Mark Present" confirmation pop-up
       setShowMarkPresentPopup(false);
       toast.success("Successfully marked remaining students as present.");
-
-      
-       // Show success confirmation pop-up
     } catch (error) {
-      // Handle error (e.g., display error message)
       console.error("Error marking remaining students as present:", error);
       toast.error("Error marking remaining students as present. Please try again.");
-      // Show error confirmation pop-up
     }
-  };  
+  };
 
-  // Navigate back to the Duty Page
   const handleBackConfirm = () => {
-    setShowBackPopup(false); // Close the back confirmation popup
+    setShowBackPopup(false);
     navigate("/duty", {
-      state: { selectedCourse, selectedDate: date }, // Passing the course and date back
+      state: { selectedCourse, selectedDate: date },
     });
   };
 
   const handleBackCancel = () => {
-    setShowBackPopup(false); // Close the back confirmation popup without navigating
+    setShowBackPopup(false);
   };
 
-  // Handle the "OK" click in the confirmation popup
   const handleConfirmationPopupOk = async () => {
-    try {
-      // Make the API request to mark the absentees
-      const [yearOfStudy, branch, section] = selectedCourse.split(" - ");
-      await axios.post("http://localhost:5000/api/attendance/absent", {
-        rollNumbers: selectedRollNos,
-        date,
-        yearOfStudy,
-        branch,
-        section,
-      });
-      setShowConfirmationPopup(false); // Close the confirmation popup
-    } catch (error) {
-      console.error("Error marking absentees:", error);
+    const numSelected = selectedRollNos.length;
+
+    if (numSelected === 0) {
+      toast.info("No one marked absent.");
+      setShowConfirmationPopup(false);
+      setMarkPresentVisible(true);
+    } else {
+      try {
+        const [yearOfStudy, branch, section] = selectedCourse.split(" - ");
+        await axios.post("http://localhost:5000/api/attendance/absent", {
+          rollNumbers: selectedRollNos,
+          date,
+          yearOfStudy,
+          branch,
+          section,
+        });
+        toast.success(`Absent marked for ${numSelected} students.`);
+        setShowConfirmationPopup(false);
+        setMarkPresentVisible(true);
+      } catch (error) {
+        console.error("Error marking absentees:", error);
+        toast.error("Attendance already marked. Please try again.");
+      }
     }
+  };
+
+  // Reusable Popup Component
+  const ReusablePopup = ({ show, message, color, onConfirm, onCancel, confirmText, cancelText }) => {
+    if (!show) return null;
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fadeIn">
+        <div className="p-8 transition-all duration-500 transform scale-90 bg-gray-800 rounded-lg shadow-lg animate-slideDown">
+          <h2 className="mb-4 text-2xl font-semibold text-center text-white">Confirm Action</h2>
+          <p className="mb-6 text-center text-white">{message}</p>
+          <div className="flex justify-center space-x-6">
+            <button
+              onClick={onConfirm}
+              className={`px-8 py-3 text-white ${color} rounded-lg hover:bg-opacity-80`}
+            >
+              {confirmText || 'Confirm'}
+            </button>
+            <button
+              onClick={onCancel}
+              className="px-8 py-3 text-white bg-red-600 rounded-lg hover:bg-red-700"
+            >
+              {cancelText || 'Cancel'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
     <div className="flex flex-col items-center flex-1 p-6 md:p-8 lg:p-12">
-      {/* Title and Selected Course Display */}
       <div className="p-4 text-center text-black">
         <h1 className="text-4xl font-semibold">{selectedCourse}</h1>
         <h3 className="text-2xl font-semibold">Absentees Page</h3>
         <h3 className="mt-2 text-xl font-semibold">{date}</h3>
       </div>
 
-      {/* Roll Number Buttons */}
       <div className="grid w-full grid-cols-2 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
         {rollNumbers.map((rollNumber, index) => (
           <div
@@ -169,7 +191,6 @@ function Absentees() {
         ))}
       </div>
 
-      {/* Selected Roll Numbers */}
       <div className="mt-8 text-xl font-semibold text-black">
         <h3>Selected Roll Numbers:</h3>
         <ul>
@@ -179,138 +200,61 @@ function Absentees() {
         </ul>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-col items-center mt-8 space-y-4">
-        {/* Back Button */}
+      <div className="flex flex-col gap-4 mt-8 md:w-1/4 lg:w-1/4 sm:w-1/2">
+
         <button
           onClick={handleBackButton}
-          className="w-full max-w-xs px-6 py-3 text-white transition-all duration-300 ease-in-out transform bg-blue-600 rounded-lg hover:bg-blue-700 hover:scale-110"
+          className="w-full px-8 py-4 text-xl font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700"
         >
           Back
         </button>
-
-        {/* Confirm Button */}
+        
         <button
-          onClick={handleConfirm}
-          className="w-full max-w-xs px-6 py-3 text-white transition-all duration-300 ease-in-out transform bg-red-600 rounded-lg hover:bg-red-700 hover:scale-110"
-        >
-          Mark Absent
-        </button>
+  onClick={handleConfirm}
+  className="w-full px-8 py-4 text-xl font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 whitespace-nowrap"
+>
+  Mark Absentees
+</button>
 
-        {/* Mark Present Button */}
-        <button
-          onClick={handleMarkPresent}
-          className={`w-full max-w-xs px-6 py-3 text-white rounded-lg focus:outline-none focus:ring-4 transition-all duration-300 ease-in-out transform hover:scale-110
-            ${isConfirmed
-              ? "bg-green-600 hover:bg-green-700 focus:ring-green-300 cursor-pointer"
-              : "bg-gray-400 cursor-not-allowed"
+
+        {markPresentVisible && (
+          <button
+            onClick={() => setShowMarkPresentPopup(true)}
+            disabled={markPresentDisabled}
+            className={`w-full px-8 py-4 text-xl font-semibold rounded-lg ${
+              markPresentDisabled ? "bg-gray-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700 text-white"
             }`}
-          disabled={!isConfirmed}
-        >
-          Mark Present
-        </button>
+          >
+            Mark Present
+          </button>
+        )}
       </div>
 
-      {/* Animated Custom Popup for Confirming Mark Attendance */}
-      {showConfirmationPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fadeIn">
-          <div className="p-8 transition-all duration-500 transform scale-90 bg-gray-800 rounded-lg shadow-lg animate-slideDown">
-            <h2 className="mb-4 text-2xl font-semibold text-center text-white">
-              Confirm Action
-            </h2>
-            <p className="mb-6 text-center text-white">{popupMessage}</p>
-            <div className="flex justify-center space-x-6">
-              <button
-                onClick={handleConfirmationPopupOk}
-                className="px-6 py-3 text-lg font-semibold text-white transition-all bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300"
-              >
-                OK
-              </button>
-              <button
-                onClick={() => setShowConfirmationPopup(false)}
-                className="px-6 py-3 text-lg font-semibold text-white transition-all bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Mark Present Confirmation Popup */}
-      {showMarkPresentPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fadeIn">
-          <div className="p-8 transition-all duration-500 transform scale-90 bg-gray-800 rounded-lg shadow-lg animate-slideDown">
-            <h2 className="mb-4 text-2xl font-semibold text-center text-white">
-              Confirm Marking as Present
-            </h2>
-            <p className="mb-6 text-center text-white">{popupMessage}</p>
-            <div className="flex justify-center space-x-6">
-              <button
-                onClick={handleMarkPresentConfirm}
-                className="px-6 py-3 text-lg font-semibold text-white transition-all bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300"
-              >
-                Yes
-              </button>
-              <button
-                onClick={() => setShowMarkPresentPopup(false)}
-                className="px-6 py-3 text-lg font-semibold text-white transition-all bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Back Button Confirmation Popup */}
-      {showBackPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fadeIn">
-          <div className="p-8 transition-all duration-500 transform scale-90 bg-gray-800 rounded-lg shadow-lg animate-slideDown">
-            <h2 className="mb-4 text-2xl font-semibold text-center text-white">
-              Confirm Back Action
-            </h2>
-            <p className="mb-6 text-center text-white">{popupMessage}</p>
-            <div className="flex justify-center space-x-6">
-              <button
-                onClick={handleBackConfirm}
-                className="px-6 py-3 text-lg font-semibold text-white transition-all bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300"
-              >
-                Yes
-              </button>
-              <button
-                onClick={handleBackCancel}
-                className="px-6 py-3 text-lg font-semibold text-white transition-all bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        toastStyle={{
-          borderRadius: '8px',
-          fontSize: '16px',
-          padding: '12px',
-          fontFamily: 'Gentium Basic, sans-serif', // Using custom font
-          fontWeight: 'bold',              // Bold text
-        }}
+      {/* Reusable Popup Instances */}
+      <ReusablePopup
+        show={showBackPopup}
+        message={popupMessage}
+        color={popupColor}
+        onConfirm={handleBackConfirm}
+        onCancel={handleBackCancel}
       />
-
-
+      <ReusablePopup
+        show={showConfirmationPopup}
+        message={popupMessage}
+        color={popupColor}
+        onConfirm={handleConfirmationPopupOk}
+        onCancel={() => setShowConfirmationPopup(false)}
+      />
+      <ReusablePopup
+        show={showMarkPresentPopup}
+        message="Are you sure you want to mark the remaining students as present?"
+        color="bg-green-600"
+        onConfirm={handleMarkPresentConfirm}
+        onCancel={() => setShowMarkPresentPopup(false)}
+      />
+      <ToastContainer />
     </div>
   );
 }
 
 export default Absentees;
-
