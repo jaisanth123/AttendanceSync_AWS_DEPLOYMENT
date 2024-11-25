@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom"; // Import useNavigate
 const ActionButton = ({ label, onClick }) => (
   <button
     className="px-6 py-3 font-bold text-white transition-all duration-300 transform bg-gray-600 rounded-lg shadow-lg w-80 hover:bg-gray-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 active:scale-95"
-    aria-label={`${label} button`}
+    aria-label={`${label} button`} // Fixed interpolation for aria-label
     onClick={onClick}
   >
     {label}
@@ -20,7 +20,7 @@ function HomePage({ toggleSidebar }) {
       {/* Attendance Button */}
       <ActionButton label="MARK ATTENDANCE" onClick={toggleSidebar} />
 
-      {/* Use Dashboard Button */}
+      {/* View Attendance Button */}
       <ActionButton
         label="VIEW ATTENDANCE"
         onClick={() => navigate("/dashboard")} // Navigate to /dashboard
@@ -29,6 +29,14 @@ function HomePage({ toggleSidebar }) {
         label="DASHBOARD"
         onClick={() => navigate("/dashboard")} // Navigate to /dashboard
       />
+
+<ActionButton
+        label="SIGNIN"
+        onClick={() => navigate("/signin")} // Navigate to /dashboard
+      />
+
+
+
     </div>
   );
 }
