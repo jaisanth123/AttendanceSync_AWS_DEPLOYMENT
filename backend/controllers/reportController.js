@@ -262,3 +262,143 @@ exports.handleAbsentStudentsReport = async (gender, req, res) => {
     }
 };
 
+
+exports.handleDownloadAbsentReport = async (gender, req, res) => {
+
+    const { date } = req.query;
+    console.log('Request received to generate report for gender:', gender, 'and date:', date);
+
+    try {
+        // Fetch all students of the specified gender
+        const allStudents = await Student.find({ gender }).select('rollNo name yearOfStudy branch section hostellerDayScholar');
+        console.log('Total students fetched:', allStudents.length);
+
+        // Fetch attendance records for the specified date (only absent students)
+        const attendanceRecords = await Attendance.find({ date, status: 'Absent' }).select('rollNo');
+        console.log('Total attendance records fetched for absent students:', attendanceRecords.length);
+
+        // Filter students who were absent on the given date
+        const absentStudents = allStudents.filter(student =>
+            attendanceRecords.some(record => record.rollNo === student.rollNo)
+        );
+        console.log('Absent Students before hostel filter:', absentStudents);
+
+        // Filter absent students to include only HOSTELLER or HOSTELER
+        const filteredAbsentStudents = absentStudents.filter(student =>
+            student.hostellerDayScholar && 
+            (student.hostellerDayScholar.toUpperCase() === 'HOSTELLER' || student.hostellerDayScholar.toUpperCase() === 'HOSTELER')
+        );
+        console.log('Filtered Absent Students:', filteredAbsentStudents);
+
+        if (filteredAbsentStudents.length === 0) {
+            console.log(`No absent ${gender.toLowerCase()} students found for ${date}.`);
+            return res.status(404).json({ message: `No absent ${gender.toLowerCase()} students found for ${date}.` });
+        }
+
+        // Sort absent students by yearOfStudy (Roman numeral order) and then by rollNo
+        filteredAbsentStudents.sort((a, b) => {
+            const yearA = romanToInt(a.yearOfStudy);
+            const yearB = romanToInt(b.yearOfStudy);
+            if (yearA === yearB) {
+                const rollNoA = parseInt(a.rollNo.replace(/\D/g, '')); // Extract numeric part of rollNo
+                const rollNoB = parseInt(b.rollNo.replace(/\D/g, ''));
+                return rollNoA - rollNoB;
+            }
+            return yearA - yearB;
+        });
+
+        console.log('Absent students sorted successfully');
+        const formattedDate = formatDate(date);
+
+        // Determine Hostel type based on gender (Boys or Girls)
+        const hostelType = gender === 'MALE' ? 'Boys' : 'Girls';
+
+        // Prepare the report data with merged header rows
+        const reportData = [
+            ['Kongu Engineering College'],
+            ['Department of Artificial Intelligence'],
+            [`${hostelType} Hostel Students Absentees List - ${formattedDate}`],
+            ['S.No', 'Roll No', 'Student Name', 'Year', 'Branch']
+        ];
+
+        // Add the absent students' data
+        filteredAbsentStudents.forEach((student, index) => {
+            reportData.push([
+                index + 1,
+                student.rollNo,
+                student.name,
+                student.yearOfStudy,
+                `${student.branch}-${student.section}`
+            ]);
+        });
+
+        // Create a new workbook and worksheet
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Absent Students');
+
+        // Add the report data to the worksheet
+        worksheet.addRows(reportData);
+
+        // Apply row height adjustments
+        worksheet.getRow(1).height = 25; // First header row
+        worksheet.getRow(2).height = 25; // Second header row
+        worksheet.getRow(3).height = 25; // Third header row
+        worksheet.getRow(4).height = 25; // Column headers row
+        for (let row = 5; row <= reportData.length; row++) {
+            worksheet.getRow(row).height = 25; // Data rows
+        }
+
+        // Apply thicker borders around the header and filled cells (data rows)
+        const borderStyle = {
+            top: { style: 'medium' },
+            left: { style: 'medium' },
+            bottom: { style: 'medium' },
+            right: { style: 'medium' },
+        };
+
+        // Apply borders for header row (row 4)
+        for (let col = 1; col <= 5; col++) {
+            worksheet.getCell(4, col).border = borderStyle;
+            worksheet.getCell(4, col).alignment = { horizontal: 'center', vertical: 'middle' }; // Center-align
+            worksheet.getCell(4, col).font = { bold: true, name: 'Times New Roman', size: 12 };
+        }
+
+        // Apply borders for each row with student data (starting from row 5)
+        for (let row = 5; row <= reportData.length; row++) {
+            for (let col = 1; col <= 5; col++) {
+                worksheet.getCell(row, col).border = borderStyle;
+                worksheet.getCell(row, col).alignment = { horizontal: 'center', vertical: 'middle' }; // Center-align
+                worksheet.getCell(row, col).font = { name: 'Times New Roman', size: 12 };
+            }
+        }
+
+        console.log('Borders and alignment applied successfully.');
+
+        // Merge and center the header cells
+        worksheet.mergeCells('A1:E1'); // Merging the first header row
+        worksheet.mergeCells('A2:E2'); // Merging the second header row
+        worksheet.mergeCells('A3:E3'); // Merging the third header row
+
+        // Set header cell alignment to center
+        worksheet.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' };
+        worksheet.getCell('A1').font = { name: 'Times New Roman', size: 12, bold: true };
+        worksheet.getCell('A2').alignment = { horizontal: 'center', vertical: 'middle' };
+        worksheet.getCell('A2').font = { name: 'Times New Roman', size: 12, bold: true };
+        worksheet.getCell('A3').alignment = { horizontal: 'center', vertical: 'middle' };
+        worksheet.getCell('A3').font = { name: 'Times New Roman', size: 12, bold: true };
+
+        console.log('Header merged and centered successfully.');
+
+        // Set the file as an attachment for download
+        res.attachment(`${hostelType}_Absent_Students_${formattedDate}.xlsx`);
+        
+        // Write the workbook to the response as a stream
+        await workbook.xlsx.write(res);
+        res.end(); // End the response stream to indicate completion
+        console.log('Excel file sent to the client successfully.');
+
+    } catch (error) {
+        console.error("Error generating report:", error);
+        res.status(500).json({ message: 'Error generating absent students report' });
+    }
+};

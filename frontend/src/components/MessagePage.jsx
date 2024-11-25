@@ -121,18 +121,18 @@ const MessagePage = ({ toggleSidebar }) => {
                 </div>
               )}
 
-              {missingStudents.length > 0 && (
-                <div className="mt-4">
-                  <p className="text-gray-700">{missingStudents.length}</p>
-                </div>
-              )}
-
               {errorMessage && (
                 <div className="p-3 mt-4 border border-red-300 rounded bg-red-50">
                   <p className="text-red-600">{errorMessage}</p>
                 </div>
               )}
+              {missingStudents.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-xl">Count of Missing Absentees Records: {missingStudents.length}</p>
+                </div>
+              )}
             </div>
+            
 
             <button
               onClick={copyCardContent}
