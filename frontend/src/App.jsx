@@ -15,6 +15,7 @@ import SignUp from "./components/SignUp";
 
 
 import AbsentReportDownloader from './components/AbsentReportDownloader'; // Adjust the path as needed
+import DownloadReport from './components/DownloadReport'; // Adjust the path as needed
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -121,6 +122,8 @@ function App() {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/absent-report" element={<AbsentReportDownloader />} />
+            <Route path="/downloadReport" element={<DownloadReport />} />
+
 
           </Routes>
         </div>

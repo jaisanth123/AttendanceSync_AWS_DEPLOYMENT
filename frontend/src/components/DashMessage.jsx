@@ -117,6 +117,7 @@ const DashMessage = ({ toggleSidebar }) => {
             <option value="Select Year">Select Year</option>
             <option value="IV">IV</option>
             <option value="III">III</option>
+            <option value="II">II</option>
           </select>
 
           <select

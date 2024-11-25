@@ -149,6 +149,8 @@ const MessagePage = ({ toggleSidebar }) => {
         >
           ATTENDENCE
         </button>
+
+        
       </div>
       <ToastContainer />
     </div>
