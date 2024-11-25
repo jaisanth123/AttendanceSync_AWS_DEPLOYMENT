@@ -18,11 +18,11 @@ function HomePage({ toggleSidebar }) {
   return (
     <div className="flex flex-col items-center justify-center h-full space-y-10">
       {/* Attendance Button */}
-      <ActionButton label="ATTENDANCE" onClick={toggleSidebar} />
+      <ActionButton label="MARK ATTENDANCE" onClick={toggleSidebar} />
 
       {/* Use Dashboard Button */}
       <ActionButton
-        label="USE DASHBOARD"
+        label="VIEW ATTENDANCE"
         onClick={() => navigate("/dashboard")} // Navigate to /dashboard
       />
     </div>
