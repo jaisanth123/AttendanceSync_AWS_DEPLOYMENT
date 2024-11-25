@@ -10,6 +10,7 @@ import DashboardPage from "./components/DashboardPage";
 import GenerateExcel from "./components/GenerateExcel";
 import SendMail from "./components/SendMail";
 import DashMessage from "./components/DashMessage";
+import AbsentReportDownloader from './components/AbsentReportDownloader'; // Adjust the path as needed
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -85,6 +86,8 @@ function App() {
             <Route path="/generate_excel" element={<GenerateExcel />} />
             <Route path="/send_mail" element={<SendMail />} />
             <Route path="/dashmessage" element={<DashMessage />} />
+            <Route path="/absent-report" element={<AbsentReportDownloader />} />
+
           </Routes>
         </div>
 
