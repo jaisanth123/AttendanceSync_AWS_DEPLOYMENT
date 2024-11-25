@@ -273,7 +273,7 @@ function Absentees() {
         )}
 
         
-        {showGenerateMessageButton && (
+{showGenerateMessageButton && (
   <button
     onClick={() =>
       navigate("/message", {

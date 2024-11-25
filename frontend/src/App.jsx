@@ -9,6 +9,7 @@ import MessagePage from "./components/MessagePage";
 import DashboardPage from "./components/DashboardPage";
 import GenerateExcel from "./components/GenerateExcel";
 import SendMail from "./components/SendMail";
+import DashMessage from "./components/DashMessage";
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -83,6 +84,7 @@ function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/generate_excel" element={<GenerateExcel />} />
             <Route path="/send_mail" element={<SendMail />} />
+            <Route path="/dashmessage" element={<DashMessage />} />
           </Routes>
         </div>
 

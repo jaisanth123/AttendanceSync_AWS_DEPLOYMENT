@@ -1,21 +1,17 @@
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify"; // Import react-toastify
-import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 
-const MessagePage = ({ toggleSidebar }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const [selectedCourse, setSelectedCourse] = useState(location.state?.selectedCourse || "Select a course");
-  const [selectedDate, setSelectedDate] = useState(location.state?.selectedDate || "");
-
+const DashMessage = ({ toggleSidebar }) => {
+  const [selectedYear, setSelectedYear] = useState("Select Year");
+  const [selectedBranch, setSelectedBranch] = useState("Select Branch");
+  const [selectedSection, setSelectedSection] = useState("Select Section");
+  const [selectedDate, setSelectedDate] = useState("");
   const [message, setMessage] = useState("");
   const [details, setDetails] = useState([]);
   const [missingStudents, setMissingStudents] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
-
   const [showCard, setShowCard] = useState(false);
 
   // Format the date to DD-MM-YYYY
@@ -53,11 +49,22 @@ const MessagePage = ({ toggleSidebar }) => {
     return text.replace(/\n/g, "<br />");
   };
 
-  const getAbsentStudents = async (course, date) => {
-    const [yearOfStudy, branch, section] = course.split(" - ");
+  const getAbsentStudents = async () => {
+    if (
+      selectedYear === "Select Year" ||
+      selectedBranch === "Select Branch" ||
+      selectedSection === "Select Section"
+    ) {
+      toast.error("Please select valid Year, Branch, and Section!", {
+        autoClose: 1500,
+      });
+      return;
+    }
+
+    const course = `${selectedYear} - ${selectedBranch} - ${selectedSection}`;
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/report/absentStudents?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${date}`
+        `http://localhost:5000/api/report/absentStudents?yearOfStudy=${selectedYear}&branch=${selectedBranch}&section=${selectedSection}&date=${selectedDate}`
       );
 
       if (response.data.message) {
@@ -85,16 +92,65 @@ const MessagePage = ({ toggleSidebar }) => {
     setShowCard(!showCard);
   };
 
+  const handleDeselect = (dropdown) => {
+    if (dropdown === "year") {
+      setSelectedYear("Select Year");
+    } else if (dropdown === "branch") {
+      setSelectedBranch("Select Branch");
+    } else if (dropdown === "section") {
+      setSelectedSection("Select Section");
+    }
+  };
+
   return (
     <div className="p-4 text-center text-black">
-      <h1 className="text-2xl font-semibold md:text-3xl lg:text-4xl">{selectedCourse}</h1>
-      <h3 className="text-lg font-semibold md:text-xl lg:text-2xl">Message Page</h3>
-      <h3 className="mt-2 text-base font-semibold md:text-lg lg:text-xl">{formatDate(selectedDate)}</h3>
+      <h1 className="text-2xl font-semibold md:text-3xl lg:text-4xl">Message Report</h1>
+      <h3 className="mt-2 mb-4 text-base font-semibold md:text-lg lg:text-xl">{formatDate(selectedDate)}</h3>
 
       <div className="flex flex-col items-center gap-y-4">
+        <div className="flex flex-wrap justify-center gap-4">
+          <select
+            className="px-4 py-2 border rounded-md focus:outline-none focus:ring"
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+          >
+            <option value="Select Year">Select Year</option>
+            <option value="IV">IV</option>
+            <option value="III">III</option>
+          </select>
+
+          <select
+            className="px-4 py-2 border rounded-md focus:outline-none focus:ring"
+            value={selectedBranch}
+            onChange={(e) => setSelectedBranch(e.target.value)}
+          >
+            <option value="Select Branch">Select Branch</option>
+            <option value="AIML">ML</option>
+            <option value="AIDS">DS</option>
+          </select>
+
+          <select
+            className="px-4 py-2 border rounded-md focus:outline-none focus:ring"
+            value={selectedSection}
+            onChange={(e) => setSelectedSection(e.target.value)}
+          >
+            <option value="Select Section">Select Section</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+          </select>
+        </div>
+
+        <input
+          type="date"
+          className="px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+        />
+
         <button
           onClick={() => {
-            getAbsentStudents(selectedCourse, selectedDate);
+            getAbsentStudents();
             toggleCardVisibility();
           }}
           className="px-6 py-2 mt-4 font-semibold text-white bg-gray-800 rounded-lg shadow-lg hover:bg-gray-600 active:bg-gray-700 focus:outline-none focus:ring focus:ring-blue-300"
@@ -107,7 +163,10 @@ const MessagePage = ({ toggleSidebar }) => {
             <div id="cardContent">
               {message && (
                 <div className="mt-4">
-                  <p className="font-semibold text-gray-800" dangerouslySetInnerHTML={{ __html: formatTextWithLineBreaks(message) }} />
+                  <p
+                    className="font-semibold text-gray-800"
+                    dangerouslySetInnerHTML={{ __html: formatTextWithLineBreaks(message) }}
+                  />
                 </div>
               )}
 
@@ -147,7 +206,7 @@ const MessagePage = ({ toggleSidebar }) => {
           onClick={toggleSidebar}
           className="px-6 py-2 mt-4 font-semibold text-white bg-gray-800 rounded-lg shadow-lg hover:bg-gray-500 focus:outline-none focus:ring focus:ring-blue-300"
         >
-          ATTENDENCE
+          ATTENDANCE
         </button>
       </div>
       <ToastContainer />
@@ -155,4 +214,4 @@ const MessagePage = ({ toggleSidebar }) => {
   );
 };
 
-export default MessagePage;
+export default DashMessage;
