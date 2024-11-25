@@ -25,6 +25,10 @@ function DashboardPage() {
       >
         Send Email
       </button>
+      <button
+        className="h-12 px-6 py-2 m-4 text-xl text-white transition bg-gray-800 rounded-lg hover:scale-110 lg:w-1/4 sm:w-1/2 hover:bg-gray-600"
+        onClick={() => navigate("/downloadReport")}
+      >Report      </button>
     </div>
   );
 }
