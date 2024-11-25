@@ -6,6 +6,10 @@ import HomePage from "./components/HomePage";
 import DutyPage from "./components/DutyPage";
 import Absentees from "./components/Absentees"; // Import Absentees component
 import MessagePage from "./components/MessagePage";
+import DashboardPage from "./components/DashboardPage";
+import GenerateExcel from "./components/GenerateExcel";
+import SendMail from "./components/SendMail";
+
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -53,7 +57,7 @@ function App() {
           ></div>
         )}
 
-        <div className="flex-1 mt-20 md:mt-24">
+<div className="flex-1 mt-20 md:mt-24">
           <Routes>
             <Route
               path="/"
@@ -61,13 +65,27 @@ function App() {
             />
             <Route
               path="/duty"
-              element={<DutyPage selectedCourse={selectedItem}/>}
+              element={<DutyPage selectedCourse={selectedItem} />}
             />
-            <Route path="/absentees" element={<Absentees selectedCourse={selectedItem}  />} />
-            <Route path="/message" element={<MessagePage selectedCourse={selectedItem} toggleSidebar={toggleSidebar} />} />
-
+            <Route
+              path="/absentees"
+              element={<Absentees selectedCourse={selectedItem} />}
+            />
+            <Route
+              path="/message"
+              element={
+                <MessagePage
+                  selectedCourse={selectedItem}
+                  toggleSidebar={toggleSidebar}
+                />
+              }
+            />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/generate_excel" element={<GenerateExcel />} />
+            <Route path="/send_mail" element={<SendMail />} />
           </Routes>
         </div>
+
 
         {isSidebarOpen && (
           <Sidebar

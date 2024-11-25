@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 // Reusable Button Component
 const ActionButton = ({ label, onClick }) => (
@@ -12,13 +13,18 @@ const ActionButton = ({ label, onClick }) => (
 );
 
 function HomePage({ toggleSidebar }) {
+  const navigate = useNavigate(); // Initialize useNavigate
+
   return (
     <div className="flex flex-col items-center justify-center h-full space-y-10">
       {/* Attendance Button */}
       <ActionButton label="ATTENDANCE" onClick={toggleSidebar} />
 
       {/* Use Dashboard Button */}
-      <ActionButton label="USE DASHBOARD" onClick={() => alert("Dashboard coming soon!")} />
+      <ActionButton
+        label="USE DASHBOARD"
+        onClick={() => navigate("/dashboard")} // Navigate to /dashboard
+      />
     </div>
   );
 }
