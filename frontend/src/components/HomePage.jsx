@@ -25,6 +25,10 @@ function HomePage({ toggleSidebar }) {
         label="VIEW ATTENDANCE"
         onClick={() => navigate("/dashboard")} // Navigate to /dashboard
       />
+      <ActionButton
+        label="DASHBOARD"
+        onClick={() => navigate("/dashboard")} // Navigate to /dashboard
+      />
     </div>
   );
 }
