@@ -22,7 +22,8 @@ const SendEmail = () => {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("subject", "Daily Report");
+    const currentDate = new Date().toLocaleDateString('en-GB');
+    formData.append("subject", `${currentDate} - Absentees Report`);
     formData.append("content", "Please find the attached Excel report.");
     formData.append("toEmails", toEmails); // Use the toEmails state
 
