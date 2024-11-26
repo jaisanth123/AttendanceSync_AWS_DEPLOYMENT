@@ -1,11 +1,12 @@
 const express = require('express');
-const { generateAbsentStudentsMessage,handleDownloadAbsentReport,handleCustomDownloadAbsentReport } = require('../controllers/reportController');
+const {handleCustomAbsentMessage, generateAbsentStudentsMessage,handleDownloadAbsentReport,handleCustomDownloadAbsentReport } = require('../controllers/reportController');
 
 const router = express.Router();
 
 // Define the route to generate the absent students' message
 router.get('/absentStudents', generateAbsentStudentsMessage);
 
+router.get('/absentStudentsCustom', handleCustomAbsentMessage);
 
 router.get('/downloadreport/male', (req, res) => {
     handleDownloadAbsentReport('MALE', req, res);

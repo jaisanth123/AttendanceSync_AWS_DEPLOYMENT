@@ -12,7 +12,7 @@ const ActionCard = ({ label, onClick }) => (
   </div>
 );
 
-function DashboardPage({ toggleSidebar }) {
+function ViewAttendance({ toggleSidebar }) {
   const navigate = useNavigate();
 
   return (
@@ -48,4 +48,4 @@ function DashboardPage({ toggleSidebar }) {
   );
 }
 
-export default DashboardPage;
+export default ViewAttendance;
