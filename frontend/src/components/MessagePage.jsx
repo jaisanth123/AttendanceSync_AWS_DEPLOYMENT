@@ -150,7 +150,7 @@ const MessagePage = ({ toggleSidebar }) => {
           onClick={toggleSidebar}
           className="w-40 px-6 py-2 font-semibold text-white bg-gray-800 rounded-lg shadow-lg hover:bg-gray-500 focus:outline-none focus:ring focus:ring-blue-300"
         >
-          ATTENDANCE
+          Attendance
         </button>
 
         {/* Home Button */}

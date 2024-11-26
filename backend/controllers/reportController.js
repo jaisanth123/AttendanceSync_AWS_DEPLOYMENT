@@ -81,10 +81,6 @@ exports.generateAbsentStudentsMessage = async (req, res) => {
         });
 
         // Step 7: Lock the attendance for this date, year, branch, and section
-        await Attendance.updateMany(
-            { date, yearOfStudy, branch, section },
-            { locked: true }
-        );
 
         console.log(`Attendance locked for ${yearOfStudy} ${branch} ${section} on ${formattedDate}`);
 

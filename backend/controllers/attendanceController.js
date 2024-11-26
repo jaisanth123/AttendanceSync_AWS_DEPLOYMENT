@@ -47,7 +47,7 @@ exports.markOnDuty = async (req, res) => {
       yearOfStudy,
       branch,
       section,
-      locked: false
+      locked: true
     }));
 
     // Insert the new "On Duty" records
@@ -136,7 +136,7 @@ exports.markAbsent = async (req, res) => {
       yearOfStudy,
       branch,
       section,
-      locked: false
+      locked: true
     }));
 
     // Insert the new "Absent" records
@@ -183,7 +183,7 @@ exports.markRemainingPresent = async (req, res) => {
       yearOfStudy,
       branch,
       section,
-      locked: false
+      locked: true
     }));
 
     // Array to track roll numbers with existing attendance
