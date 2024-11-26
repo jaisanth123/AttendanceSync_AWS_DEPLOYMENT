@@ -1,6 +1,8 @@
 const Student = require('../models/Student');
 const Attendance = require('../models/Attendance');
-
+const nodemailer = require("nodemailer");
+const multer = require("multer");
+const path = require("path");
 
 // 1. Mark students as "On Duty"
 exports.markOnDuty = async (req, res) => {
@@ -226,3 +228,46 @@ exports.markRemainingPresent = async (req, res) => {
   }
 };
 
+
+
+// Email sending function
+const storage = multer.memoryStorage(); // Store files in memory, not on disk
+const upload = multer({ storage: storage });
+
+exports.sendEmail = async (req, res) => {
+  const { subject, content, toEmails } = req.body;
+  const file = req.file;
+
+  if (!file) {
+    return res.status(400).send({ message: "No file uploaded" });
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "vijayakanthm.23aim@kongu.edu", // Replace with your email
+      pass: "bebg srbb qojy nydn", // Replace with your app-specific password
+    },
+  });
+
+  const mailOptions = {
+    from: "vijayakanthm.23aim@kongu.edu", // Replace with your email
+    to: toEmails,
+    subject: subject,
+    text: content,
+    attachments: [
+      {
+        filename: file.originalname, // Use original file name
+        content: file.buffer, // Use the file stored in memory
+      },
+    ],
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    res.status(200).send({ message: "Email sent successfully" });
+  } catch (error) {
+    console.error("Error sending email:", error);
+    res.status(500).send({ message: "Failed to send email" });
+  }
+};
