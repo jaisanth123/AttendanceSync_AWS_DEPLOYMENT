@@ -1,5 +1,17 @@
 const Student = require('../models/Student');
 const Attendance = require('../models/Attendance');
+const ExcelJS = require('exceljs');
+// Helper function to convert Roman numerals to integers for sorting
+const romanToInt = (roman) => {
+    const romanNumerals = {
+        'I': 1,
+        'II': 2,
+        'III': 3,
+        'IV': 4
+    };
+    return romanNumerals[roman] || 0; // Return 0 if invalid Roman numeral
+};
+
 const formatDate = (dateString) => {
     if (!dateString) return "";
     const [year, month, day] = dateString.split("-");
@@ -86,30 +98,122 @@ exports.generateAbsentStudentsMessage = async (req, res) => {
 
 //Generate content for Hostel Gmail Report
 // Convert Roman numeral to integer
-// Helper function to convert Roman numerals to integers for sorting
-const romanToInt = (roman) => {
-    const romanNumerals = {
-        'I': 1,
-        'II': 2,
-        'III': 3,
-        'IV': 4
-    };
-    return romanNumerals[roman] || 0; // Return 0 if invalid Roman numeral
+
+exports.handleCustomAbsentMessage = async (req, res) => {
+    const { gender, date, hostellerDayScholar, yearOfStudy, section, branch } = req.query; // Added branch filter from query params
+    console.log('Request received to generate report for gender:', gender, 'date:', date, 'hostellerDayScholar:', hostellerDayScholar, 'yearOfStudy:', yearOfStudy, 'section:', section, 'branch:', branch);
+
+    try {
+        let allStudents;
+
+        // Fetch students based on gender selection
+        if (gender === 'ALL') {
+            allStudents = await Student.find().select('rollNo name gender yearOfStudy branch section hostellerDayScholar');
+        } else {
+            allStudents = await Student.find({ gender }).select('rollNo name gender yearOfStudy branch section hostellerDayScholar');
+        }
+        console.log('Total students fetched:', allStudents.length);
+
+        // Apply branch filter if provided
+        if (branch && branch !== 'ALL') {
+            allStudents = allStudents.filter(student => student.branch === branch);
+        }
+
+        // Apply hostellerDayScholar filter if provided
+        if (hostellerDayScholar && hostellerDayScholar !== 'ALL') {
+            allStudents = allStudents.filter(student => student.hostellerDayScholar === hostellerDayScholar);
+        }
+
+        // Apply yearOfStudy filter if provided
+        if (yearOfStudy && yearOfStudy !== 'ALL') {
+            allStudents = allStudents.filter(student => student.yearOfStudy === yearOfStudy);
+        }
+
+        // Apply section filter if provided
+        if (section && section !== 'ALL') {
+            allStudents = allStudents.filter(student => student.section === section);
+        }
+
+        // Fetch attendance records for the specified date (only absent students)
+        const attendanceRecords = await Attendance.find({ date, status: 'Absent' }).select('rollNo');
+        console.log('Total attendance records fetched for absent students:', attendanceRecords.length);
+
+        // Filter students who were absent on the given date
+        const absentStudents = allStudents.filter(student =>
+            attendanceRecords.some(record => record.rollNo === student.rollNo)
+        );
+        console.log('Absent Students before hostel filter:', absentStudents);
+
+        if (absentStudents.length === 0) {
+            console.log(`No absent students found for specified criteria on ${date}.`);
+            return res.status(404).json({ message: `No absent students found for specified criteria on ${date}.` });
+        }
+
+        // Sort absent students first by yearOfStudy (Roman numeral order), then by branch (AIDS before AIML), and then by rollNo
+        absentStudents.sort((a, b) => {
+            const yearA = romanToInt(a.yearOfStudy);
+            const yearB = romanToInt(b.yearOfStudy);
+
+            // If the years are the same, sort by branch (AIDS before AIML)
+            if (yearA === yearB) {
+                const branchOrder = ['AIDS', 'AIML']; // Custom order for branches
+                const branchAIndex = branchOrder.indexOf(a.branch);
+                const branchBIndex = branchOrder.indexOf(b.branch);
+
+                if (branchAIndex === branchBIndex) {
+                    // If branches are the same, sort by rollNo
+                    const rollNoA = parseInt(a.rollNo.replace(/\D/g, '')); // Extract numeric part of rollNo
+                    const rollNoB = parseInt(b.rollNo.replace(/\D/g, ''));
+                    return rollNoA - rollNoB; // Sort by rollNo if branch is the same
+                }
+
+                return branchAIndex - branchBIndex; // Sort by custom branch order
+            }
+
+            return yearA - yearB; // If years are different, sort by year
+        });
+        // Prepare the message header
+        // Prepare the message header
+        const formattedDate = formatDate(date);
+        let messageHeader = `Kongu Engineering College\nDepartment of Artificial Intelligence\nStudents Absentees List - ${formattedDate}\n\n`;
+
+        // Group students by year and branch
+        let groupedDetails = {};
+
+        absentStudents.forEach(student => {
+            const groupKey = `${student.yearOfStudy} ${student.branch}-${student.section}`; // Year and Branch group key
+
+            if (!groupedDetails[groupKey]) {
+                groupedDetails[groupKey] = [];
+            }
+        
+            const hostellerOrDayScholar = student.hostellerDayScholar === 'HOSTELLER' ? 'Hostel' : 'Day Scholar';
+            groupedDetails[groupKey].push(`${student.rollNo} ${student.name} (${hostellerOrDayScholar})`);
+        });
+
+// Format the grouped students with an extra newline between each group
+        let absentDetails = '';
+        for (let groupKey in groupedDetails) {
+            absentDetails += `\n${groupKey}\n`; 
+            absentDetails += '\n'; // Add group heading
+            absentDetails += groupedDetails[groupKey].join('\n') + '\n';  // Add students under that group
+            absentDetails += '               ';  // Add an extra newline after each group for spacing
+        }
+        
+        // Trim any leading or trailing spaces from the final message
+        // Send the response with the formatted message and details
+        res.json({
+            message: messageHeader,
+            details: absentDetails
+        });
+    } catch (error) {
+        console.error("Error generating report:", error);
+        res.status(500).send('Error generating absent students report');
+    }
 };
 
-const fs = require('fs');
-const path = require('path');
-const ExcelJS = require('exceljs');
 
-const reportDir = path.join(__dirname, '..', 'reports'); // Adjust the path if needed
 
-// Ensure the directory exists
-if (!fs.existsSync(reportDir)) {
-    console.log('Report directory does not exist. Creating directory:', reportDir);
-    fs.mkdirSync(reportDir);
-} else {
-    console.log('Report directory already exists:', reportDir);
-}
 
 
 
