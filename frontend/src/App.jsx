@@ -7,11 +7,10 @@ import DutyPage from "./components/DutyPage";
 import Absentees from "./components/Absentees";
 import MessagePage from "./components/MessagePage";
 import ViewAttendance from "./components/ViewAttendance";
-import SendMail from "./components/SendMail";
 import GenerateMessage from "./components/GenerateMessage";
 import SignIn from "./components/SignIn";
 import SignUp from "./components/SignUp";
-
+import Dashboard from "./components/Dashboard";
 import GenerateExcel from './components/GenerateExcel';
 import GenerateReport from './components/GenerateReport';
 
@@ -109,15 +108,14 @@ function App() {
               path="/viewattendance"
               element={<ViewAttendance />} // Removed toggleSidebar here
             />
-            <Route path="/generate_excel" element={<GenerateExcel />} />
-            <Route path="/send_mail" element={<SendMail />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/GenerateMessage" element={<GenerateMessage toggleSidebar={toggleSidebar} />} /> {/* Pass toggleSidebar here */}
 
             {/* Authentication Pages */}
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/absent-report" element={<GenerateExcel />} />
-            <Route path="/downloadReport" element={<GenerateReport />} />
+            <Route path="/generateEmail" element={<GenerateExcel />} />
+            <Route path="/generateReport" element={<GenerateReport />} />
           </Routes>
         </div>
 

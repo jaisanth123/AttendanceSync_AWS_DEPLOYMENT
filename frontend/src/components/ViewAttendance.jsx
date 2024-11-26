@@ -17,7 +17,7 @@ function ViewAttendance({ toggleSidebar }) {
 
   return (
     <div className="flex items-center justify-center h-full pt-10">
-      <div className="grid w-full max-w-5xl grid-cols-2 gap-6 px-1 sm:grid-cols-4 lg:grid-cols-4 lg:gap-4">
+      <div className="grid w-full max-w-3xl grid-cols-2 gap-6 px-1 sm:grid-cols-3 lg:grid-cols-3 lg:gap-4">
       {/* Generate Message Card */}
         <ActionCard
           label="Generate Message"
@@ -25,22 +25,20 @@ function ViewAttendance({ toggleSidebar }) {
         />
 
         {/* Generate Excel Card */}
-        <ActionCard
-          label="Generate Excel"
-          onClick={() => navigate("/absent-report")}
-        />
+
 
         {/* Report Card */}
         <ActionCard
           label="Generate Report"
-          onClick={() => navigate("/downloadReport")}
+          onClick={() => navigate("/generateReport")}
+        />
+                <ActionCard
+          label="Generate Email"
+          onClick={() => navigate("/generateEmail")}
         />
         
         {/* Send Email Card */}
-        <ActionCard
-          label="Generate Email"
-          onClick={() => navigate("/send_mail")}
-        />
+
 
 
       </div>
