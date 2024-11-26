@@ -26,7 +26,6 @@ function ViewAttendance({ toggleSidebar }) {
 
         {/* Generate Excel Card */}
 
-
         {/* Report Card */}
         <ActionCard
           label="Generate Report"
