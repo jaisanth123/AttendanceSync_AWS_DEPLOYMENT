@@ -35,7 +35,7 @@ function HomePage({ toggleSidebar }) {
 
         {/* Sign-in Card */}
         <ActionCard
-          label="Signin."
+          label="Signin"
           onClick={() => navigate("/signin")}
         />
       </div>
