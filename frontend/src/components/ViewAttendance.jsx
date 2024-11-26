@@ -1,8 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-<<<<<<< HEAD
-=======
 // Reusable Card Component
 const ActionCard = ({ label, onClick }) => (
   <div
@@ -14,41 +12,10 @@ const ActionCard = ({ label, onClick }) => (
   </div>
 );
 
->>>>>>> d94b84d42949f44dd56763c7eacb743b2a852927
-function DashboardPage({ toggleSidebar }) {
+function ViewAttendance({ toggleSidebar }) {
   const navigate = useNavigate();
 
   return (
-<<<<<<< HEAD
-    <div className="flex flex-col items-center justify-center h-full">
-      <button
-        className="h-12 px-6 py-2 m-4 text-xl text-white transition bg-gray-800 rounded-lg hover:scale-110 lg:w-1/4 sm:w-1/2 hover:bg-gray-600" 
-        onClick={() => {
-            // Toggle the sidebar when button is clicked
-          navigate("/dashmessage");  // Navigate to DashMessage page
-        }}
-      >
-        Generate Message
-      </button>
-      <button
-        className="h-12 px-6 py-2 m-4 text-xl text-white transition bg-gray-800 rounded-lg hover:scale-110 lg:w-1/4 sm:w-1/2 hover:bg-gray-600"
-        onClick={() => navigate("/absent-report")}
-      >
-        Generate Excel
-      </button>
-      <button
-        className="h-12 px-6 py-2 m-4 text-xl text-white transition bg-gray-800 rounded-lg hover:scale-110 lg:w-1/4 sm:w-1/2 hover:bg-gray-600"
-        onClick={() => navigate("/send_mail")}
-      >
-        Send Email
-      </button>
-      <button
-        className="h-12 px-6 py-2 m-4 text-xl text-white transition bg-gray-800 rounded-lg hover:scale-110 lg:w-1/4 sm:w-1/2 hover:bg-gray-600"
-        onClick={() => navigate("/downloadReport")}
-      >
-        Report
-      </button>
-=======
     <div className="flex items-center justify-center h-full pt-10">
       <div className="grid w-full max-w-5xl grid-cols-2 gap-6 px-1 sm:grid-cols-3 lg:grid-cols-4 lg:gap-4">
       {/* Generate Message Card */}
@@ -71,15 +38,14 @@ function DashboardPage({ toggleSidebar }) {
         
         {/* Send Email Card */}
         <ActionCard
-          label="Send Email"
+          label="Generate Email"
           onClick={() => navigate("/send_mail")}
         />
 
 
       </div>
->>>>>>> d94b84d42949f44dd56763c7eacb743b2a852927
     </div>
   );
 }
 
-export default DashboardPage;
+export default ViewAttendance;

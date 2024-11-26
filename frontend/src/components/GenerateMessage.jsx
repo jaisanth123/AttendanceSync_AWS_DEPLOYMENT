@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const DashMessage = () => {
+const GenerateMessage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [details, setDetails] = useState([]);
@@ -233,4 +233,4 @@ const DashMessage = () => {
   );
 };
 
-export default DashMessage;
+export default GenerateMessage;

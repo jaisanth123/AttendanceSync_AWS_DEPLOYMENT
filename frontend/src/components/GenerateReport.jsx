@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import the toast CSS
 
-const DownloadReport = () => {
+const GenerateReport = () => {
   const [isLoading, setIsLoading] = useState(false); // State to track loading status
   const [message, setMessage] = useState(""); // State to hold message when no students are absent
   const [date, setDate] = useState(""); // State to store selected date
@@ -235,4 +235,4 @@ const DownloadReport = () => {
   );
 };
 
-export default DownloadReport;
+export default GenerateReport;
