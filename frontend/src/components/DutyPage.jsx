@@ -194,13 +194,22 @@ function DutyPage() {
 {selectedRollNumbers.length > 0 && (
   <div className="w-full p-4 mt-6 text-lg text-black">
     <h4 className="mb-10 text-3xl font-semibold text-center">Selected Roll Numbers:</h4>
-    <div className="grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-6">
-      {selectedRollNumbers.map((rollNumber, index) => (
-        <span key={index} className="text-xl font-bold ">{rollNumber}</span>
-      ))}
+    <div className="flex flex-col items-center space-y-4">
+      {selectedRollNumbers.map((rollNo, index) => {
+        const student = rollNumbers.find((student) => student.rollNo === rollNo);
+        return (
+          <span
+            key={index}
+            className="text-xl font-bold text-center"
+          >
+            {student ? `${student.rollNo} - ${student.name}` : rollNo}
+          </span>
+        );
+      })}
     </div>
   </div>
 )}
+
 
 
       <button

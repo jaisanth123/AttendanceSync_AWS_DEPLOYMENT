@@ -2,7 +2,7 @@
 const express = require('express');
 const connectDB = require('./dbConnection'); // Import the database connection function
 const cors = require('cors'); // Import the CORS middleware
-
+const bodyParser = require("body-parser");  
 const app = express();
 
 // Connect to the database
@@ -11,7 +11,7 @@ connectDB();
 // Middleware
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json());
-
+app.use(bodyParser.json());
 // Routes
 const studentRoutes = require('./routes/studentRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
