@@ -1,127 +1,150 @@
-import React, { useState } from 'react';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Import the toast CSS
+import React, { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import the toast CSS
+import { useNavigate } from "react-router-dom"; // Make sure you import the `useNavigate` hook from react-router-dom
 
 const AbsentReportDownloader = () => {
-  const [isLoading, setIsLoading] = useState(false); // State to track loading status
-  const [message, setMessage] = useState(''); // State to hold message when no students are absent
-  const [date, setDate] = useState(''); // State to store selected date
-  const [gender, setGender] = useState('MALE'); // State to store selected gender (default 'MALE')
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [date, setDate] = useState("");
+  const [gender, setGender] = useState("MALE");
 
-  // Handle the date change
-  const handleDateChange = (e) => {
-    setDate(e.target.value);
-  };
+  const navigate = useNavigate(); // Hook to navigate
 
-  // Handle the gender change
-  const handleGenderChange = (e) => {
-    setGender(e.target.value.toUpperCase()); // Ensure gender is always in uppercase
-  };
+  const handleDateChange = (e) => setDate(e.target.value);
 
-  // Function to format date from YYYY-MM-DD to DD-MM-YYYY
+  const handleGenderChange = (e) => setGender(e.target.value.toUpperCase());
+
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   };
 
-  // Handle the button click to download the report
   const handleDownload = () => {
     if (!date) {
-      // Show toast message for missing date selection
-      toast.info('Please select a date.', { autoClose: 800 });
+      toast.info("Please select a date.", { autoClose: 800 });
       return;
     }
 
     setIsLoading(true);
-    setMessage(''); // Reset previous message
+    setMessage("");
 
-    // Construct the URL with the gender and date parameters
     const url = `http://localhost:5000/api/report/downloadreport/${gender.toLowerCase()}?date=${date}`;
 
-    // Fetch the report from the server
     fetch(url)
       .then((response) => {
         if (response.status === 404) {
-          // If no absent students, set message and show toast for no absent students
           return response.json().then((data) => {
-            const formattedDate = formatDate(date); // Format the date
-            setMessage(`No absent ${gender.toLowerCase()} students found for ${formattedDate}.`);
+            const formattedDate = formatDate(date);
+            setMessage(
+              `No absent ${gender.toLowerCase()} students found for ${formattedDate}.`
+            );
             setIsLoading(false);
-            toast.info(`No absent ${gender.toLowerCase()} students found for ${formattedDate}.`, { autoClose: 2000 });
+            toast.info(
+              `No absent ${gender.toLowerCase()} students found for ${formattedDate}.`,
+              { autoClose: 2000 }
+            );
           });
         } else if (response.ok) {
-          // If response is a file, trigger the download
           return response.blob().then((blob) => {
-            const link = document.createElement('a');
+            const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = 'Absent_Students_Report.xlsx'; // Set file name
+            link.download = "Absent_Students_Report.xlsx";
             link.click();
             setIsLoading(false);
-
-            // Show success toast notification after file download
-            toast.success('Report downloaded successfully!', { autoClose: 2000 });
+            toast.success("Report downloaded successfully!", {
+              autoClose: 2000,
+            });
           });
         } else {
-          throw new Error('Something went wrong with the report generation');
+          throw new Error("Something went wrong with the report generation");
         }
       })
       .catch((error) => {
-        console.error('Error generating report:', error);
-        toast.error('An error occurred while generating the report.', { autoClose: 2000 });
-        setIsLoading(false); // Set loading to false if error occurs
+        console.error("Error generating report:", error);
+        toast.error("An error occurred while generating the report.", {
+          autoClose: 2000,
+        });
+        setIsLoading(false);
       });
   };
 
   return (
-    <div>
-      {/* Date input field */}
-      <div>
-        <label htmlFor="date">Select Date:</label>
-        <input
-          type="date"
-          id="date"
-          value={date}
-          onChange={handleDateChange}
-          style={{ padding: '5px', margin: '10px 0' }}
-        />
+    <div className="flex items-center justify-center min-h-screen p-4 ">
+      <div className="w-full max-w-md p-6 text-white bg-gray-800 rounded-lg shadow-md">
+        <h2 className="mb-4 text-2xl font-bold text-center">
+          Absent Report Downloader
+        </h2>
+        <div className="mb-4">
+          <label htmlFor="date" className="block mb-1 font-semibold">
+            Select Date:
+          </label>
+          <input
+            type="date"
+            id="date"
+            value={date}
+            onChange={handleDateChange}
+            className="w-full p-2 text-gray-900 rounded-md"
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="gender" className="block mb-1 font-semibold">
+            Select Gender:
+          </label>
+          <select
+            id="gender"
+            value={gender}
+            onChange={handleGenderChange}
+            className="w-full p-2 text-gray-900 rounded-md"
+          >
+            <option value="MALE">BOYS</option>
+            <option value="FEMALE">GIRLS</option>
+          </select>
+        </div>
+
+        {/* Download Report Button */}
+        <div className="mb-4">
+          <button
+            onClick={handleDownload}
+            className={`mt-4  w-full py-2 font-semibold rounded-md transition-colors ${
+              isLoading
+                ? "bg-gray-600 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
+            disabled={isLoading}
+          >
+            {isLoading ? "Generating Report..." : "Download Report"}
+          </button>
+        </div>
+
+        {/* Back Button */}
+        <div className="mb-4">
+          <button
+            onClick={() => navigate(-1)} // This will go back to the previous page
+            className="w-full px-6 py-2 font-semibold text-white bg-gray-600 rounded-md hover:bg-gray-700"
+          >
+            Back
+          </button>
+        </div>
+
+        {/* Home Button */}
+        <div className="mb-4">
+          <button
+            onClick={() => navigate("/")} // Navigate to the home page
+            className="w-full py-2 font-semibold bg-red-600 rounded-md hover:bg-red-700"
+          >
+            Home
+          </button>
+        </div>
+
+        {/* Message */}
+        {message && (
+          <p className="mt-4 text-sm text-center text-gray-400">{message}</p>
+        )}
       </div>
-
-      {/* Gender dropdown */}
-      <div>
-        <label htmlFor="gender">Select Gender:</label>
-        <select
-          id="gender"
-          value={gender}
-          onChange={handleGenderChange}
-          style={{ padding: '5px', margin: '10px 0' }}
-        >
-          <option value="MALE">BOYS</option>
-          <option value="FEMALE">GIRLS</option>
-        </select>
-      </div>
-
-      {/* Button to trigger report download */}
-      <button
-        onClick={handleDownload}
-        style={{
-          padding: '10px 20px',
-          backgroundColor: '#007BFF',
-          color: 'white',
-          border: 'none',
-          cursor: 'pointer',
-        }}
-        disabled={isLoading} // Disable the button while loading
-      >
-        {isLoading ? 'Generating Report...' : 'Download Report'}
-      </button>
-
-      {/* Displaying the message when no students are absent */}
-      {message && <p>{message}</p>}
-
-      {/* ToastContainer to render toast notifications */}
       <ToastContainer />
     </div>
   );

@@ -4,7 +4,7 @@ import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import HomePage from "./components/HomePage";
 import DutyPage from "./components/DutyPage";
-import Absentees from "./components/Absentees"; // Import Absentees component
+import Absentees from "./components/Absentees";
 import MessagePage from "./components/MessagePage";
 import DashboardPage from "./components/DashboardPage";
 import GenerateExcel from "./components/GenerateExcel";
@@ -13,15 +13,13 @@ import DashMessage from "./components/DashMessage";
 import SignIn from "./components/SignIn";
 import SignUp from "./components/SignUp";
 
-
-import AbsentReportDownloader from './components/AbsentReportDownloader'; // Adjust the path as needed
-import DownloadReport from './components/DownloadReport'; // Adjust the path as needed
+import AbsentReportDownloader from './components/AbsentReportDownloader';
+import DownloadReport from './components/DownloadReport';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const sidebarRef = useRef(null);
-  const [isSigningIn, setIsSigningIn] = useState(true);
 
   // Toggle Sidebar visibility
   const toggleSidebar = () => {
@@ -34,11 +32,6 @@ function App() {
     setIsSidebarOpen(false);
   };
 
-  // Toggle between SignIn and SignUp views
-  const toggleMode = () => {
-    setIsSigningIn(!isSigningIn);
-  };
-
   // Handle home button click
   const handleHomeClick = () => {
     if (window.location.pathname !== '/absentees') {
@@ -49,7 +42,7 @@ function App() {
 
   // Close sidebar if clicked outside
   useEffect(() => {
-    let isMounted = true; // Flag to check if component is mounted
+    let isMounted = true;
 
     const handleClickOutside = (event) => {
       if (sidebarRef.current && !sidebarRef.current.contains(event.target) && isMounted) {
@@ -60,7 +53,7 @@ function App() {
     document.addEventListener("click", handleClickOutside);
 
     return () => {
-      isMounted = false; // Set flag to false when the component unmounts
+      isMounted = false;
       document.removeEventListener("click", handleClickOutside);
     };
   }, []);
@@ -113,18 +106,19 @@ function App() {
             />
 
             {/* Dashboard and Utility Pages */}
-            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route
+              path="/dashboard"
+              element={<DashboardPage />} // Removed toggleSidebar here
+            />
             <Route path="/generate_excel" element={<GenerateExcel />} />
             <Route path="/send_mail" element={<SendMail />} />
-            <Route path="/dashmessage" element={<DashMessage />} />
+            <Route path="/dashmessage" element={<DashMessage toggleSidebar={toggleSidebar} />} /> {/* Pass toggleSidebar here */}
 
             {/* Authentication Pages */}
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/absent-report" element={<AbsentReportDownloader />} />
             <Route path="/downloadReport" element={<DownloadReport />} />
-
-
           </Routes>
         </div>
 

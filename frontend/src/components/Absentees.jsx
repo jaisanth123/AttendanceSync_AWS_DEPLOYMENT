@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 function Absentees() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [isMarkingLoading, setIsMarkingLoading] = useState(false); 
 
   // State variables
   const [selectedCourse, setSelectedCourse] = useState(location.state?.selectedCourse || "Select a course");
@@ -92,8 +93,8 @@ function Absentees() {
     setPopupColor("bg-blue-600"); // Blue for Back button
     setShowBackPopup(true); // Show Back button confirmation pop-up
   };
-
   const handleMarkPresentConfirm = async () => {
+    setIsMarkingLoading(true);
     const [yearOfStudy, branch, section] = selectedCourse.split(" - ");
     const data = { yearOfStudy, branch, section, date };
   
@@ -103,30 +104,23 @@ function Absentees() {
         data
       );
   
-      console.log("Response data:", response.data);
-  
       if (response.data.markedAsPresent === 0) {
-        toast.info("Attendance is already marked for all students.", {
-          autoClose: 800,
-        });
+        toast.info("Attendance is already marked for all students.", { autoClose: 800 });
       } else {
-        toast.success("Successfully marked remaining students as present.", {
-          autoClose: 800,
-        });
+        toast.success("Successfully marked remaining students as present.", { autoClose: 800 });
+        setShowGenerateMessageButton(true); // Enable the Generate Message button
       }
-  
-      setShowMarkPresentPopup(false);
-      setShowGenerateMessageButton(true); // Show the Generate Message button
     } catch (error) {
       console.error("Error marking remaining students as present:", error);
-      toast.error(
-        "Error marking remaining students as present. Please try again.",
-        {
-          autoClose: 800,
-        }
-      );
+      toast.error("Error marking remaining students as present. Please try again.", { autoClose: 800 });
+    } finally {
+      setIsMarkingLoading(false);
+      setShowMarkPresentPopup(false); // Close the popup
     }
   };
+  
+  
+  
 
   const handleBackConfirm = () => {
     setShowBackPopup(false);
@@ -173,7 +167,7 @@ function Absentees() {
       }
     }
   };
-
+  
   // Reusable Popup Component
   const ReusablePopup = ({
     show,
@@ -187,8 +181,7 @@ function Absentees() {
     if (!show) return null;
   
     const popupStyles = {
-      "bg-grey-800": "bg-grey-800 text-white ",
-      "bg-gray-800": "bg-gray-800 text-white ", // Default fallback
+      "bg-gray-800": "bg-gray-800 text-white", // Default fallback
     };
   
     return (
@@ -203,7 +196,10 @@ function Absentees() {
           <div className="flex justify-center space-x-6">
             {/* Confirm Button */}
             <button
-              onClick={onConfirm}
+            onClick={() => {
+              onConfirm(); // Confirm action
+              setShowMarkPresentPopup(false); // Close the popup
+            }}
               className="px-6 py-2 font-semibold text-white transition-colors bg-blue-700 rounded-md hover:bg-blue-800"
             >
               {confirmText}
@@ -262,15 +258,22 @@ function Absentees() {
         </button>
 
 
-
         {markPresentVisible && (
-          <button
-            onClick={() => setShowMarkPresentPopup(true)}
-            className="w-full px-8 py-4 text-xl font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700"
-          >
-            Mark Present
-          </button>
-        )}
+  <button
+    onClick={() => {
+      setShowMarkPresentPopup(true);
+    }}
+    disabled={isMarkingLoading}
+    className={`w-full px-8 py-4 text-xl font-semibold rounded-lg transition-all ${
+      isMarkingLoading
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-green-600 hover:bg-green-700 text-white"
+    }`}
+  >
+    {isMarkingLoading ? "Marking Present..." : "Mark Present"}
+  </button>
+)}
+
 
         
 {showGenerateMessageButton && (
@@ -285,7 +288,6 @@ function Absentees() {
     Generate Message
   </button>
 )}
-
 <button
           onClick={handleBackButton}
           className="w-full px-8 py-4 text-xl font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700"
@@ -296,12 +298,13 @@ function Absentees() {
 
       {/* Confirmation Pop-ups */}
       <ReusablePopup
-  show={showBackPopup}
-  message="Are you sure you want to go back to the Duty page?"
-  color="bg-blue-600" // Popup with blue theme
-  onConfirm={handleBackConfirm}
-  onCancel={() => setShowBackPopup(false)}
+  show={showMarkPresentPopup}
+  message={`All the remaining students will be marked as present.`} // Updated message to show number of students selected
+  color="bg-green-600" // Popup with green theme for mark present
+  onConfirm={handleMarkPresentConfirm}
+  onCancel={() => setShowMarkPresentPopup(false)}
 />
+
 
 <ReusablePopup
   show={showConfirmationPopup}
