@@ -86,27 +86,34 @@ const GenerateMessage = () => {
   };
 
   return (
-    <div>
+    <div className="flex items-center justify-center min-h-screen p-6">
+      <div className="w-full p-6 bg-gray-800 rounded-lg shadow-lg sm:w-96 md:w-80 lg:w-96 xl:w-1/3">
+      <h2 className="mb-6 text-2xl font-semibold text-center text-white">
+          Generate Absentee Message
+        </h2>
       {/* Date input field */}
       <div>
-        <label htmlFor="date">Date:</label>
+        <label htmlFor="date"
+        className="block text-sm font-medium text-gray-300">Date:</label>
         <input
           type="date"
           id="date"
           value={date}
           onChange={handleDateChange}
           style={{ padding: '5px', margin: '10px 0' }}
+           className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
       {/* Gender dropdown */}
       <div>
-        <label htmlFor="gender">Gender:</label>
+        <label htmlFor="gender" className="block text-sm font-medium text-gray-300">Gender:</label>
         <select
           id="gender"
           value={gender}
           onChange={handleGenderChange}
           style={{ padding: '5px', margin: '10px 0' }}
+          className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
         >
           <option value="MALE">BOYS</option>
           <option value="FEMALE">GIRLS</option>
@@ -116,12 +123,13 @@ const GenerateMessage = () => {
 
       {/* Hosteller/Day Scholar dropdown */}
       <div>
-        <label htmlFor="hostellerDayScholar">Hostel Type:</label>
+        <label htmlFor="hostellerDayScholar" className="block text-sm font-medium text-gray-300">Hostel Type:</label>
         <select
           id="hostellerDayScholar"
           value={hostellerDayScholar}
           onChange={handleHostellerDayScholarChange}
           style={{ padding: '5px', margin: '10px 0' }}
+          className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
         >
           <option value="ALL">ALL</option>
           <option value="HOSTELLER">HOSTELLER</option>
@@ -131,12 +139,13 @@ const GenerateMessage = () => {
 
       {/* Year of Study dropdown */}
       <div>
-        <label htmlFor="yearOfStudy">Year of Study:</label>
+        <label htmlFor="yearOfStudy" className="block text-sm font-medium text-gray-300">Year of Study:</label>
         <select
           id="yearOfStudy"
           value={yearOfStudy}
           onChange={handleYearOfStudyChange}
           style={{ padding: '5px', margin: '10px 0' }}
+          className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
         >
           <option value="ALL">ALL</option>
           <option value="II">Second Year</option>
@@ -147,12 +156,13 @@ const GenerateMessage = () => {
 
       {/* Branch dropdown */}
       <div>
-        <label htmlFor="branch">Branch:</label>
+        <label htmlFor="branch" className="block text-sm font-medium text-gray-300">Branch:</label>
         <select
           id="branch"
           value={branch}
           onChange={handleBranchChange}
           style={{ padding: '5px', margin: '10px 0' }}
+          className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
         >
           <option value="ALL">ALL</option>
           <option value="AIML">ML</option>
@@ -162,12 +172,13 @@ const GenerateMessage = () => {
 
       {/* Section dropdown */}
       <div>
-        <label htmlFor="section">Section:</label>
+        <label htmlFor="section" className="block text-sm font-medium text-gray-300">Section:</label>
         <select
           id="section"
           value={section}
           onChange={handleSectionChange}
           style={{ padding: '5px', margin: '10px 0' }}
+          className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
         >
           <option value="ALL">ALL</option>
           <option value="A">A</option>
@@ -182,7 +193,7 @@ const GenerateMessage = () => {
           handleDownload();
           toggleCardVisibility();
         }}
-        className="w-full px-6 py-2 mt-4 font-semibold text-white bg-blue-600 rounded-lg shadow-lg sm:w-64 md:w-64 hover:bg-blue-700"
+        className="w-full px-4 py-2 font-bold text-white transition duration-300 bg-blue-600 rounded-md shadow hover:bg-blue-700"
       >
         {isLoading ? 'Generating Report...' : 'Get Absent Students'}
       </button>
@@ -226,7 +237,7 @@ const GenerateMessage = () => {
           </button>
         </div>
       )}
-
+</div>
       {/* ToastContainer to render toast notifications */}
       <ToastContainer />
     </div>
