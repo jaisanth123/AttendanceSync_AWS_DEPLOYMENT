@@ -109,7 +109,7 @@ const AbsentReportDownloader = () => {
         <div className="mb-4">
           <button
             onClick={handleDownload}
-            className={`mt-4  w-full py-2 font-semibold rounded-md transition-colors ${
+            className={`mt-4  w-full py-2 transition-all duration-500 transform font-semibold rounded-md hover:scale-105 ${
               isLoading
                 ? "bg-gray-600 cursor-not-allowed"
                 : "bg-blue-600 hover:bg-blue-700"
@@ -124,7 +124,7 @@ const AbsentReportDownloader = () => {
         <div className="mb-4">
           <button
             onClick={() => navigate(-1)} // This will go back to the previous page
-            className="w-full px-6 py-2 font-semibold text-white bg-gray-600 rounded-md hover:bg-gray-700"
+            className="w-full px-6 py-2 font-semibold text-white transition-all duration-500 transform bg-gray-600 rounded-md hover:scale-105 hover:bg-gray-700"
           >
             Back
           </button>
@@ -134,7 +134,7 @@ const AbsentReportDownloader = () => {
         <div className="mb-4">
           <button
             onClick={() => navigate("/")} // Navigate to the home page
-            className="w-full py-2 font-semibold bg-red-600 rounded-md hover:bg-red-700"
+            className="w-full py-2 font-semibold transition-all duration-500 transform bg-gray-600 rounded-md hover:bg-gray-700 hover:scale-105"
           >
             Home
           </button>

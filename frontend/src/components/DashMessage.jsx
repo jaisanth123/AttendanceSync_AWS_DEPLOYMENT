@@ -135,7 +135,7 @@ const DashMessage = ({ toggleSidebar }) => {
               getAbsentStudents();
               toggleCardVisibility();
             }}
-            className="w-full px-6 py-2 mt-4 font-semibold text-white bg-blue-600 rounded-lg shadow-lg sm:w-64 md:w-64 hover:bg-blue-700"
+            className="w-full px-6 py-2 mt-4 font-semibold text-white duration-500 transform bg-blue-600 rounded-lg shadow-lg hover:scale-105 transistion sm:w-64 md:w-64 hover:bg-blue-700"
           >
             Get Absent Students
           </button>
@@ -171,23 +171,26 @@ const DashMessage = ({ toggleSidebar }) => {
 
               <button
                 onClick={copyCardContent}
-                className="px-4 py-2 mt-4 font-semibold text-white bg-green-500 rounded hover:bg-green-600"
+                className="px-4 py-2 mt-4 font-semibold text-white duration-500 bg-green-500 rounded hover:scale-105 transistion hover:bg-green-600"
               >
                 Copy Content
               </button>
             </div>
           )}
 
-          <button
-            onClick={() => toggleSidebar()}
-            className="w-full px-6 py-2 mt-4 font-semibold text-white bg-gray-600 rounded-lg shadow-lg sm:w-64 md:w-64 hover:bg-gray-700"
+
+
+                    <button
+            onClick={() => navigate(-1)} // Navigate to home
+            className="w-full px-6 py-2 font-semibold text-white duration-500 bg-gray-600 rounded-lg shadow-lg hover:scale-105 transistion sm:w-64 md:w-64 hover:bg-gray-700 focus:outline-none focus:ring focus:ring-blue-300"
           >
-            Toggle Sidebar
+            Back
           </button>
+    
 
           <button
             onClick={() => navigate("/")} // Navigate to home
-            className="w-full px-6 py-2 font-semibold text-white bg-red-700 rounded-lg shadow-lg sm:w-64 md:w-64 hover:bg-red-800 focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full px-6 py-2 font-semibold text-white duration-500 bg-gray-600 rounded-lg shadow-lg hover:scale-105 transistion sm:w-64 md:w-64 hover:bg-gray-700 focus:outline-none focus:ring focus:ring-blue-300"
           >
             Home
           </button>
