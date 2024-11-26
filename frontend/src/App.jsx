@@ -7,7 +7,6 @@ import DutyPage from "./components/DutyPage";
 import Absentees from "./components/Absentees";
 import MessagePage from "./components/MessagePage";
 import ViewAttendance from "./components/ViewAttendance";
-import GenerateExcel from "./components/GenerateExcel";
 import SendMail from "./components/SendMail";
 import GenerateMessage from "./components/GenerateMessage";
 import SignIn from "./components/SignIn";
@@ -107,7 +106,7 @@ function App() {
 
             {/* Dashboard and Utility Pages */}
             <Route
-              path="/dashboard"
+              path="/viewattendance"
               element={<ViewAttendance />} // Removed toggleSidebar here
             />
             <Route path="/generate_excel" element={<GenerateExcel />} />

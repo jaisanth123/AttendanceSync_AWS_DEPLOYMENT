@@ -21,7 +21,7 @@ function ViewAttendance({ toggleSidebar }) {
       {/* Generate Message Card */}
         <ActionCard
           label="Generate Message"
-          onClick={() => navigate("/dashmessage")}
+          onClick={() => navigate("/generateMessage")}
         />
 
         {/* Generate Excel Card */}
