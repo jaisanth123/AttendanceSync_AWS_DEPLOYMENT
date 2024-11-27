@@ -39,6 +39,7 @@ function Absentees() {
       const response = await axios.get(url);
       const fetchedRollNumbers = response.data.students.map((student) => ({
         rollNo: student.rollNo,
+        name: student.name,
         isSelected: false,
       }));
       setRollNumbers(fetchedRollNumbers);
@@ -238,15 +239,18 @@ function Absentees() {
           </div>
         ))}
       </div>
-
+      {selectedRollNos.length > 0 && (
       <div className="w-full p-4 mt-6 text-lg text-black">
   <h4 className="mb-10 text-3xl font-semibold text-center">Selected Roll Numbers:</h4>
-  <div className="grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-6">
-    {selectedRollNos.map((rollNo, index) => (
-      <span key={index} className="text-xl font-bold">{rollNo}</span>
-    ))}
+  <div className="flex flex-col items-center space-y-4">
+    {selectedRollNos.map((rollNo, index) => {
+      const student = rollNumbers.find((student) => student.rollNo === rollNo);
+      return (
+      <span key={index} className="text-xl font-bold text-center"> {student ? `${student.rollNo} - ${student.name}` : rollNo}</span>);
+    })}
   </div>
 </div>
+      )}
 
 
       <div className="flex flex-col gap-4 mt-8 md:w-1/4 lg:w-1/5">
