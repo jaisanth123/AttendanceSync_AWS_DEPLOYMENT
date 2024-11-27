@@ -119,10 +119,6 @@ function Absentees() {
       setShowMarkPresentPopup(false); // Close the popup
     }
   };
-  
-  
-  
-
   const handleBackConfirm = () => {
     setShowBackPopup(false);
     navigate("/duty", {
