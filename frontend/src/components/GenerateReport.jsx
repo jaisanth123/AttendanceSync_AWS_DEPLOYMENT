@@ -82,11 +82,9 @@ const GenerateReport = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-6">
-      <div className="w-full p-6 bg-gray-800 rounded-lg shadow-lg sm:w-96 md:w-80 lg:w-96 xl:w-1/3">
-        <h2 className="mb-6 text-2xl font-semibold text-center text-white">
-          Download Absentee Report
-        </h2>
+<div className="flex items-start justify-center min-h-screen p-6">
+  <div className="w-full p-6 bg-gray-800 rounded-lg shadow-lg sm:w-96 md:w-80 lg:w-96 xl:w-1/3">
+    <h2 className="mb-2 text-2xl font-semibold text-center text-white">Download Absentee Report</h2>
 
         {/* Date input field */}
         <div className="mb-4">

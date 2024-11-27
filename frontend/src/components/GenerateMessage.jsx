@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from "react-router-dom";
 
 const GenerateMessage = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -9,6 +10,7 @@ const GenerateMessage = () => {
   const [missingStudents, setMissingStudents] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [showCard, setShowCard] = useState(false);
+  const navigate = useNavigate();
 
   const [date, setDate] = useState('');
   const [gender, setGender] = useState('ALL');
@@ -86,25 +88,20 @@ const GenerateMessage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-6">
-      <div className="w-full p-6 bg-gray-800 rounded-lg shadow-lg sm:w-96 md:w-80 lg:w-96 xl:w-1/3">
-      <h2 className="mb-6 text-2xl font-semibold text-center text-white">
-          Generate Absentee Message
-        </h2>
+<div className="flex items-start justify-center min-h-screen p-6">
+  <div className="w-full p-6 bg-gray-800 rounded-lg shadow-lg sm:w-96 md:w-80 lg:w-96 xl:w-1/3">
+    <h2 className="mb-2 text-2xl font-semibold text-center text-white">Generate Absentee Message</h2>
       {/* Date input field */}
       <div>
-        <label htmlFor="date"
-        className="block text-sm font-medium text-gray-300">Date:</label>
-        <input
-          type="date"
-          id="date"
-          value={date}
-          onChange={handleDateChange}
-          style={{ padding: '5px', margin: '10px 0' }}
-           className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-
+      <label htmlFor="date" className="block text-sm font-medium text-gray-300">Date:</label>
+      <input
+        type="date"
+        id="date"
+        value={date}
+        onChange={handleDateChange}
+        className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+      />
+    </div>
       {/* Gender dropdown */}
       <div>
         <label htmlFor="gender" className="block text-sm font-medium text-gray-300">Gender:</label>
@@ -193,10 +190,17 @@ const GenerateMessage = () => {
           handleDownload();
           toggleCardVisibility();
         }}
-        className="w-full px-4 py-2 font-bold text-white transition duration-300 bg-blue-600 rounded-md shadow hover:bg-blue-700"
+        className="w-full px-4 py-2 mt-2 font-bold text-white transition duration-300 bg-blue-600 rounded-md shadow hover:bg-blue-700"
       >
         {isLoading ? 'Generating Report...' : 'Get Absent Students'}
       </button>
+      <button
+          onClick={() => navigate(-1)} // Replace with actual back navigation logic
+          className="w-full px-4 py-2 mt-4 font-bold text-white transition duration-300 bg-gray-600 rounded-md shadow hover:bg-gray-700"
+        >
+          Back
+        </button>
+
 
       {/* Display card with message and details */}
       {showCard && (message || details.length > 0 || missingStudents.length > 0 || errorMessage) && (
