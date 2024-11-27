@@ -14,6 +14,8 @@ import Dashboard from "./components/Dashboard";
 import GenerateExcel from './components/GenerateExcel';
 import GenerateReport from './components/GenerateReport';
 
+import SendEmail from "./components/SendMail";
+
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -115,6 +117,7 @@ function App() {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/generateEmail" element={<GenerateExcel />} />
+            <Route path="/send-email" element={<SendEmail />} />
             <Route path="/generateReport" element={<GenerateReport />} />
           </Routes>
         </div>

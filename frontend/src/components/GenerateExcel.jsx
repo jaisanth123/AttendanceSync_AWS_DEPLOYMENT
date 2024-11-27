@@ -76,7 +76,7 @@ const GenerateExcel = () => {
     <div className="flex items-center justify-center min-h-screen p-4 ">
       <div className="w-full max-w-md p-6 text-white bg-gray-800 rounded-lg shadow-md">
         <h2 className="mb-4 text-2xl font-bold text-center">
-          Absent Report Downloader
+          Absent mail generator
         </h2>
         <div className="mb-4">
           <label htmlFor="date" className="block mb-1 font-semibold">
@@ -119,6 +119,16 @@ const GenerateExcel = () => {
             {isLoading ? "Generating Report..." : "Download Report"}
           </button>
         </div>
+        {/* Navigate to Send Email Page */}
+<div className="mb-4">
+  <button
+    onClick={() => navigate("/send-email")} // Adjust this path based on your route setup
+    className="w-full px-6 py-2 font-semibold text-white transition-all duration-500 transform bg-blue-600 rounded-md hover:scale-105 hover:bg-blue-700"
+  >
+    Go to Send Email Page
+  </button>
+</div>
+
 
         {/* Back Button */}
         <div className="mb-4">

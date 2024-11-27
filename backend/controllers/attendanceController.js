@@ -242,6 +242,12 @@ exports.sendEmail = async (req, res) => {
     return res.status(400).send({ message: "No file uploaded" });
   }
 
+  if (!toEmails) {
+    return res.status(400).send({ message: "No email addresses provided" });
+  }
+
+  const emailList = toEmails.split(",").map((email) => email.trim()); // Split and trim emails
+
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -252,7 +258,7 @@ exports.sendEmail = async (req, res) => {
 
   const mailOptions = {
     from: "vijayakanthm.23aim@kongu.edu", // Replace with your email
-    to: toEmails,
+    bcc: emailList, // Use BCC for all recipients
     subject: subject,
     text: content,
     attachments: [
