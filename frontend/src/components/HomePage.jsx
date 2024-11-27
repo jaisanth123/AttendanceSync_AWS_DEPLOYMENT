@@ -17,11 +17,17 @@ function HomePage({ toggleSidebar }) {
 
   return (
     <div className="flex items-center justify-center h-full pt-10">
-      <div className="grid w-full max-w-5xl grid-cols-2 gap-6 px-1 sm:grid-cols-4 lg:grid-cols-4 lg:gap-4">
+      <div className="grid w-full max-w-5xl grid-cols-2 gap-6 px-1 sm:grid-cols-5 lg:grid-cols-5 lg:gap-4">
       {/* Attendance Card */}
         <ActionCard label="Mark Attendance" onClick={toggleSidebar} />
 
         {/* View Attendance Card */}
+
+        <ActionCard
+          label="Mark On Duty"
+          onClick={() => navigate("/duty")}
+        /> 
+
         <ActionCard
           label="View Attendance"
           onClick={() => navigate("/viewattendance")}

@@ -7,14 +7,16 @@ import "react-toastify/dist/ReactToastify.css"; // Import CSS for Toastify
 function DutyPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [showGenerateMessageButton, setShowGenerateMessageButton] = useState(false);
 
-  const [selectedCourse, setSelectedCourse] = useState(location.state?.selectedCourse || "Select a course");
-  const [date, setDate] = useState(location.state?.selectedDate || "");
+  const [date, setDate] = useState(location.state?.selectedDate || new Date().toISOString().split("T")[0]); // Default to today's date
   const [rollNumbers, setRollNumbers] = useState([]);
   const [message, setMessage] = useState("");
   const [selectedRollNumbers, setSelectedRollNumbers] = useState([]);
   const [isConfirmed, setIsConfirmed] = useState(false);
-
+  const [yearOfStudy, setYearOfStudy] = useState('nan');
+  const [section, setSection] = useState('nan');
+  const [branch, setBranch] = useState('nan');
   const formatDate = (dateString) => {
     const dateObj = new Date(dateString);
     const day = String(dateObj.getDate()).padStart(2, "0");
@@ -22,15 +24,27 @@ function DutyPage() {
     const year = dateObj.getFullYear();
     return `${day}-${month}-${year}`;
   };
+const [selectedCourse,setselectedCourse] =useState("")
 
   useEffect(() => {
-    if (selectedCourse && date) {
-      fetchRollNumbers(selectedCourse, date);
-    }
-  }, [selectedCourse, date]);
+    // Debugging logs for values
+    console.log("Triggering useEffect...");
+    console.log("yearOfStudy:", yearOfStudy, "branch:", branch, "section:", section, "date:", date);
 
-  const fetchRollNumbers = async (course, selectedDate) => {
-    const [yearOfStudy, branch, section] = course.split(" - ");
+    // Ensure yearOfStudy, branch, and section are valid (not "nan") and non-empty
+    if (yearOfStudy !== "nan" && branch !== "nan" && section !== "nan") {
+      setselectedCourse(`${yearOfStudy}-${branch}-${section}`);
+      console.log("Valid selections made. Proceeding with fetch...");
+      
+      if (yearOfStudy && branch && section && date) {
+        fetchRollNumbers(yearOfStudy, branch, section, date);
+      }
+    }
+  }, [yearOfStudy, branch, section, date]);
+  
+  
+
+  const fetchRollNumbers = async (yearOfStudy, branch, section, selectedDate) => {
     const url = `http://localhost:5000/api/students/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
 
     try {
@@ -98,18 +112,16 @@ function DutyPage() {
       toast.info("0 Students are Marked as On Duty", {
         position: "top-right",
         autoClose: 800,
-      })
-
-      // Wait for toast to finish before redirecting
+      });
+  
+      // Close the pop-up after displaying the toast
       setTimeout(() => {
-        navigate("/absentees", {
-          state: { selectedCourse, selectedDate: date },
-        });
-      }, 800); // Delay the redirection after 3 seconds (toast duration)
+        setIsConfirmed(false); // Close pop-up
+      }, 800); // Delay the pop-up close to match toast duration
       return;
     }
-
-    const [yearOfStudy, branch, section] = selectedCourse.split(" - ");
+  
+    
     const payload = {
       rollNumbers: selectedRollNumbers,
       date,
@@ -117,21 +129,19 @@ function DutyPage() {
       branch,
       section,
     };
-
+  
     try {
       const response = await axios.post("http://localhost:5000/api/attendance/onDuty", payload);
       if (response.status === 200) {
-        // Display success toast
         toast.success(`${selectedRollNumbers.length} students marked as On Duty`, {
           autoClose: 800,
         });
-
-        // Show success and navigate after a delay
+        setShowGenerateMessageButton(true);
+  
+        // Close the pop-up after displaying the toast
         setTimeout(() => {
-          navigate("/absentees", {
-            state: { selectedCourse, selectedDate: date },
-          });
-        }, 2000);
+          setIsConfirmed(false); // Close pop-up
+        }, 800);
       } else {
         toast.error("Failed to mark OD. Please try again.", {
           autoClose: 800,
@@ -144,38 +154,84 @@ function DutyPage() {
       });
     }
   };
-
   const handleClosePopup = () => {
     setIsConfirmed(false);
   };
 
   return (
     <div className="flex flex-col items-center flex-1 p-6 md:p-8 lg:p-12">
-      <div className="p-4 text-center text-black">
-        <h1 className="text-4xl font-semibold">{selectedCourse}</h1>
-        <h3 className="text-2xl font-semibold">ON DUTY</h3>
+    <div className="p-4 text-center text-black">
+      <h1 className="text-4xl font-semibold">ON DUTY</h1>
+    </div>
+  
+    {/* Dropdowns Row */}
+    <div className="flex flex-wrap justify-center w-full mt-4 space-x-4 gap-y-4">
+      <div className="w-full sm:w-1/3 md:w-1/4 lg:w-1/5">
+        <label htmlFor="yearOfStudy" className="block text-sm font-medium text-gray-300">Year:</label>
+        <select
+          id="yearOfStudy"
+          value={yearOfStudy}
+          onChange={(e) => setYearOfStudy(e.target.value)}
+          className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+        >
+          <option value="nan">Select Year</option>
+          <option value="IV">IV</option>
+          <option value="III">III</option>
+          <option value="II">II</option>
+        </select>
       </div>
-
-      <div className="w-full max-w-sm mt-4">
-        <label htmlFor="date" className="block mb-2 text-lg font-medium">
-          Select Date:
-        </label>
-        <input
-          type="date"
-          id="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-        />
+  
+      <div className="w-full sm:w-1/3 md:w-1/4 lg:w-1/5">
+        <label htmlFor="branch" className="block text-sm font-medium text-gray-300">Branch:</label>
+        <select
+          id="branch"
+          value={branch}
+          onChange={(e) => setBranch(e.target.value)}
+          className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+        >
+          <option value="nan">Select Branch</option>
+          <option value="AIDS">AIDS</option>
+          <option value="AIML">AIML</option>
+        </select>
       </div>
-
-      {message && (
-        <div className="w-full max-w-lg p-4 mt-6 text-lg text-center text-red-500">
-          {message}
-        </div>
-      )}
-
-      {rollNumbers.length > 0 && (
+  
+      <div className="w-full sm:w-1/3 md:w-1/4 lg:w-1/5">
+        <label htmlFor="section" className="block text-sm font-medium text-gray-300">Section:</label>
+        <select
+          id="section"
+          value={section}
+          onChange={(e) => setSection(e.target.value)}
+          className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+        >
+          <option value="nan">Select Section</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+        </select>
+      </div>
+    </div>
+  
+    {/* Date Selection */}
+    <div className="w-full max-w-sm mt-6">
+      <label htmlFor="date" className="block mb-2 text-lg font-medium text-gray-300">Select Date:</label>
+      <input
+        type="date"
+        id="date"
+        value={date}
+        onChange={(e) => setDate(e.target.value)}
+        className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+      />
+    </div>
+  
+    {/* Message Display */}
+    {message && (
+      <div className="w-full max-w-lg p-4 mt-6 text-lg text-center text-red-500">
+        {message}
+      </div>
+    )}
+  
+    {/* Roll Numbers */}
+    {rollNumbers.length > 0 && (
         <div className="grid w-full grid-cols-2 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
           {rollNumbers.map((rollNumber, index) => (
             <div
@@ -210,14 +266,25 @@ function DutyPage() {
   </div>
 )}
 
-
-
-      <button
+  
+ 
+  <button
         onClick={() => setIsConfirmed(true)}
         className="px-6 py-3 mt-10 text-white bg-red-500 rounded-lg hover:bg-red-600"
       >
         MARK OD
       </button>
+      {showGenerateMessageButton && (
+  <button
+    onClick={() =>
+      navigate("/message", {
+        state: { selectedCourse, selectedDate: date },
+      })
+    }
+    className="w-full px-8 py-4 mt-2 text-xl font-semibold text-white bg-gray-800 rounded-lg hover:bg-gray-700"
+  >
+    Generate Message
+  </button>)}
 
       {isConfirmed && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fadeIn">
@@ -248,8 +315,8 @@ function DutyPage() {
         </div>
       )}
 
-      <ToastContainer />
-    </div>
+    <ToastContainer position="top-right" />
+  </div>
   );
 }
 

@@ -43,7 +43,7 @@ function Sidebar({ closeSidebar, handleItemSelection }) {
   const handleCourseSelection = (course) => {
     closeSidebar();
     handleItemSelection(course);
-    navigate("/duty", { state: { selectedCourse: course } });
+    navigate("/absentees", { state: { selectedCourse: course } });
     window.location.reload();
     
   };

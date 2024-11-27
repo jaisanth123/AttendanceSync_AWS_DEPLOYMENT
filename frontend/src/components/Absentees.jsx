@@ -8,10 +8,11 @@ function Absentees() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMarkingLoading, setIsMarkingLoading] = useState(false); 
-
+  
   // State variables
+  const [date, setDate] = useState(location.state?.selectedDate || new Date().toISOString().split("T")[0]); // Default to today's date
+
   const [selectedCourse, setSelectedCourse] = useState(location.state?.selectedCourse || "Select a course");
-  const [date, setDate] = useState(location.state?.selectedDate || "");
   const [rollNumbers, setRollNumbers] = useState([]);
   const [isConfirmed, setIsConfirmed] = useState(false); // For Confirm button state
   const [showBackPopup, setShowBackPopup] = useState(false); // For Back button confirmation popup
@@ -23,8 +24,13 @@ function Absentees() {
   const [markPresentDisabled, setMarkPresentDisabled] = useState(true); // Disable Mark Present button initially
   const [markPresentVisible, setMarkPresentVisible] = useState(false);
   const [showGenerateMessageButton, setShowGenerateMessageButton] = useState(false);
-
-
+  const formatDate = (dateString) => {
+    const dateObj = new Date(dateString);
+    const day = String(dateObj.getDate()).padStart(2, "0");
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const year = dateObj.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
   useEffect(() => {
     if (selectedCourse && date) {
       fetchRollNumbers(selectedCourse, date);
@@ -34,6 +40,7 @@ function Absentees() {
   // Fetch roll numbers when selectedCourse or date changes
   const fetchRollNumbers = async (course, selectedDate) => {
     const [yearOfStudy, branch, section] = course.split(" - ");
+    console.log(yearOfStudy, branch, section)
     const url = `http://localhost:5000/api/attendance/remaining?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
     try {
       const response = await axios.get(url);
@@ -48,11 +55,7 @@ function Absentees() {
       setRollNumbers([]);
     }
   };
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const [year, month, day] = dateString.split("-");
-    return `${day}-${month}-${year}`;
-  };
+
   // Toggle selection of roll numbers
   const toggleSelection = (index) => {
     setRollNumbers((prevRollNumbers) => {
@@ -220,7 +223,16 @@ function Absentees() {
       <div className="p-4 text-center text-black">
         <h1 className="text-4xl font-semibold">{selectedCourse}</h1>
         <h3 className="text-2xl font-semibold">Absentees Page</h3>
-        <h3 className="mt-2 text-xl font-semibold">{formatDate(date)}</h3>
+        <div className="w-full max-w-sm mt-6">
+      <label htmlFor="date" className="block mb-2 text-xl font-medium ">Select Date:</label>
+      <input
+        type="date"
+        id="date"
+        value={date}
+        onChange={(e) => setDate(e.target.value)}
+        className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+      />
+    </div>
       </div>
 
       <div className="grid w-full grid-cols-2 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
@@ -273,27 +285,17 @@ function Absentees() {
     {isMarkingLoading ? "Marking Present..." : "Mark Present"}
   </button>
 )}
-
+        <div className="h-10 mb-4">
+          <button
+            onClick={() => navigate("/")} // Navigate to the home page
+            className="w-full px-8 py-4 text-xl font-semibold text-white transition-all duration-500 transform bg-gray-600 rounded-md hover:bg-gray-700 hover:scale-110"
+          >
+            Home
+          </button></div>
 
         
-{showGenerateMessageButton && (
-  <button
-    onClick={() =>
-      navigate("/message", {
-        state: { selectedCourse, selectedDate: date },
-      })
-    }
-    className="w-full px-8 py-4 mt-2 text-xl font-semibold text-white bg-gray-800 rounded-lg hover:bg-gray-700"
-  >
-    Generate Message
-  </button>
-)}
-<button
-          onClick={handleBackButton}
-          className="w-full px-8 py-4 text-xl font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-        >
-          Back
-        </button>
+
+
       </div>
 
       {/* Confirmation Pop-ups */}
