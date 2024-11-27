@@ -224,7 +224,7 @@ function Absentees() {
         <h1 className="text-4xl font-semibold">{selectedCourse}</h1>
         <h3 className="text-2xl font-semibold">Absentees Page</h3>
         <div className="w-full max-w-sm mt-6">
-      <label htmlFor="date" className="block mb-2 text-xl font-medium ">Select date:</label>
+      <label htmlFor="date" className="block mb-2 text-xl font-medium ">Select Date:</label>
       <input
         type="date"
         id="date"
