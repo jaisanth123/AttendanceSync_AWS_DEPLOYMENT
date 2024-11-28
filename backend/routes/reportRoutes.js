@@ -1,21 +1,36 @@
 const express = require('express');
-const {handleCustomAbsentMessage, generateAbsentStudentsMessage,handleDownloadAbsentReport,handleCustomDownloadAbsentReport } = require('../controllers/reportController');
+
+// Import the controller functions
+const {
+    handleCustomAbsentMessage,
+    generateAbsentStudentsMessage,
+    handleDownloadAbsentReport,
+    handleCustomDownloadAbsentReport
+  } = require('../controllers/reportController');
+  
+
+// Import authentication middleware
+const { authenticateAdmin } = require('../controllers/authController');
 
 const router = express.Router();
 
-// Define the route to generate the absent students' message
+// Route to generate absent students' message
 router.get('/absentStudents', generateAbsentStudentsMessage);
 
+// Route to generate custom absent students' message
 router.get('/absentStudentsCustom', handleCustomAbsentMessage);
 
+// Route to handle downloading the absent report for male students
 router.get('/downloadreport/male', (req, res) => {
-    handleDownloadAbsentReport('MALE', req, res);
+  handleDownloadAbsentReport('MALE', req, res);
 });
 
+// Route to handle downloading the absent report for female students
 router.get('/downloadreport/female', (req, res) => {
-    handleDownloadAbsentReport('FEMALE', req, res);
+  handleDownloadAbsentReport('FEMALE', req, res);
 });
 
-router.get('/download-absent-report', handleCustomDownloadAbsentReport);
+// Route to handle downloading a custom absent report (admin-only access)
+router.get('/download-absent-report', authenticateAdmin, handleCustomDownloadAbsentReport);
 
-module.exports = router;// Route for generating report for female students
+module.exports = router;
