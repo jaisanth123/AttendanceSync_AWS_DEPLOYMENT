@@ -2,21 +2,23 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css"; // Import CSS for Toastify
+import "react-toastify/dist/ReactToastify.css";
 
 function DutyPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [showGenerateMessageButton, setShowGenerateMessageButton] = useState(false);
 
-  const [date, setDate] = useState(location.state?.selectedDate || new Date().toISOString().split("T")[0]); // Default to today's date
+  const [date, setDate] = useState(location.state?.selectedDate || new Date().toISOString().split("T")[0]);
   const [rollNumbers, setRollNumbers] = useState([]);
   const [message, setMessage] = useState("");
   const [selectedRollNumbers, setSelectedRollNumbers] = useState([]);
   const [isConfirmed, setIsConfirmed] = useState(false);
-  const [yearOfStudy, setYearOfStudy] = useState('nan');
-  const [section, setSection] = useState('nan');
-  const [branch, setBranch] = useState('nan');
+  const [yearOfStudy, setYearOfStudy] = useState("nan");
+  const [section, setSection] = useState("nan");
+  const [branch, setBranch] = useState("nan");
+  const [selectedCourse, setSelectedCourse] = useState("");
+
   const formatDate = (dateString) => {
     const dateObj = new Date(dateString);
     const day = String(dateObj.getDate()).padStart(2, "0");
@@ -24,25 +26,25 @@ function DutyPage() {
     const year = dateObj.getFullYear();
     return `${day}-${month}-${year}`;
   };
-const [selectedCourse,setselectedCourse] =useState("")
 
   useEffect(() => {
-    // Debugging logs for values
     console.log("Triggering useEffect...");
     console.log("yearOfStudy:", yearOfStudy, "branch:", branch, "section:", section, "date:", date);
 
     // Ensure yearOfStudy, branch, and section are valid (not "nan") and non-empty
     if (yearOfStudy !== "nan" && branch !== "nan" && section !== "nan") {
-      setselectedCourse(`${yearOfStudy}-${branch}-${section}`);
+      setSelectedCourse(`${yearOfStudy}-${branch}-${section}`);
       console.log("Valid selections made. Proceeding with fetch...");
-      
+
       if (yearOfStudy && branch && section && date) {
         fetchRollNumbers(yearOfStudy, branch, section, date);
       }
     }
+
+    // Reset selected roll numbers and rollNumbers array
+    setSelectedRollNumbers([]);
+    setRollNumbers([]);
   }, [yearOfStudy, branch, section, date]);
-  
-  
 
   const fetchRollNumbers = async (yearOfStudy, branch, section, selectedDate) => {
     const url = `http://localhost:5000/api/students/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
@@ -59,13 +61,14 @@ const [selectedCourse,setselectedCourse] =useState("")
       }
 
       if (students.length === 0) {
-        setMessage(`For ${yearOfStudy} - ${branch} - ${section}, students attendance for ${formattedDate} has already been marked.`);
+        setMessage(
+          `For ${yearOfStudy} - ${branch} - ${section}, students attendance for ${formattedDate} has already been marked.`
+        );
         setRollNumbers([]);
         return;
       }
 
       setMessage("");
-
       const fetchedRollNumbers = students.map((student) => ({
         rollNo: student.rollNo,
         name: student.name,
@@ -113,15 +116,13 @@ const [selectedCourse,setselectedCourse] =useState("")
         position: "top-right",
         autoClose: 800,
       });
-  
-      // Close the pop-up after displaying the toast
+
       setTimeout(() => {
-        setIsConfirmed(false); // Close pop-up
-      }, 800); // Delay the pop-up close to match toast duration
+        setIsConfirmed(false);
+      }, 800);
       return;
     }
-  
-    
+
     const payload = {
       rollNumbers: selectedRollNumbers,
       date,
@@ -129,7 +130,7 @@ const [selectedCourse,setselectedCourse] =useState("")
       branch,
       section,
     };
-  
+
     try {
       const response = await axios.post("http://localhost:5000/api/attendance/onDuty", payload);
       if (response.status === 200) {
@@ -137,10 +138,9 @@ const [selectedCourse,setselectedCourse] =useState("")
           autoClose: 800,
         });
         setShowGenerateMessageButton(true);
-  
-        // Close the pop-up after displaying the toast
+
         setTimeout(() => {
-          setIsConfirmed(false); // Close pop-up
+          setIsConfirmed(false);
         }, 800);
       } else {
         toast.error("Failed to mark OD. Please try again.", {
@@ -154,6 +154,7 @@ const [selectedCourse,setselectedCourse] =useState("")
       });
     }
   };
+
   const handleClosePopup = () => {
     setIsConfirmed(false);
   };
@@ -164,52 +165,53 @@ const [selectedCourse,setselectedCourse] =useState("")
       <h1 className="text-4xl font-semibold">ON DUTY</h1>
     </div>
   
-    {/* Dropdowns Row */}
-    <div className="flex flex-wrap justify-center w-full mt-4 space-x-4 gap-y-4">
-      <div className="w-full sm:w-1/3 md:w-1/4 lg:w-1/5">
-        <label htmlFor="yearOfStudy" className="block text-sm font-medium text-gray-300">Year:</label>
-        <select
-          id="yearOfStudy"
-          value={yearOfStudy}
-          onChange={(e) => setYearOfStudy(e.target.value)}
-          className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-        >
-          <option value="nan">Select Year</option>
-          <option value="IV">IV</option>
-          <option value="III">III</option>
-          <option value="II">II</option>
-        </select>
-      </div>
-  
-      <div className="w-full sm:w-1/3 md:w-1/4 lg:w-1/5">
-        <label htmlFor="branch" className="block text-sm font-medium text-gray-300">Branch:</label>
-        <select
-          id="branch"
-          value={branch}
-          onChange={(e) => setBranch(e.target.value)}
-          className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-        >
-          <option value="nan">Select Branch</option>
-          <option value="AIDS">AIDS</option>
-          <option value="AIML">AIML</option>
-        </select>
-      </div>
-  
-      <div className="w-full sm:w-1/3 md:w-1/4 lg:w-1/5">
-        <label htmlFor="section" className="block text-sm font-medium text-gray-300">Section:</label>
-        <select
-          id="section"
-          value={section}
-          onChange={(e) => setSection(e.target.value)}
-          className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-        >
-          <option value="nan">Select Section</option>
-          <option value="A">A</option>
-          <option value="B">B</option>
-          <option value="C">C</option>
-        </select>
-      </div>
-    </div>
+{/* Dropdowns Row */}
+<div className="flex flex-wrap justify-center w-full mt-4 gap-x-2 gap-y-4">
+  <div className="flex-1 min-w-[100px] max-w-[150px]">
+    <label htmlFor="yearOfStudy" className="block text-sm font-medium text-gray-300">Year:</label>
+    <select
+      id="yearOfStudy"
+      value={yearOfStudy}
+      onChange={(e) => setYearOfStudy(e.target.value)}
+      className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
+    >
+      <option value="nan"> Year</option>
+      <option value="IV">IV</option>
+      <option value="III">III</option>
+      <option value="II">II</option>
+    </select>
+  </div>
+
+  <div className="flex-1 min-w-[100px] max-w-[150px]">
+    <label htmlFor="branch" className="block text-sm font-medium text-gray-300">Branch:</label>
+    <select
+      id="branch"
+      value={branch}
+      onChange={(e) => setBranch(e.target.value)}
+      className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
+    >
+      <option value="nan">Branch</option>
+      <option value="AIDS">AIDS</option>
+      <option value="AIML">AIML</option>
+    </select>
+  </div>
+
+  <div className="flex-1 min-w-[100px] max-w-[150px]">
+    <label htmlFor="section" className="block text-sm font-medium text-gray-300">Section:</label>
+    <select
+      id="section"
+      value={section}
+      onChange={(e) => setSection(e.target.value)}
+      className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
+    >
+      <option value="nan">Section</option>
+      <option value="A">A</option>
+      <option value="B">B</option>
+      <option value="C">C</option>
+    </select>
+  </div>
+</div>
+
   
     {/* Date Selection */}
     <div className="w-full max-w-sm mt-6">
@@ -219,7 +221,7 @@ const [selectedCourse,setselectedCourse] =useState("")
         id="date"
         value={date}
         onChange={(e) => setDate(e.target.value)}
-        className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+        className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
       />
     </div>
   
