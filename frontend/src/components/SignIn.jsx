@@ -42,7 +42,7 @@ function SignIn() {
 
       // Wait for 2 seconds, then navigate to the homepage
       setTimeout(() => {
-        navigate("/"); // Redirect to homepage after sign-in
+        navigate("/homePage"); // Redirect to homepage after sign-in
       }, 2000);
 
     } catch (error) {

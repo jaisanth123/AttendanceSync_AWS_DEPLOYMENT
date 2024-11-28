@@ -36,8 +36,6 @@ function ViewAttendance({ toggleSidebar }) {
           onClick={() => navigate("/generateEmail")}
         />
         
-        {/* Send Email Card */}
-
 
 
       </div>

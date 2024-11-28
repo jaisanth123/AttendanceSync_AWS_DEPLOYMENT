@@ -4,6 +4,8 @@ const connectDB = require('./dbConnection'); // Import the database connection f
 const cors = require('cors'); // Import the CORS middleware
 const bodyParser = require("body-parser");  
 const app = express();
+const cookieParser = require('cookie-parser');
+
 
 // Connect to the database
 connectDB();
@@ -12,9 +14,12 @@ require('dotenv').config(); // Load environment variables from .env file
 app.use(cors({
   origin: 'http://localhost:5173', // Allow requests only from the frontend origin
   methods: 'GET,POST', // Specify allowed methods
-  credentials: true // Allow cookies to be sent
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization'], // Explicitly allow these headers
+  // Allow cookies to be sent
 }));
  // Enable CORS for all routes
+app.use(cookieParser());
 app.use(express.json());
 app.use(bodyParser.json());
 // Routes

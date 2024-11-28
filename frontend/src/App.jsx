@@ -78,7 +78,7 @@ function App() {
           <Routes>
             {/* Home Page */}
             <Route
-              path="/"
+              path="/homePage"
               element={<HomePage toggleSidebar={toggleSidebar} />}
             />
 
@@ -114,8 +114,7 @@ function App() {
             <Route path="/GenerateMessage" element={<GenerateMessage toggleSidebar={toggleSidebar} />} /> {/* Pass toggleSidebar here */}
 
             {/* Authentication Pages */}
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
+            <Route path="/" element={<SignIn />} />
             <Route path="/generateEmail" element={<GenerateExcel />} />
             <Route path="/send-email" element={<SendEmail />} />
             <Route path="/generateReport" element={<GenerateReport />} />

@@ -2,7 +2,7 @@ const express = require('express');
 
 // Import the controller functions
 const {
-    handleCustomAbsentMessage,
+  handleCustomAbsentMessage,
     generateAbsentStudentsMessage,
     handleDownloadAbsentReport,
     handleCustomDownloadAbsentReport
@@ -10,7 +10,7 @@ const {
   
 
 // Import authentication middleware
-const { authenticateAdmin } = require('../controllers/authController');
+const { authenticateAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
+import axios from "axios"; // Import axios
 import "react-toastify/dist/ReactToastify.css"; // Import the toast CSS
 
 const GenerateReport = () => {
@@ -43,44 +44,55 @@ const GenerateReport = () => {
 
     const url = `http://localhost:5000/api/report/download-absent-report?gender=${gender}&date=${date}&hostellerDayScholar=${hostellerDayScholar}&yearOfStudy=${yearOfStudy}&section=${section}&branch=${branch}`;
 
-    fetch(url)
+    // Using axios to handle the request
+    axios
+      .get(url, { responseType: "blob",
+        withCredentials: true // Include credentials (cookies) with the request
+       }) // Set the responseType to 'blob' for file downloads
       .then((response) => {
         if (response.status === 404) {
-          return response.json().then((data) => {
-            const formattedDate = formatDate(date);
-            setMessage(
-              `No absent students found for specified criteria on ${formattedDate}.`
-            );
-            setIsLoading(false);
-            toast.info(
-              `No absent students found for specified criteria on ${formattedDate}.`,
-              { autoClose: 2000 }
-            );
-          });
-        } else if (response.ok) {
-          return response.blob().then((blob) => {
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = "Absent_Students_Report.xlsx";
-            link.click();
-            setIsLoading(false);
-            toast.success("Report downloaded successfully!", {
-              autoClose: 2000,
-            });
-          });
-        } else {
-          throw new Error("Something went wrong with the report generation");
+          const formattedDate = formatDate(date);
+          setMessage(
+            `No absent students found for specified criteria on ${formattedDate}.`
+          );
+          setIsLoading(false);
+          toast.info(
+            `No absent students found for specified criteria on ${formattedDate}.`,
+            { autoClose: 2000 }
+          );
+        } else if (response.status === 200) {
+          const blob = response.data;
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "Absent_Students_Report.xlsx";
+          link.click();
+          setIsLoading(false);
+          toast.success("Report downloaded successfully!", { autoClose: 2000 });
         }
       })
       .catch((error) => {
         console.error("Error generating report:", error);
-        toast.error("An error occurred while generating the report.", {
+        if (error.response) {
+          console.log("Error Response Data:", error.response.data);
+        }
+        
+        // Check for specific error responses
+        if (error.response && error.response.status === 403) {
+          console.log("Error Response:", error.response); // Log the full error response to the console
+          const errorMessage = error.response.data.message || "You are not authorized to access this page.";
+          toast.error(`Error: ${errorMessage}`, {
           autoClose: 2000,
-        });
+          });
+        }
+         else {
+          toast.error("An error occurred while generating the report.", {
+            autoClose: 2000,
+          });
+        }
+    
         setIsLoading(false);
       });
   };
-
   return (
 <div className="flex items-start justify-center min-h-screen p-6">
   <div className="w-full p-6 bg-gray-800 rounded-lg shadow-lg sm:w-96 md:w-80 lg:w-96 xl:w-1/3">
