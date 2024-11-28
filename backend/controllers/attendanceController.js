@@ -8,52 +8,24 @@ const path = require("path");
 exports.markOnDuty = async (req, res) => {
   const { rollNumbers, date, yearOfStudy, branch, section } = req.body;
 
+  console.log(rollNumbers, date, yearOfStudy, branch, section);
   try {
     // Array to track roll numbers that are already marked
-    let alreadyMarkedRollNos = [];
-
-    // Iterate over each roll number
-    for (let rollNo of rollNumbers) {
-      // Check if any record exists for this roll number and date
-      const existingRecord = await Attendance.findOne({
-        rollNo,
-        date
-      });
-
-      if (existingRecord) {
-        // If a record exists, check if it's locked
-        if (existingRecord.locked === true) {
-          // If locked, prevent overwriting and return message
-          return res.status(400).json({
-            message: `Attendance for Roll No: ${rollNo} on ${date} is locked. Cannot overwrite.`
-          });
-        } else {
-          // If not locked, attendance is already marked for this roll number
-          alreadyMarkedRollNos.push(rollNo); // Add to already marked list
-        }
+  
+    // Create new On Duty records for the roll numbersd
+    const result = await Attendance.updateMany(
+      {
+        rollNo: { $in: rollNumbers }, // Match roll numbers in the provided array
+        date,                        // Match the specified date
+        yearOfStudy,                 // Match the year of study
+        branch,                      // Match the branch
+        section,                     // Match the section
+        status: 'Absent',            // Only update records marked as "Absent"
+      },
+      {
+        $set: { status: 'On Duty' }, // Set the status to "On Duty"
       }
-    }
-
-    // If any roll numbers are already marked, return a response with those roll numbers
-    if (alreadyMarkedRollNos.length > 0) {
-      return res.status(400).json({
-        message: `Attendance is already marked for the following Roll Nos: ${alreadyMarkedRollNos.join(', ')}. Cannot mark as On Duty again.`
-      });
-    }
-
-    // Create new On Duty records for the roll numbers
-    const attendanceRecords = rollNumbers.map(rollNo => ({
-      rollNo,
-      date,
-      status: 'On Duty',
-      yearOfStudy,
-      branch,
-      section,
-      locked: true
-    }));
-
-    // Insert the new "On Duty" records
-    await Attendance.insertMany(attendanceRecords);
+    );
     res.json({ message: 'Marked as On Duty successfully' });
 
   } catch (error) {
@@ -69,21 +41,18 @@ exports.fetchRemainingStudents = async (req, res) => {
 
   try {
     // Fetch all students in the specified year, branch, and section
-    const allStudents = await Student.find({ yearOfStudy, branch, section }).select('rollNo name -_id');
     
     // Fetch roll numbers of students marked as either "On Duty" or "Absent" on the specified date
-    const excludedRollNumbers = await Attendance.find({ 
+    const remainingStudents = await Attendance.find({ 
       date, 
-      status: { $in: ['On Duty', 'Absent'] },  // Only fetch those who are marked as "On Duty" or "Absent"
+      status: { $in: ['Absent'] },  // Only fetch those who are marked as "On Duty" or "Absent"
       yearOfStudy, 
       branch, 
       section 
     }).select('rollNo');
 
     // Filter out students who are marked as "On Duty" or "Absent"
-    const remainingStudents = allStudents.filter(student =>
-      !excludedRollNumbers.some(record => record.rollNo === student.rollNo)
-    );
+    
 
     // Sort the remaining students by roll number in ascending order (numeric part only)
     remainingStudents.sort((a, b) => {
@@ -138,7 +107,7 @@ exports.markAbsent = async (req, res) => {
       yearOfStudy,
       branch,
       section,
-      locked: true
+      locked: false
     }));
 
     // Insert the new "Absent" records
@@ -185,38 +154,11 @@ exports.markRemainingPresent = async (req, res) => {
       yearOfStudy,
       branch,
       section,
-      locked: true
+      locked:false
     }));
 
     // Array to track roll numbers with existing attendance
-    let alreadyMarkedRollNos = [];
 
-    // Check if any record already exists for these roll numbers for the same date
-    for (let record of presentRecords) {
-      const existingRecord = await Attendance.findOne({
-        rollNo: record.rollNo,
-        date: record.date
-      });
-
-      if (existingRecord) {
-        // If a record exists, check if it's locked
-        if (existingRecord.locked === true) {
-          // If locked, prevent overwriting and return message
-          return res.status(400).json({
-            message: `Attendance for Roll No: ${record.rollNo} on ${date} is locked. Cannot overwrite.`
-          });
-        } else {
-          // If not locked, attendance is already marked for this roll number
-          alreadyMarkedRollNos.push(record.rollNo); // Add to already marked list
-        }
-      }
-    }
-
-    if (alreadyMarkedRollNos.length > 0) {
-      return res.status(400).json({
-        message: `Attendance is already marked for the following Roll Nos: ${alreadyMarkedRollNos.join(', ')}. Cannot mark as Present again.`
-      });
-    }
 
     // Insert the "Present" records for the remaining students
     await Attendance.insertMany(presentRecords);

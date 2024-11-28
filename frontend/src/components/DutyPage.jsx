@@ -28,25 +28,20 @@ function DutyPage() {
   };
 
   useEffect(() => {
-    console.log("Triggering useEffect...");
-    console.log("yearOfStudy:", yearOfStudy, "branch:", branch, "section:", section, "date:", date);
-
-    // Ensure yearOfStudy, branch, and section are valid (not "nan") and non-empty
-    if (yearOfStudy !== "nan" && branch !== "nan" && section !== "nan") {
-      setSelectedCourse(`${yearOfStudy}-${branch}-${section}`);
-      console.log("Valid selections made. Proceeding with fetch...");
-
-      if (yearOfStudy && branch && section && date) {
-        fetchRollNumbers(yearOfStudy, branch, section, date);
-      }
-    }
-
-    // Reset selected roll numbers and rollNumbers array
+    // Clear selected roll numbers whenever year, branch, section, or date changes
     setSelectedRollNumbers([]);
-    setRollNumbers([]);
+    
+    console.log("Triggering immediate fetch...");
+    if (yearOfStudy !== "nan" && branch !== "nan" && section !== "nan" && date) {
+      fetchRollNumbers(yearOfStudy, branch, section, date);
+
+    } else {
+      setRollNumbers([]);
+    }
   }, [yearOfStudy, branch, section, date]);
 
   const fetchRollNumbers = async (yearOfStudy, branch, section, selectedDate) => {
+    setSelectedCourse(`${yearOfStudy}-${branch}-${section}`)
     const url = `http://localhost:5000/api/students/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
 
     try {
@@ -116,7 +111,7 @@ function DutyPage() {
         position: "top-right",
         autoClose: 800,
       });
-
+      setShowGenerateMessageButton(true);
       setTimeout(() => {
         setIsConfirmed(false);
       }, 800);
@@ -161,86 +156,85 @@ function DutyPage() {
 
   return (
     <div className="flex flex-col items-center flex-1 p-6 md:p-8 lg:p-12">
-    <div className="p-4 text-center text-black">
-      <h1 className="text-4xl font-semibold">ON DUTY</h1>
-    </div>
-  
-{/* Dropdowns Row */}
-<div className="flex flex-wrap justify-center w-full mt-4 gap-x-2 gap-y-4">
-  <div className="flex-1 min-w-[100px] max-w-[150px]">
-    <label htmlFor="yearOfStudy" className="block text-sm font-medium text-gray-300">Year:</label>
-    <select
-      id="yearOfStudy"
-      value={yearOfStudy}
-      onChange={(e) => setYearOfStudy(e.target.value)}
-      className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
-    >
-      <option value="nan"> Year</option>
-      <option value="IV">IV</option>
-      <option value="III">III</option>
-      <option value="II">II</option>
-    </select>
-  </div>
-
-  <div className="flex-1 min-w-[100px] max-w-[150px]">
-    <label htmlFor="branch" className="block text-sm font-medium text-gray-300">Branch:</label>
-    <select
-      id="branch"
-      value={branch}
-      onChange={(e) => setBranch(e.target.value)}
-      className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
-    >
-      <option value="nan">Branch</option>
-      <option value="AIDS">AIDS</option>
-      <option value="AIML">AIML</option>
-    </select>
-  </div>
-
-  <div className="flex-1 min-w-[100px] max-w-[150px]">
-    <label htmlFor="section" className="block text-sm font-medium text-gray-300">Section:</label>
-    <select
-      id="section"
-      value={section}
-      onChange={(e) => setSection(e.target.value)}
-      className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
-    >
-      <option value="nan">Section</option>
-      <option value="A">A</option>
-      <option value="B">B</option>
-      <option value="C">C</option>
-    </select>
-  </div>
-</div>
-
-  
-    {/* Date Selection */}
-    <div className="w-full max-w-sm mt-6">
-      <label htmlFor="date" className="block mb-2 text-lg font-medium text-gray-300">Select Date:</label>
-      <input
-        type="date"
-        id="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
-      />
-    </div>
-  
-    {/* Message Display */}
-    {message && (
-      <div className="w-full max-w-lg p-4 mt-6 text-lg text-center text-red-500">
-        {message}
+      <div className="p-4 text-center text-black">
+        <h1 className="text-4xl font-semibold">ON DUTY</h1>
       </div>
-    )}
-  
-    {/* Roll Numbers */}
-    {rollNumbers.length > 0 && (
+
+      {/* Dropdowns Row */}
+      <div className="flex flex-wrap justify-center w-full mt-4 gap-x-2 gap-y-4">
+        <div className="flex-1 min-w-[100px] max-w-[150px]">
+          <label htmlFor="yearOfStudy" className="block font-medium text-md">Year:</label>
+          <select
+            id="yearOfStudy"
+            value={yearOfStudy}
+            onChange={(e) => setYearOfStudy(e.target.value)}
+            className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
+          >
+            <option value="nan"> Year</option>
+            <option value="IV">IV</option>
+            <option value="III">III</option>
+            <option value="II">II</option>
+          </select>
+        </div>
+
+        <div className="flex-1 min-w-[100px] max-w-[150px]">
+          <label htmlFor="branch" className="block font-medium text-md">Branch:</label>
+          <select
+            id="branch"
+            value={branch}
+            onChange={(e) => setBranch(e.target.value)}
+            className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
+          >
+            <option value="nan">Branch</option>
+            <option value="AIDS">AIDS</option>
+            <option value="AIML">AIML</option>
+          </select>
+        </div>
+
+        <div className="flex-1 min-w-[100px] max-w-[150px]">
+          <label htmlFor="section" className="block font-medium text-md">Section:</label>
+          <select
+            id="section"
+            value={section}
+            onChange={(e) => setSection(e.target.value)}
+            className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
+          >
+            <option value="nan">Section</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Date Selection */}
+      <div className="w-full max-w-sm mt-6">
+        <label htmlFor="date" className="block mb-2 text-lg font-medium">Select Date:</label>
+        <input
+          type="date"
+          id="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
+        />
+      </div>
+
+      {/* Message Display */}
+      {message && (
+        <div className="w-full max-w-lg p-4 mt-6 text-lg text-center text-red-500">
+          {message}
+        </div>
+      )}
+
+      {/* Roll Numbers */}
+      {rollNumbers.length > 0 && (
         <div className="grid w-full grid-cols-2 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
           {rollNumbers.map((rollNumber, index) => (
             <div
               key={index}
               onClick={() => toggleSelection(index)}
-              className={`flex items-center justify-center p-6 text-white transition-transform transform text-xl font-semibold rounded-lg cursor-pointer shadow-md ${
-                rollNumber.isSelected ? "bg-blue-600" : "bg-gray-700"
+              className={`flex items-center justify-center p-6 text-white transition-all transform duration-500 text-xl font-semibold rounded-lg cursor-pointer shadow-md ${
+                rollNumber.isSelected ? "bg-blue-600" : "bg-red-600"
               } hover:scale-110`}
             >
               {rollNumber.rollNo}
@@ -249,30 +243,28 @@ function DutyPage() {
         </div>
       )}
 
-{selectedRollNumbers.length > 0 && (
-  <div className="w-full p-4 mt-6 text-lg text-black">
-    <h4 className="mb-10 text-3xl font-semibold text-center">Selected Roll Numbers:</h4>
-    <div className="flex flex-col items-center space-y-4">
-      {selectedRollNumbers.map((rollNo, index) => {
-        const student = rollNumbers.find((student) => student.rollNo === rollNo);
-        return (
-          <span
-            key={index}
-            className="text-xl font-bold text-center"
-          >
-            {student ? `${student.rollNo} - ${student.name}` : rollNo}
-          </span>
-        );
-      })}
-    </div>
-  </div>
-)}
+      {selectedRollNumbers.length > 0 && (
+        <div className="w-full p-4 mt-6 text-lg text-black">
+          <h4 className="mb-10 text-3xl font-semibold text-center">Selected Roll Numbers:</h4>
+          <div className="flex flex-col items-center space-y-4">
+            {selectedRollNumbers.map((rollNo, index) => {
+              const student = rollNumbers.find((student) => student.rollNo === rollNo);
+              return (
+                <span
+                  key={index}
+                  className="text-xl font-bold text-center"
+                >
+                  {student ? `${student.rollNo} - ${student.name}` : rollNo}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
-  
- 
-  <button
+      <button
         onClick={() => setIsConfirmed(true)}
-        className="px-6 py-3 mt-10 text-white bg-red-500 rounded-lg hover:bg-red-600"
+        className="px-6 py-3 mt-10 text-white transition-all duration-500 transform bg-gray-800 rounded-lg hover:bg-gray-600 hover:scale-110"
       >
         MARK OD
       </button>
@@ -280,13 +272,21 @@ function DutyPage() {
   <button
     onClick={() =>
       navigate("/message", {
-        state: { selectedCourse, selectedDate: date },
+        state: { 
+          yearOfStudy, 
+          branch, 
+          section, 
+          selectedDate: date, 
+          selectedCourse  // Include the selected course here
+        },
       })
     }
-    className="w-full px-8 py-4 mt-2 text-xl font-semibold text-white bg-gray-800 rounded-lg hover:bg-gray-700"
+    className="px-6 py-3 mt-4 text-white transition-all duration-500 transform bg-gray-800 rounded-lg hover:bg-gray-600 hover:scale-110"
   >
     Generate Message
-  </button>)}
+  </button>
+)}
+
 
       {isConfirmed && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fadeIn">
@@ -317,8 +317,8 @@ function DutyPage() {
         </div>
       )}
 
-    <ToastContainer position="top-right" />
-  </div>
+      <ToastContainer position="top-right" />
+    </div>
   );
 }
 

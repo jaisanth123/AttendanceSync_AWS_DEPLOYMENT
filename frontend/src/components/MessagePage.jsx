@@ -7,7 +7,9 @@ import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 const MessagePage = ({ toggleSidebar }) => {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const [yearOfStudy, setYearOfStudy] = useState("");
+  const [section, setSection] = useState("");
+  const [branch, setBranch] = useState("");
   const [selectedCourse, setSelectedCourse] = useState(location.state?.selectedCourse || "Select a course");
   const [selectedDate, setSelectedDate] = useState(location.state?.selectedDate || "");
 
@@ -54,7 +56,9 @@ const MessagePage = ({ toggleSidebar }) => {
   };
 
   const getAbsentStudents = async (course, date) => {
-    const [yearOfStudy, branch, section] = course.split(" - ");
+    const [yearOfStudy, branch, section] = course.split("-");
+    
+    console.log(yearOfStudy, branch, section)
     try {
       const response = await axios.get(
         `http://localhost:5000/api/report/absentStudents?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${date}`
