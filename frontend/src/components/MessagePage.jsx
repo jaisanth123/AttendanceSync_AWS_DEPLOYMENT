@@ -64,7 +64,7 @@ const MessagePage = ({ toggleSidebar }) => {
     console.log(yearOfStudy, branch, section);
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/report/absentStudents?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${date}`
+        `${import.meta.env.BACKEND_URL}/api/report/absentStudents?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${date}`
       );
 
       if (response.data.message) {

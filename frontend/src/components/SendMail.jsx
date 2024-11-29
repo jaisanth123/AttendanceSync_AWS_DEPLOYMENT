@@ -29,7 +29,7 @@ const SendEmail = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/attendance/send-email",
+        "${import.meta.env.BACKEND_URL}/api/attendance/send-email",
         {
           method: "POST",
           body: formData,

@@ -50,7 +50,7 @@ function Absentees() {
   const fetchRollNumbers = async (course, selectedDate) => {
     const [yearOfStudy, branch, section] = course.split(" - ");
     setYearOfStudy(yearOfStudy);
-    const url = `http://localhost:5000/api/attendance/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
+    const url = `${import.meta.env.BACKEND_URL}/api/attendance/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
   
     try {
       const { data } = await axios.get(url);
@@ -156,7 +156,7 @@ function Absentees() {
       setYearOfStudy(yearOfStudy);
   
       // Make sure the server endpoint and data are correct
-      const response = await axios.post("http://localhost:5000/api/attendance/absent", {
+      const response = await axios.post("${import.meta.env.BACKEND_URL}/api/attendance/absent", {
         rollNumbers: selectedRollNos,
         date,
         yearOfStudy,
@@ -196,7 +196,7 @@ function Absentees() {
   
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/attendance/mark-remaining-present",
+        "${import.meta.env.BACKEND_URL}/api/attendance/mark-remaining-present",
         data
       );
   
@@ -234,7 +234,7 @@ function Absentees() {
   
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/attendance/mark-remaining-present",
+        "${import.meta.env.BACKEND_URL}/api/attendance/mark-remaining-present",
         data
       );
   

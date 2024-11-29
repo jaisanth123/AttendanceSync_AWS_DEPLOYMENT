@@ -32,7 +32,7 @@ const GenerateExcel = () => {
     setIsLoading(true);
     setMessage("");
 
-    const url = `http://localhost:5000/api/report/downloadreport/${gender.toLowerCase()}?date=${date}`;
+    const url = `${import.meta.env.BACKEND_URL}/api/report/downloadreport/${gender.toLowerCase()}?date=${date}`;
 
     fetch(url)
       .then((response) => {
