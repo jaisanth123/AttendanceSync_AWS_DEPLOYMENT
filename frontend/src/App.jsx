@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import Toastify CSS
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import HomePage from "./components/HomePage";
@@ -9,32 +11,29 @@ import MessagePage from "./components/MessagePage";
 import ViewAttendance from "./components/ViewAttendance";
 import GenerateMessage from "./components/GenerateMessage";
 import SignIn from "./components/SignIn";
-import SignUp from "./components/SignUp";
 import Dashboard from "./components/Dashboard";
-import GenerateExcel from './components/GenerateExcel';
-import GenerateReport from './components/GenerateReport';
-
+import GenerateExcel from "./components/GenerateExcel";
+import GenerateReport from "./components/GenerateReport";
 import SendEmail from "./components/SendMail";
+import ProtectedRoute from "./components/ProtectedRoute"; // Import ProtectedRoute
+import NotFound from "./components/NotFound"; // Import the NotFound component
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const sidebarRef = useRef(null);
 
-  // Toggle Sidebar visibility
   const toggleSidebar = () => {
     setIsSidebarOpen((prevState) => !prevState);
   };
 
-  // Handle item selection in the sidebar
   const handleItemSelection = (item) => {
     setSelectedItem(item);
     setIsSidebarOpen(false);
   };
 
-  // Handle home button click
   const handleHomeClick = () => {
-    if (window.location.pathname !== '/absentees') {
+    if (window.location.pathname !== "/absentees") {
       setSelectedItem(null); // Reset selectedItem only if not on /absentees
     }
     setIsSidebarOpen(false);
@@ -58,11 +57,21 @@ function App() {
     };
   }, []);
 
+  const logoutHandler = () => {
+    // Remove the token from sessionStorage
+    sessionStorage.removeItem("authToken");
+    // Redirect to the SignIn page
+    window.location.href = "/";
+  };
+
+  // Check if user is authenticated
+  const isAuthenticated = sessionStorage.getItem("authToken");
+
   return (
     <Router>
       <div className="flex flex-col h-screen">
-        {/* Navbar Component */}
-        <Navbar toggleSidebar={toggleSidebar} />
+        {/* Render Navbar only if authenticated */}
+        {isAuthenticated && <Navbar toggleSidebar={toggleSidebar} logoutHandler={logoutHandler} />}
 
         {/* Sidebar Overlay for Mobile */}
         {isSidebarOpen && (
@@ -76,48 +85,53 @@ function App() {
         {/* Main Content Area */}
         <div className="flex-1 mt-20 md:mt-24">
           <Routes>
-            {/* Home Page */}
+            {/* Authentication Pages */}
+            <Route path="/signin" element={<SignIn />} />
+
+            {/* Protected Routes */}
             <Route
               path="/homePage"
-              element={<HomePage toggleSidebar={toggleSidebar} />}
+              element={<ProtectedRoute element={<HomePage toggleSidebar={toggleSidebar} />} />}
             />
-
-            {/* Duty Page */}
             <Route
               path="/duty"
-              element={<DutyPage selectedCourse={selectedItem} />}
+              element={<ProtectedRoute element={<DutyPage selectedCourse={selectedItem} />} />}
             />
-
-            {/* Absentees Page */}
             <Route
               path="/absentees"
-              element={<Absentees selectedCourse={selectedItem} />}
+              element={<ProtectedRoute element={<Absentees selectedCourse={selectedItem} />} />}
             />
-
-            {/* Message Page */}
             <Route
               path="/message"
-              element={
-                <MessagePage
-                  selectedCourse={selectedItem}
-                  toggleSidebar={toggleSidebar}
-                />
-              }
+              element={<ProtectedRoute element={<MessagePage selectedCourse={selectedItem} toggleSidebar={toggleSidebar} />} />}
             />
-
-            {/* Dashboard and Utility Pages */}
             <Route
               path="/viewattendance"
-              element={<ViewAttendance />} // Removed toggleSidebar here
+              element={<ProtectedRoute element={<ViewAttendance />} />}
             />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/GenerateMessage" element={<GenerateMessage toggleSidebar={toggleSidebar} />} /> {/* Pass toggleSidebar here */}
+            <Route
+              path="/dashboard"
+              element={<ProtectedRoute element={<Dashboard />} />}
+            />
+            <Route
+              path="/generateMessage"
+              element={<ProtectedRoute element={<GenerateMessage toggleSidebar={toggleSidebar} />} />}
+            />
+            <Route
+              path="/generateEmail"
+              element={<ProtectedRoute element={<GenerateExcel />} />}
+            />
+            <Route
+              path="/send-email"
+              element={<ProtectedRoute element={<SendEmail />} />}
+            />
+            <Route
+              path="/generateReport"
+              element={<ProtectedRoute element={<GenerateReport />} />}
+            />
 
-            {/* Authentication Pages */}
-            <Route path="/" element={<SignIn />} />
-            <Route path="/generateEmail" element={<GenerateExcel />} />
-            <Route path="/send-email" element={<SendEmail />} />
-            <Route path="/generateReport" element={<GenerateReport />} />
+            {/* Catch all unmatched routes */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
 
@@ -131,6 +145,9 @@ function App() {
           />
         )}
       </div>
+
+      {/* ToastContainer for displaying toasts */}
+      <ToastContainer />
     </Router>
   );
 }
