@@ -324,7 +324,6 @@ function DutyPage() {
         </div>
       )}
 
-      <ToastContainer position="top-right" />
     </div>
   );
 }

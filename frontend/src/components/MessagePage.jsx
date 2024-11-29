@@ -165,7 +165,7 @@ const MessagePage = ({ toggleSidebar }) => {
           Home
         </button>
       </div>
-      <ToastContainer />
+  
     </div>
   );
 };

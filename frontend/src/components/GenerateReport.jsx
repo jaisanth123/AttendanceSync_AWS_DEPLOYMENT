@@ -240,7 +240,7 @@ const GenerateReport = () => {
       </div>
 
       {/* Toast notifications */}
-      <ToastContainer />
+    
     </div>
   );
 };
