@@ -18,8 +18,6 @@ function Absentees() {
     location.state?.selectedCourse || "Select a course"
   );
   const [rollNumbers, setRollNumbers] = useState([]);
-  const [isConfirmed, setIsConfirmed] = useState(false); // For Confirm button state
-  const [showBackPopup, setShowBackPopup] = useState(false); // For Back button confirmation popup
   const [showConfirmationPopup, setShowConfirmationPopup] = useState(false); // For Confirm button confirmation popup
   const [showMarkPresentPopup, setShowMarkPresentPopup] = useState(false); // For Mark Present button confirmation popup
   const [showMarkSuperPaccPopup,setShowMarkSuperPaccPopup] = useState(false); // For Mark Present button confirmation popup
@@ -31,7 +29,7 @@ function Absentees() {
   const [showGenerateMessageButton, setShowGenerateMessageButton] =useState(false);
   const[markabsentbutton , setMarkabsentButton] = useState(false)
   const [errorMessage, setErrorMessage] = useState(""); // State to store the error message
-
+    
   const [yearOfStudy, setYearOfStudy] = useState();
   const formatDate = (dateString) => {
     const dateObj = new Date(dateString);
@@ -51,6 +49,7 @@ function Absentees() {
   // Fetch roll numbers when selectedCourse or date changes
   const fetchRollNumbers = async (course, selectedDate) => {
     const [yearOfStudy, branch, section] = course.split(" - ");
+    setYearOfStudy(yearOfStudy);
     const url = `http://localhost:5000/api/attendance/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
   
     try {
@@ -127,6 +126,7 @@ function Absentees() {
       setPopupMessage("No one marked absent. Click confirm to proceed.");
       setPopupColor("bg-red-600"); // Red for confirmation popup
       setShowConfirmationPopup(true); // Show confirmation popup
+     
     } else {
       // Case 2: Roll numbers are selected
       setPopupMessage(
@@ -143,10 +143,11 @@ function Absentees() {
   
     if (numSelected === 0) {
       toast.info("No one marked absent.", {
-        autoClose: 2000, // Increased auto-close duration for better visibility
+        autoClose: 800, // Increased auto-close duration for better visibility
       });
       setShowConfirmationPopup(false);
       setMarkPresentVisible(true);
+   
       return; // Early return to prevent further execution
     } 
   
@@ -375,8 +376,9 @@ function Absentees() {
         </div>
       )}
            <div className="flex flex-col gap-4 mt-8 md:w-1/4 lg:w-1/5">
+
+
 {!markabsentbutton && (
- 
         <button
           onClick={handleConfirm}
           className="w-full px-8 py-4 text-xl font-semibold text-white transition-all duration-500 bg-red-600 rounded-lg hover:scale-110 hover:bg-red-700"
@@ -385,7 +387,7 @@ function Absentees() {
         </button>
 )}
 
-        {yearOfStudy === "III" && markPresentVisible && (
+        {(yearOfStudy === "III" && markPresentVisible) && (
           <button
             onClick={() => {
               setShowMarkSuperPaccPopup(true);
