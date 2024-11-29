@@ -350,10 +350,10 @@ function Absentees() {
               setShowMarkPresentPopup(true);
             }}
             disabled={isMarkingLoading}
-            className={`w-full px-8 py-4 text-xl font-semibold rounded-lg transition-all ${
+            className={`w-full px-8 py-4 text-xl duration-500 hover:scale-110 font-semibold rounded-lg transition-all ${
               isMarkingLoading
                 ? "bg-gray-400 cursor-not-allowed"
-                : "bg-green-600 hover:bg-green-700 text-white"
+                : "bg-blue-600 hover:bg-blue-800 text-white"
             }`}
           >
             {isMarkingLoading ? "Marking SuperPacc OD..." : "Mark SuperPacc OD"}
