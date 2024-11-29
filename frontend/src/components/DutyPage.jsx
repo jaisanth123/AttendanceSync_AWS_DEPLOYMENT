@@ -42,7 +42,7 @@ function DutyPage() {
 
   const fetchRollNumbers = async (yearOfStudy, branch, section, selectedDate) => {
     setSelectedCourse(`${yearOfStudy}-${branch}-${section}`)
-    const url = `http://localhost:5000/api/students/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
+    const url = `http://localhost:5000/api/students/remaining?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
 
     try {
       const response = await axios.get(url);
@@ -132,7 +132,14 @@ function DutyPage() {
         toast.success(`${selectedRollNumbers.length} students marked as On Duty`, {
           autoClose: 800,
         });
+        setIsConfirmed(false);
+        setSelectedRollNumbers([]);
+        await fetchRollNumbers(yearOfStudy, branch, section, date);
+
         setShowGenerateMessageButton(true);
+        // Clear selected roll numbers
+
+      // Await the fetchRollNumbers function to ensure data is updated before proceeding
 
         setTimeout(() => {
           setIsConfirmed(false);
@@ -253,7 +260,7 @@ function DutyPage() {
                 <span
                   key={index}
                   className="text-xl font-bold text-center"
-                >
+                >{" "}
                   {student ? `${student.rollNo} - ${student.name}` : rollNo}
                 </span>
               );

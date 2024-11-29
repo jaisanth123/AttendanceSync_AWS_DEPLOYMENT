@@ -1,3 +1,4 @@
+// ProtectedRoute.js
 import React, { useState, useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 
@@ -26,6 +27,7 @@ const ProtectedRoute = () => {
     // Redirect after the error message disappears
     return <Navigate to="/signin" replace />;
   }
+  
   if (!token) {
     // Show error message if no token
     return (
@@ -38,8 +40,6 @@ const ProtectedRoute = () => {
       </div>
     );
   }
-  
-  
 
   return <Outlet />; // Render child components if token exists
 };

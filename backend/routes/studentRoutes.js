@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const attendanceController = require('../controllers/attendanceController');
+const studentController = require('../controllers/studentController');
 
 
 // Define the route to get roll numbers by criteria
-router.get('/rollnumbers', attendanceController.fetchRemainingStudents);
+router.get('/remaining', studentController.fetchRemainingStudents);
 
 module.exports = router;

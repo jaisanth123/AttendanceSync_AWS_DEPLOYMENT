@@ -143,7 +143,7 @@ const GenerateExcel = () => {
         {/* Home Button */}
         <div className="mb-4">
           <button
-            onClick={() => navigate("/")} // Navigate to the home page
+            onClick={() => navigate("/homePage")} // Navigate to the home page
             className="w-full py-2 font-semibold transition-all duration-500 transform bg-gray-600 rounded-md hover:bg-gray-700 hover:scale-105"
           >
             Home

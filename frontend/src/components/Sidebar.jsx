@@ -37,7 +37,7 @@ function Sidebar({ closeSidebar, handleItemSelection }) {
   const toggleYear = (year) => setExpandedYear(prevYear => prevYear === year ? null : year);
   const handleHomeClick = () => {
     closeSidebar();
-    navigate("/");
+    navigate("/homePage");
   };
 
   const handleCourseSelection = (course) => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes , Navigate} from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import Toastify CSS
 import Navbar from "./components/Navbar";
@@ -61,10 +61,9 @@ function App() {
     // Remove the token from sessionStorage
     sessionStorage.removeItem("authToken");
     // Redirect to the SignIn page
-    window.location.href = "/";
+    window.location.href = "/signin";
   };
 
-  // Check if user is authenticated
   const isAuthenticated = sessionStorage.getItem("authToken");
 
   return (
@@ -86,49 +85,22 @@ function App() {
         <div className="flex-1 mt-20 md:mt-24">
           <Routes>
             {/* Authentication Pages */}
+            <Route path="/" element={<Navigate to="/signin" replace />} />
             <Route path="/signin" element={<SignIn />} />
 
             {/* Protected Routes */}
-            <Route
-              path="/homePage"
-              element={<ProtectedRoute element={<HomePage toggleSidebar={toggleSidebar} />} />}
-            />
-            <Route
-              path="/duty"
-              element={<ProtectedRoute element={<DutyPage selectedCourse={selectedItem} />} />}
-            />
-            <Route
-              path="/absentees"
-              element={<ProtectedRoute element={<Absentees selectedCourse={selectedItem} />} />}
-            />
-            <Route
-              path="/message"
-              element={<ProtectedRoute element={<MessagePage selectedCourse={selectedItem} toggleSidebar={toggleSidebar} />} />}
-            />
-            <Route
-              path="/viewattendance"
-              element={<ProtectedRoute element={<ViewAttendance />} />}
-            />
-            <Route
-              path="/dashboard"
-              element={<ProtectedRoute element={<Dashboard />} />}
-            />
-            <Route
-              path="/generateMessage"
-              element={<ProtectedRoute element={<GenerateMessage toggleSidebar={toggleSidebar} />} />}
-            />
-            <Route
-              path="/generateEmail"
-              element={<ProtectedRoute element={<GenerateExcel />} />}
-            />
-            <Route
-              path="/send-email"
-              element={<ProtectedRoute element={<SendEmail />} />}
-            />
-            <Route
-              path="/generateReport"
-              element={<ProtectedRoute element={<GenerateReport />} />}
-            />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/homePage" element={<HomePage toggleSidebar={toggleSidebar} />} />
+              <Route path="/duty" element={<DutyPage selectedCourse={selectedItem} />} />
+              <Route path="/absentees" element={<Absentees selectedCourse={selectedItem} />} />
+              <Route path="/message" element={<MessagePage selectedCourse={selectedItem} toggleSidebar={toggleSidebar} />} />
+              <Route path="/viewattendance" element={<ViewAttendance />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/generateMessage" element={<GenerateMessage toggleSidebar={toggleSidebar} />} />
+              <Route path="/generateExcel" element={<GenerateExcel />} />
+              <Route path="/send-email" element={<SendEmail />} />
+              <Route path="/generateReport" element={<GenerateReport />} />
+            </Route>
 
             {/* Catch all unmatched routes */}
             <Route path="*" element={<NotFound />} />

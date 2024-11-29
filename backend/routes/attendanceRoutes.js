@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const attendanceController = require('../controllers/attendanceController');
-const studentController = require('../controllers/studentController');
 
 const multer = require("multer");
 //console.log('attendanceRoutes.js loaded');  // Log to confirm if file is being loaded
@@ -10,7 +9,7 @@ const multer = require("multer");
 router.post('/onDuty', attendanceController.markOnDuty);
 
 // Route to fetch students not marked as "On Duty"
-router.get('/remaining', studentController.getStudentsWithoutAttendance);
+router.get('/rollnumbers', attendanceController.getStudentsWithoutAttendance);
 
 // Route to mark students as "Absent"
 router.post('/absent', attendanceController.markAbsent);

@@ -29,6 +29,8 @@ function Absentees() {
   const [markPresentVisible, setMarkPresentVisible] = useState(false);
   const [showGenerateMessageButton, setShowGenerateMessageButton] =
     useState(false);
+  const [errorMessage, setErrorMessage] = useState(""); // State to store the error message
+
   const [yearOfStudy, setYearOfStudy] = useState();
   const formatDate = (dateString) => {
     const dateObj = new Date(dateString);
@@ -40,27 +42,45 @@ function Absentees() {
   useEffect(() => {
     if (selectedCourse && date) {
       fetchRollNumbers(selectedCourse, date);
+      setErrorMessage("");
     }
   }, [selectedCourse, date]);
 
   // Fetch roll numbers sds selectedCoursor date changes
   const fetchRollNumbers = async (course, selectedDate) => {
     const [yearOfStudy, branch, section] = course.split(" - ");
-    console.log(yearOfStudy, branch, section);
-    const url = `http://localhost:5000/api/attendance/remaining?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
+    const url = `http://localhost:5000/api/attendance/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
+  
     try {
       const response = await axios.get(url);
-      const fetchedRollNumbers = response.data.students.map((student) => ({
-        rollNo: student.rollNo,
-        name: student.name,
-        isSelected: false,
-      }));
-      setRollNumbers(fetchedRollNumbers);
+  
+      if (response.data && response.data.message) {
+        if (response.data.message === "Attendance has already been marked for all students.") {
+          // Show the error message as a toast
+          setErrorMessage(response.data.message); // Update the error message state
+          setRollNumbers([]); // Reset roll numbers
+          return; // Stop further processing
+        }
+      }
+  
+      // If no message and students are present, proceed with mapping the students
+      if (response.data && Array.isArray(response.data.students)) {
+        const fetchedRollNumbers = response.data.students.map((student) => ({
+          rollNo: student.rollNo,
+          name: student.name,
+          isSelected: false,
+        }));
+        setRollNumbers(fetchedRollNumbers);
+      } else {
+        console.error("No students found in response:", response.data);
+        setRollNumbers([]); // Set an empty array if no students found
+      }
     } catch (error) {
       console.error("Error fetching roll numbers:", error);
-      setRollNumbers([]);
+      setRollNumbers([]); // Reset roll numbers on error
     }
   };
+  
 
   // Toggle selection of roll numbers
   const toggleSelection = (index) => {
@@ -136,6 +156,8 @@ function Absentees() {
     } finally {
       setIsMarkingLoading(false);
       setShowMarkPresentPopup(false); // Close the popup
+      await fetchRollNumbers(selectedCourse, date);  // Refresh the roll numbers after marking present
+
     }
   };
   const handleBackConfirm = () => {
@@ -161,7 +183,6 @@ function Absentees() {
     } else {
       try {
         const [yearOfStudy, branch, section] = selectedCourse.split(" - ");
-        set;
         await axios.post("http://localhost:5000/api/attendance/absent", {
           rollNumbers: selectedRollNos,
           date,
@@ -254,7 +275,12 @@ function Absentees() {
           />
         </div>
       </div>
-
+       {/* Display error message on the page if there's one */}
+    {errorMessage && (
+      <div className=" text-red-600 font-bold p-4 rounded-md mb-4">
+        {errorMessage}
+      </div>
+    )}
       <div className="grid w-full grid-cols-2 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
         {rollNumbers.map((rollNumber, index) => (
           <div
@@ -331,7 +357,7 @@ function Absentees() {
         )}
         <div className="h-10 mb-4">
           <button
-            onClick={() => navigate("/")} // Navigate to the home page
+            onClick={() => navigate("/homePage")} // Navigate to the home page
             className="w-full px-8 py-4 text-xl font-semibold text-white transition-all duration-500 transform bg-gray-600 rounded-md hover:bg-gray-700 hover:scale-110"
           >
             Home
