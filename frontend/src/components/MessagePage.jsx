@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify"; // Import react-toastify
@@ -19,6 +19,9 @@ const MessagePage = ({ toggleSidebar }) => {
   const [errorMessage, setErrorMessage] = useState("");
 
   const [showCard, setShowCard] = useState(false);
+
+  // Reference to the card element
+  const cardRef = useRef(null);
 
   // Format the date to DD-MM-YYYY
   const formatDate = (dateString) => {
@@ -57,8 +60,8 @@ const MessagePage = ({ toggleSidebar }) => {
 
   const getAbsentStudents = async (course, date) => {
     const [yearOfStudy, branch, section] = course.split("-");
-    
-    console.log(yearOfStudy, branch, section)
+
+    console.log(yearOfStudy, branch, section);
     try {
       const response = await axios.get(
         `http://localhost:5000/api/report/absentStudents?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${date}`
@@ -89,6 +92,23 @@ const MessagePage = ({ toggleSidebar }) => {
     setShowCard(!showCard);
   };
 
+  // Close the card if the click is outside of it
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (cardRef.current && !cardRef.current.contains(event.target)) {
+        setShowCard(false);
+      }
+    };
+
+    // Add event listener for clicks outside the card
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="p-4 text-center text-black">
       <h1 className="text-2xl font-semibold md:text-3xl lg:text-4xl">{selectedCourse}</h1>
@@ -97,75 +117,81 @@ const MessagePage = ({ toggleSidebar }) => {
 
       <div className="flex flex-col items-center gap-y-4">
         {/* Get Absentees Button */}
-        <button
-          onClick={() => {
-            getAbsentStudents(selectedCourse, selectedDate);
-            toggleCardVisibility();
-          }}
-          className="w-40 px-6 py-2 font-semibold text-white bg-gray-800 rounded-lg shadow-lg hover:bg-gray-600 active:bg-gray-700 focus:outline-none focus:ring focus:ring-blue-300"
-        >
-          Get Absentees
-        </button>
-
-        {/* Attendance Button */}
-
-
-      {showCard && (message || details.length > 0 || missingStudents.length > 0 || errorMessage) && (
-        <div className="w-full h-auto p-6 mx-auto mt-6 bg-white border-2 border-gray-300 rounded-lg shadow-lg sm:w-3/4 md:w-2/3 lg:w-1/2">
-          <div id="cardContent">
-            {message && (
-              <div className="mt-4">
-                <p className="font-semibold text-gray-800" dangerouslySetInnerHTML={{ __html: formatTextWithLineBreaks(message) }} />
-              </div>
-            )}
-
-            {Array.isArray(details) && details.length > 0 && (
-              <div className="mt-4">
-                <ul className="mt-2 space-y-2 text-gray-700 list-none">
-                  {details.map((detail, index) => (
-                    <li key={index} className="font-bold">{detail}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {errorMessage && (
-              <div className="p-3 mt-4 border border-red-300 rounded bg-red-50">
-                <p className="text-red-600">{errorMessage}</p>
-              </div>
-            )}
-            {missingStudents.length > 0 && (
-              <div className="mt-4">
-                <p className="text-xl">Count of Missing Absentees Records: {missingStudents.length}</p>
-              </div>
-            )}
-          </div>
-
+        <div className="w-full max-w-xs p-6 mx-auto mt-6 text-white bg-gray-800 rounded-lg shadow-lg">
           <button
-            onClick={copyCardContent}
-            className="px-6 py-2 mt-4 font-semibold text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-800 focus:outline-none focus:ring focus:ring-blue-300"
+            onClick={() => {
+              getAbsentStudents(selectedCourse, selectedDate);
+              toggleCardVisibility();
+            }}
+            className="w-full py-2 text-2xl font-semibold text-white bg-gray-800 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
           >
-            Copy Content
+            Get Absentees
           </button>
         </div>
-      )}
 
-<button
-          onClick={toggleSidebar}
-          className="w-40 px-6 py-2 font-semibold text-white bg-gray-800 rounded-lg shadow-lg hover:bg-gray-500 focus:outline-none focus:ring focus:ring-blue-300"
-        >
-          Attendance
-        </button>
+        {showCard && (message || details.length > 0 || missingStudents.length > 0 || errorMessage) && (
+          <div
+            ref={cardRef}
+            className="w-full h-auto p-6 mx-auto mt-6 bg-white border-2 border-gray-300 rounded-lg shadow-lg sm:w-3/4 md:w-2/3 lg:w-1/2"
+          >
+            <div id="cardContent">
+              {message && (
+                <div className="mt-4">
+                  <p className="font-semibold text-gray-800" dangerouslySetInnerHTML={{ __html: formatTextWithLineBreaks(message) }} />
+                </div>
+              )}
+
+              {Array.isArray(details) && details.length > 0 && (
+                <div className="mt-4">
+                  <ul className="mt-2 space-y-2 text-gray-700 list-none">
+                    {details.map((detail, index) => (
+                      <li key={index} className="font-bold">{detail}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {errorMessage && (
+                <div className="p-3 mt-4 border border-red-300 rounded bg-red-50">
+                  <p className="text-red-600">{errorMessage}</p>
+                </div>
+              )}
+              {missingStudents.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-xl">Count of Missing Absentees Records: {missingStudents.length}</p>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={copyCardContent}
+              className="px-6 py-2 mt-4 font-semibold text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-800 focus:outline-none focus:ring focus:ring-blue-300"
+            >
+              Copy Content
+            </button>
+          </div>
+        )}
+
+        {/* Attendance Button */}
+        <div className="w-full max-w-xs p-6 mx-auto mt-6 text-white bg-gray-800 rounded-lg shadow-lg">
+          <button
+            onClick={toggleSidebar}
+            className="w-full py-2 text-2xl font-semibold text-white bg-gray-800 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+          >
+            Attendance
+          </button>
+        </div>
 
         {/* Home Button */}
-        <button
-          onClick={() => navigate("/homePage")}
-          className="w-40 px-6 py-2 font-semibold text-white bg-gray-800 rounded-lg shadow-lg hover:bg-gray-500 focus:outline-none focus:ring focus:ring-blue-300"
-        >
-          Home
-        </button>
+        <div className="w-full max-w-xs p-6 mx-auto mt-6 text-white bg-gray-800 rounded-lg shadow-lg">
+          <button
+            onClick={() => navigate("/homePage")}
+            className="w-full py-2 text-2xl font-semibold text-white bg-gray-800 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+          >
+            Home
+          </button>
+        </div>
       </div>
-  
     </div>
   );
 };
