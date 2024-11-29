@@ -39,13 +39,13 @@ function SignIn() {
 
       // Show success toast
       toast.success(response.data.message, {
-        autoClose: 2000, // Timeout for toast to disappear after 2 seconds
+        autoClose: 800, // Timeout for toast to disappear after 2 seconds
       });
 
       // Wait for 2 seconds, then navigate to the homepage
       setTimeout(() => {
         navigate("/homePage"); // Redirect to homepage after sign-in
-      }, 2000);
+      }, 800);
     } catch (error) {
       // Show error toast if authentication fails
       toast.error(error.response?.data?.message || "Login failed. Please try again.", {
@@ -108,7 +108,7 @@ function SignIn() {
               <button
                 type="button"
                 onClick={togglePassword}
-                className="absolute right-3 top-3 text-white"
+                className="absolute text-white right-3 top-3"
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Toggle icon */}
               </button>
