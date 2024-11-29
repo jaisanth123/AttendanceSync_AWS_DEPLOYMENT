@@ -16,16 +16,14 @@ const ActionCard = ({ label, onClick }) => (
 function HomePage({ toggleSidebar }) {
   const navigate = useNavigate();
   const [role, setRole] = useState(null);
-  window.onload = () => {
-    console.log(RoleFromToken());  // Calls your function once the page has fully loaded
-  };
+
   useEffect(() => {
-    // Get the role from the token on page load
-    
-    
+    // Get the role from the token when the component mounts
     const userRole = RoleFromToken();
+    console.log("User Role:", userRole); // Log the role to check its value
     setRole(userRole);
   }, []);
+
   return (
     <div className="flex items-center justify-center h-full pt-10">
       <div className="grid w-full max-w-5xl grid-cols-2 gap-6 px-1 sm:grid-cols-5 lg:grid-cols-5 lg:gap-4">
@@ -42,7 +40,6 @@ function HomePage({ toggleSidebar }) {
               label="View Attendance"
               onClick={() => navigate("/viewattendance")}
             />
-
             <ActionCard
               label="Dashboard"
               onClick={() => navigate("/dashboard")}
@@ -50,8 +47,6 @@ function HomePage({ toggleSidebar }) {
           </>
         )}
 
-        {/* Sign-in Card */}
-        <ActionCard label="Signin" onClick={() => navigate("/signin")} />
       </div>
     </div>
   );

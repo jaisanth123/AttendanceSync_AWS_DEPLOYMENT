@@ -18,12 +18,13 @@ const sendToken = (user, statusCode, res, message) => {
     httpOnly: true,
   };
 
-  res.status(statusCode).cookie('authToken', token, options).json({
+  res.status(statusCode).json({
     success: true,
     user,
     message,
     token,
   });
+  
 };
 
 module.exports = { sendToken };

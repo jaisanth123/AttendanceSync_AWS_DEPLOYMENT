@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";  // Import axios for API requests
+import axios from "axios"; // Import axios for API requests
 import { ToastContainer, toast } from "react-toastify"; // Import toastify
 import "react-toastify/dist/ReactToastify.css"; // Import toastify CSS
 
@@ -22,18 +22,18 @@ function SignIn() {
         username,
         password,
       };
+
       // Send login request based on role
       let response;
       if (role === "user") {
-
-        response = await axios.post("http://localhost:5000/api/auth/login/user", payload, {
-          withCredentials: true, // Send cookies along with the request
-        });
+        response = await axios.post("http://localhost:5000/api/auth/login/user", payload);
       } else {
-        response = await axios.post("/api/auth/login/admin", payload, {
-          withCredentials: true, // Send cookies along with the request
-        });
+        response = await axios.post("http://localhost:5000/api/auth/login/admin", payload);
       }
+
+      // Save the token in sessionStorage
+      const token = response.data.token;
+      sessionStorage.setItem("authToken", token); // Store token in sessionStorage
 
       // Show success toast
       toast.success(response.data.message, {
@@ -44,7 +44,6 @@ function SignIn() {
       setTimeout(() => {
         navigate("/homePage"); // Redirect to homepage after sign-in
       }, 2000);
-
     } catch (error) {
       // Show error toast if authentication fails
       toast.error(error.response?.data?.message || "Login failed. Please try again.", {
