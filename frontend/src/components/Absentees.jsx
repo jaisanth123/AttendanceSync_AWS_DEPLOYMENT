@@ -22,6 +22,7 @@ function Absentees() {
   const [showBackPopup, setShowBackPopup] = useState(false); // For Back button confirmation popup
   const [showConfirmationPopup, setShowConfirmationPopup] = useState(false); // For Confirm button confirmation popup
   const [showMarkPresentPopup, setShowMarkPresentPopup] = useState(false); // For Mark Present button confirmation popup
+  const [showMarkSuperPaccPopup,setShowMarkSuperPaccPopup] = useState(false); // For Mark Present button confirmation popup
   const [popupMessage, setPopupMessage] = useState(""); // To dynamically update popup messages
   const [popupColor, setPopupColor] = useState(""); // To dynamically update popup colors
   const [selectedRollNos, setSelectedRollNos] = useState([]); // To keep track of selected roll numbers
@@ -221,6 +222,46 @@ function Absentees() {
       await fetchRollNumbers(selectedCourse, date);  // Refresh the roll numbers after marking present
     }
   };
+
+
+
+
+  const handleMarkSuperPaccConfirm = async () => {
+    setIsMarkingLoading(true);
+    const [yearOfStudy, branch, section] = selectedCourse.split(" - ");
+    const data = { yearOfStudy, branch, section, date };
+  
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/attendance/mark-remaining-present",
+        data
+      );
+  
+      if (response.data.markedAsPresent === 0) {
+        toast.info("Onduty for Superpacc students have alredy marked.", {
+          autoClose: 800,
+        });
+        setMarkPresentVisible(false); // Hide Mark Present button
+      } else {
+        toast.success("Successfully marked SuperPacc Students ad OnDuty", {
+          autoClose: 800,
+        });
+        setShowGenerateMessageButton(true); // Show Generate Message button
+      }
+    } catch (error) {
+      console.error("Error marking SuperPacc students as OnDuty:", error);
+      toast.error("Error marking SuperPacc students as On Duty. Please try again.", {
+        autoClose: 800,
+      });
+    } finally {
+      setIsMarkingLoading(false);
+      setShowMarkSuperPaccPopup(false); // Close the popup
+      setSelectedRollNos([]); // Reset selectedRollNos array
+      await fetchRollNumbers(selectedCourse, date);  // Refresh the roll numbers after marking present
+    }
+  };
+  
+
   
 
  
@@ -347,9 +388,12 @@ function Absentees() {
         {yearOfStudy === "III" && markPresentVisible && (
           <button
             onClick={() => {
-              setShowMarkPresentPopup(true);
+              setShowMarkSuperPaccPopup(true);
+              setPopupMessage("Are you sure you want to mark SuperPacc students as OnDuty?");
+              setShowMarkSuperPaccPopup(true);
             }}
             disabled={isMarkingLoading}
+            
             className={`w-full px-8 py-4 text-xl duration-500 hover:scale-110 font-semibold rounded-lg transition-all ${
               isMarkingLoading
                 ? "bg-gray-400 cursor-not-allowed"
@@ -386,25 +430,28 @@ function Absentees() {
       </div>
 
       {/* Confirmation Pop-ups */}
-      <ReusablePopup
-        show={showMarkPresentPopup}
-        message={`All the remaining students will be marked as present.`} // Updated message to show number of students selected
-        color="bg-green-600" // Popup with green theme for mark present
-        onConfirm={handleMarkPresentConfirm}
-        onCancel={() => setShowMarkPresentPopup(false)}
-      />
+
 
       <ReusablePopup
         show={showConfirmationPopup}
-        message={`${selectedRollNos.length} students will be marked absent.`} // Updated message to show number of students selected
+        message={`${selectedRollNos.length} students will be marked as absent.`} // Updated message to show number of students selected
         color="bg-red-600" // Popup with red theme for absentees
         onConfirm={handleConfirmationPopupOk}
         onCancel={() => setShowConfirmationPopup(false)}
       />
+<ReusablePopup
+  show={showMarkSuperPaccPopup} // Use the correct state
+  message={popupMessage} // Dynamic message
+  color={popupColor} // Dynamic color
+  onConfirm={handleMarkSuperPaccConfirm} // Trigger the confirm function
+  onCancel={() => setShowMarkSuperPaccPopup(false)} // Close popup on cancel
+  confirmText="Confirm"
+  cancelText="Cancel"
+/>
 
       <ReusablePopup
         show={showMarkPresentPopup}
-        message={`all the remaining students will be marked as present`} // Updated message to show number of students selected
+        message={`Are you sure mark remaining students as Present`} // Updated message to show number of students selected
         color="bg-green-600" // Popup with green theme for mark present
         onConfirm={handleMarkPresentConfirm}
         onCancel={() => setShowMarkPresentPopup(false)}
