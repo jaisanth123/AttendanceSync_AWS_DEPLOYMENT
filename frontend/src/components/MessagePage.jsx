@@ -172,7 +172,7 @@ const MessagePage = ({ toggleSidebar }) => {
           </div>
         )}
 
-        {/* Attendance Button */}
+        {/* Attendancee Button */}
         <div className="w-full max-w-xs p-6 mx-auto mt-6 text-white bg-gray-800 rounded-lg shadow-lg">
           <button
             onClick={toggleSidebar}
