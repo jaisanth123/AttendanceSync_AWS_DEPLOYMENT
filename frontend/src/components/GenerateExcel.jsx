@@ -32,13 +32,14 @@ const GenerateExcel = () => {
     setIsLoading(true);
     setMessage("");
 
-    const url = `${import.meta.env.BACKEND_URL}/api/report/downloadreport/${gender.toLowerCase()}?date=${date}`;
+    const url = `${import.meta.env.VITE_BACKEND_URL}/api/report/downloadreport/${gender.toLowerCase()}?date=${date}`;
 
     fetch(url)
       .then((response) => {
         if (response.status === 404) {
           return response.json().then((data) => {
-            const formattedDate = formatDate(date);
+            const formattedDate = formatDate(
+              date);
             setMessage(
               `No absent ${gender.toLowerCase()} students found for ${formattedDate}.`
             );
