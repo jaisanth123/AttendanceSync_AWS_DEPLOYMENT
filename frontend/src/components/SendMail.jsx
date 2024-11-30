@@ -5,7 +5,7 @@ const SendEmail = () => {
   const [emailStatus, setEmailStatus] = useState("");
   const [file, setFile] = useState(null);
   const [isButtonClicked, setIsButtonClicked] = useState(false);
-  const [toEmails, setToEmails] = useState("vikymahendiran123@gmail.com, bdvbusiness247@gmail.com,jaisanthk2006@gmail.com"); // Default emails
+  const [toEmails, setToEmails] = useState("vikymahendiran123@gmail.com, bdvbusiness247@gmail.com,jaisanth2006@gmail.com"); // Default emails
   const navigate = useNavigate();
 
   const handleFileChange = (e) => {
