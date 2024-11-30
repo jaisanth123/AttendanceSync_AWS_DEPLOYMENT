@@ -12,7 +12,7 @@ connectDB();
 require('dotenv').config(); // Load environment variables from .env file
 // Middleware
 app.options('*', cors({
-  origin: '*',  // Allow all origins (for debugging only)
+  origin: 'https://ai-attendance-deployment.onrender.com',  // Allow all origins (for debugging only)
   methods: ['GET', 'POST'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization'],
