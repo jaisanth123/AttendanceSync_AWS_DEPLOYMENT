@@ -11,12 +11,16 @@ const cookieParser = require('cookie-parser');
 connectDB();
 require('dotenv').config(); // Load environment variables from .env file
 // Middleware
-app.options('*', cors({
-  origin: 'https://ai-attendance-client.vercel.app',  // Allow all origins (for debugging only)
-  methods: ['GET', 'POST'],
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+// CORS configuration
+const corsOptions = {
+  origin: 'https://ai-attendance-client.vercel.app', // Your client URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed methods
+  credentials: true, // Allow cookies and credentials
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+};
+
+// Apply CORS middleware globally
+app.use(cors(corsOptions));
  // Enable CORS for all routes
 app.use(cookieParser());
 app.use(express.json());
