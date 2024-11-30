@@ -42,7 +42,7 @@ const GenerateReport = () => {
     setIsLoading(true);
     setMessage("");
 
-    const url = `${import.meta.env.BACKEND_URL}/api/report/download-absent-report?gender=${gender}&date=${date}&hostellerDayScholar=${hostellerDayScholar}&yearOfStudy=${yearOfStudy}&section=${section}&branch=${branch}`;
+    const url = `${import.meta.env.VITE_BACKEND_URL}/api/report/download-absent-report?gender=${gender}&date=${date}&hostellerDayScholar=${hostellerDayScholar}&yearOfStudy=${yearOfStudy}&section=${section}&branch=${branch}`;
 
     // Using axios to handle the request
     axios

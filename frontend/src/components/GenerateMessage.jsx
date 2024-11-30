@@ -66,7 +66,7 @@ const GenerateMessage = () => {
     setMissingStudents([]);
     setErrorMessage('');
 
-    const url = `${import.meta.env.BACKEND_URL}/api/report/absentStudentsCustom?gender=${gender}&date=${date}&hostellerDayScholar=${hostellerDayScholar}&yearOfStudy=${yearOfStudy}&section=${section}&branch=${branch}`;
+    const url = `${import.meta.env.VITE_BACKEND_URL}/api/report/absentStudentsCustom?gender=${gender}&date=${date}&hostellerDayScholar=${hostellerDayScholar}&yearOfStudy=${yearOfStudy}&section=${section}&branch=${branch}`;
 
     fetch(url)
       .then((response) => response.json())
