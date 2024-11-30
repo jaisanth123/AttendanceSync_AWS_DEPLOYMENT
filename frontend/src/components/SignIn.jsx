@@ -30,9 +30,13 @@ function SignIn() {
       // Send login request based on role
       let response;
       if (role === "user") {
-        response = await axios.post(`${backendURL}/api/auth/login/user`, payload);
+        response = await axios.post(`${backendURL}/api/auth/login/user`, payload, {
+          withCredentials: true, // Make sure credentials (cookies) are sent
+        });
       } else {
-        response = await axios.post(`${backendURL}/api/auth/login/admin`, payload);
+        response = await axios.post(`${backendURL}/api/auth/login/admin`, payload, {
+          withCredentials: true, // Make sure credentials (cookies) are sent
+        });
       }
 
       // Save the token in sessionStorage
