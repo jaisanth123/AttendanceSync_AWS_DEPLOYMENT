@@ -42,7 +42,8 @@ function DutyPage() {
 
   const fetchRollNumbers = async (yearOfStudy, branch, section, selectedDate) => {
     setSelectedCourse(`${yearOfStudy}-${branch}-${section}`)
-    const url = `${import.meta.env.VITE_BACKEND_URL}/api/students/remaining?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
+    const backendURL = import.meta.env.VITE_BACKEND_URL;
+    const url = `${backendURL}}/api/students/remaining?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
 
     try {
       const response = await axios.get(url);
@@ -127,7 +128,7 @@ function DutyPage() {
     };
 
     try {
-      const response = await axios.post("${import.meta.env.VITE_BACKEND_URL}/api/attendance/onDuty", payload);
+      const response = await axios.post(`${backendURL}/api/attendance/onDuty`, payload);
       if (response.status === 200) {
         toast.success(`${selectedRollNumbers.length} students marked as On Duty`, {
           autoClose: 800,

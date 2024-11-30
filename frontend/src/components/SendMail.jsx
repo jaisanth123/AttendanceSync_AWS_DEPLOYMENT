@@ -5,7 +5,7 @@ const SendEmail = () => {
   const [emailStatus, setEmailStatus] = useState("");
   const [file, setFile] = useState(null);
   const [isButtonClicked, setIsButtonClicked] = useState(false);
-  const [toEmails, setToEmails] = useState("vikymahendiran123@gmail.com, bdvbusiness247@gmail.com,jaisanthk2006@gmail.com"); // Default emails
+  const [toEmails, setToEmails] = useState("vikymahendiran123@gmail.com, bdvbusiness247@gmail.com,jaisanth2006@gmail.com"); // Default emails
   const navigate = useNavigate();
 
   const handleFileChange = (e) => {
@@ -28,8 +28,9 @@ const SendEmail = () => {
     formData.append("toEmails", toEmails); // Use the toEmails state
 
     try {
+      const backendURL = import.meta.env.VITE_BACKEND_URL;
       const response = await fetch(
-        "${import.meta.env.VITE_BACKEND_URL}/api/attendance/send-email",
+        `${backendURL}/api/attendance/send-email`,
         {
           method: "POST",
           body: formData,

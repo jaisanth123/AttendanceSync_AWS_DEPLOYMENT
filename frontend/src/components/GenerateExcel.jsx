@@ -31,8 +31,8 @@ const GenerateExcel = () => {
 
     setIsLoading(true);
     setMessage("");
-
-    const url = `${import.meta.env.VITE_BACKEND_URL}/api/report/downloadreport/${gender.toLowerCase()}?date=${date}`;
+    const backendURL = import.meta.env.VITE_BACKEND_URL;
+    const url = `${backendURL}/api/report/downloadreport/${gender.toLowerCase()}?date=${date}`;
 
     fetch(url)
       .then((response) => {
