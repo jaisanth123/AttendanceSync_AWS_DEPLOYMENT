@@ -75,7 +75,7 @@ function SignUp() {
       </div>
 
       {/* Toast Container to show notifications */}
-      <ToastContainer />
+    
     </div>
   );
 }

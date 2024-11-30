@@ -18,19 +18,18 @@ function Absentees() {
     location.state?.selectedCourse || "Select a course"
   );
   const [rollNumbers, setRollNumbers] = useState([]);
-  const [isConfirmed, setIsConfirmed] = useState(false); // For Confirm button state
-  const [showBackPopup, setShowBackPopup] = useState(false); // For Back button confirmation popup
   const [showConfirmationPopup, setShowConfirmationPopup] = useState(false); // For Confirm button confirmation popup
   const [showMarkPresentPopup, setShowMarkPresentPopup] = useState(false); // For Mark Present button confirmation popup
+  const [showMarkSuperPaccPopup,setShowMarkSuperPaccPopup] = useState(false); // For Mark Present button confirmation popup
   const [popupMessage, setPopupMessage] = useState(""); // To dynamically update popup messages
   const [popupColor, setPopupColor] = useState(""); // To dynamically update popup colors
   const [selectedRollNos, setSelectedRollNos] = useState([]); // To keep track of selected roll numbers
   const [markPresentDisabled, setMarkPresentDisabled] = useState(true); // Disable Mark Present button initially
   const [markPresentVisible, setMarkPresentVisible] = useState(false);
-  const [showGenerateMessageButton, setShowGenerateMessageButton] =
-    useState(false);
+  const [showGenerateMessageButton, setShowGenerateMessageButton] =useState(false);
+  const[markabsentbutton , setMarkabsentButton] = useState(false)
   const [errorMessage, setErrorMessage] = useState(""); // State to store the error message
-
+    
   const [yearOfStudy, setYearOfStudy] = useState();
   const formatDate = (dateString) => {
     const dateObj = new Date(dateString);
@@ -47,39 +46,55 @@ function Absentees() {
   }, [selectedCourse, date]);
 
   // Fetch roll numbers sds selectedCoursor date changes
+  // Fetch roll numbers when selectedCourse or date changes
   const fetchRollNumbers = async (course, selectedDate) => {
     const [yearOfStudy, branch, section] = course.split(" - ");
+    setYearOfStudy(yearOfStudy);
     const url = `http://localhost:5000/api/attendance/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
   
     try {
-      const response = await axios.get(url);
+      const { data } = await axios.get(url);
   
-      if (response.data && response.data.message) {
-        if (response.data.message === "Attendance has already been marked for all students.") {
-          // Show the error message as a toast
-          setErrorMessage(response.data.message); // Update the error message state
+      if (data?.message) {
+        if (data.message === "Attendance has already been marked for all students.") {
+          setMarkabsentButton(true);
+          setErrorMessage(data.message);
           setRollNumbers([]); // Reset roll numbers
-          return; // Stop further processing
+          return;
         }
-      }
   
-      // If no message and students are present, proceed with mapping the students
-      if (response.data && Array.isArray(response.data.students)) {
-        const fetchedRollNumbers = response.data.students.map((student) => ({
+        setErrorMessage(data.message);
+        setRollNumbers([]);
+      } else if (data?.students?.length) {
+        setMarkabsentButton(false);
+        const fetchedRollNumbers = data.students.map((student) => ({
           rollNo: student.rollNo,
           name: student.name,
           isSelected: false,
         }));
-        setRollNumbers(fetchedRollNumbers);
+        setRollNumbers(fetchedRollNumbers); // Update roll numbers
       } else {
-        console.error("No students found in response:", response.data);
-        setRollNumbers([]); // Set an empty array if no students found
+        setErrorMessage("No students found for the selected criteria.");
+        setRollNumbers([]); // Reset roll numbers
       }
     } catch (error) {
       console.error("Error fetching roll numbers:", error);
-      setRollNumbers([]); // Reset roll numbers on error
+      setErrorMessage("Failed to fetch data. Please try again.");
+      setRollNumbers([]); // Reset roll numbers
     }
   };
+  
+
+  const RollNumberCard = ({ rollNumber, isSelected, onClick }) => (
+    <div
+      onClick={onClick}
+      className={`flex items-center justify-center p-6 text-white text-xl font-semibold rounded-lg cursor-pointer shadow-md transition-transform transform ${
+        isSelected ? "bg-blue-600" : "bg-gray-700"
+      } hover:scale-110`}
+    >
+      {rollNumber}
+    </div>
+  );
   
 
   // Toggle selection of roll numbers
@@ -90,16 +105,17 @@ function Absentees() {
           ? { ...rollNumber, isSelected: !rollNumber.isSelected }
           : rollNumber
       );
-      // Update selectedRollNos array
-      const selected = newRollNumbers.filter(
-        (rollNumber) => rollNumber.isSelected
-      );
+  
+      // Update selectedRollNos array based on new selection state
+      const selected = newRollNumbers.filter((rollNumber) => rollNumber.isSelected);
       setSelectedRollNos(selected.map((rollNumber) => rollNumber.rollNo));
+  
       // If any roll numbers are selected, enable Mark Present button
       setMarkPresentDisabled(selected.length === 0);
       return newRollNumbers;
     });
   };
+  
 
   // Handle confirming the absentee list
   const handleConfirm = () => {
@@ -110,6 +126,7 @@ function Absentees() {
       setPopupMessage("No one marked absent. Click confirm to proceed.");
       setPopupColor("bg-red-600"); // Red for confirmation popup
       setShowConfirmationPopup(true); // Show confirmation popup
+     
     } else {
       // Case 2: Roll numbers are selected
       setPopupMessage(
@@ -117,94 +134,138 @@ function Absentees() {
       );
       setPopupColor("bg-red-600");
       setShowConfirmationPopup(true);
+
     }
   };
 
-  // Handle the "Back" button action
-  const handleBackButton = () => {
-    setPopupMessage("Are you sure you want to go back to the Duty page?");
-    setPopupColor("bg-blue-600"); // Blue for Back button
-    setShowBackPopup(true); // Show Back button confirmation pop-up
+  const handleConfirmationPopupOk = async () => {
+    const numSelected = selectedRollNos.length;
+  
+    if (numSelected === 0) {
+      toast.info("No one marked absent.", {
+        autoClose: 800, // Increased auto-close duration for better visibility
+      });
+      setShowConfirmationPopup(false);
+      setMarkPresentVisible(true);
+   
+      return; // Early return to prevent further execution
+    } 
+  
+    try {
+      const [yearOfStudy, branch, section] = selectedCourse.split(" - ");
+      setYearOfStudy(yearOfStudy);
+  
+      // Make sure the server endpoint and data are correct
+      const response = await axios.post("http://localhost:5000/api/attendance/absent", {
+        rollNumbers: selectedRollNos,
+        date,
+        yearOfStudy,
+        branch,
+        section,
+      });
+  
+      // Check the response status or data to ensure success
+      if (response.status === 200) {
+        toast.success(`Absent marked for ${numSelected} students.`, {
+          autoClose: 800, // Increased auto-close duration
+        });
+      } else {
+        throw new Error("Failed to mark attendance.");
+      }
+  
+      setShowConfirmationPopup(false);
+      setSelectedRollNos([]);
+      await fetchRollNumbers(selectedCourse, date);
+      setMarkPresentVisible(true);
+    } catch (error) {
+      console.error("Error marking absentees:", error);
+  
+      // Display a more detailed error message from the server, if available
+      const errorMessage = error.response?.data?.message || "Attendance already marked. Please try again.";
+      toast.error(errorMessage, {
+        autoClose: 3000, // Increased auto-close duration
+      });
+    }
   };
+  
+  
   const handleMarkPresentConfirm = async () => {
     setIsMarkingLoading(true);
     const [yearOfStudy, branch, section] = selectedCourse.split(" - ");
     const data = { yearOfStudy, branch, section, date };
-
+  
     try {
       const response = await axios.post(
         "http://localhost:5000/api/attendance/mark-remaining-present",
         data
       );
-
+  
       if (response.data.markedAsPresent === 0) {
         toast.info("Attendance is already marked for all students.", {
           autoClose: 800,
         });
+        setMarkPresentVisible(false); // Hide Mark Present button
       } else {
         toast.success("Successfully marked remaining students as present.", {
           autoClose: 800,
         });
-        setShowGenerateMessageButton(true); // Enable the Generate Message button
+        setShowGenerateMessageButton(true); // Show Generate Message button
       }
     } catch (error) {
       console.error("Error marking remaining students as present:", error);
-      toast.error(
-        "Error marking remaining students as present. Please try again.",
-        { autoClose: 800 }
-      );
+      toast.error("Error marking remaining students as present. Please try again.", {
+        autoClose: 800,
+      });
     } finally {
       setIsMarkingLoading(false);
       setShowMarkPresentPopup(false); // Close the popup
+      setSelectedRollNos([]); // Reset selectedRollNos array
       await fetchRollNumbers(selectedCourse, date);  // Refresh the roll numbers after marking present
-
     }
   };
-  const handleBackConfirm = () => {
-    setShowBackPopup(false);
-    navigate("/duty", {
-      state: { selectedCourse, selectedDate: date },
-    });
-  };
 
-  const handleBackCancel = () => {
-    setShowBackPopup(false);
-  };
 
-  const handleConfirmationPopupOk = async () => {
-    const numSelected = selectedRollNos.length;
 
-    if (numSelected === 0) {
-      toast.info("No one marked absent.", {
+
+  const handleMarkSuperPaccConfirm = async () => {
+    setIsMarkingLoading(true);
+    const [yearOfStudy, branch, section] = selectedCourse.split(" - ");
+    const data = { yearOfStudy, branch, section, date };
+  
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/attendance/mark-remaining-present",
+        data
+      );
+  
+      if (response.data.markedAsPresent === 0) {
+        toast.info("Onduty for Superpacc students have alredy marked.", {
+          autoClose: 800,
+        });
+        setMarkPresentVisible(false); // Hide Mark Present button
+      } else {
+        toast.success("Successfully marked SuperPacc Students ad OnDuty", {
+          autoClose: 800,
+        });
+        setShowGenerateMessageButton(true); // Show Generate Message button
+      }
+    } catch (error) {
+      console.error("Error marking SuperPacc students as OnDuty:", error);
+      toast.error("Error marking SuperPacc students as On Duty. Please try again.", {
         autoClose: 800,
       });
-      setShowConfirmationPopup(false);
-      setMarkPresentVisible(true);
-    } else {
-      try {
-        const [yearOfStudy, branch, section] = selectedCourse.split(" - ");
-        await axios.post("http://localhost:5000/api/attendance/absent", {
-          rollNumbers: selectedRollNos,
-          date,
-          yearOfStudy,
-          branch,
-          section,
-        });
-        toast.success(`Absent marked for ${numSelected} students.`, {
-          autoClose: 800,
-        });
-        setShowConfirmationPopup(false);
-        setSelectedRollNos([]);
-        await fetchRollNumbers(selectedCourse, date);
-        setMarkPresentVisible(true);
-      } catch (error) {
-        console.error("Error marking absentees:", error);
-        toast.error("Attendance already marked. Please try again.", {
-          autoClose: 800,
-        });
-      }
+    } finally {
+      setIsMarkingLoading(false);
+      setShowMarkSuperPaccPopup(false); // Close the popup
+      setSelectedRollNos([]); // Reset selectedRollNos array
+      await fetchRollNumbers(selectedCourse, date);  // Refresh the roll numbers after marking present
     }
   };
+  
+
+  
+
+ 
 
   // Reusable Popup Component
   const ReusablePopup = ({
@@ -265,35 +326,34 @@ function Absentees() {
         <div className="w-full max-w-sm mt-6">
           <label htmlFor="date" className="block mb-2 text-xl font-medium ">
             Select Date:
+          
           </label>
           <input
             type="date"
             id="date"
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={(e) => {setDate(e.target.value),
+              setSelectedRollNos([])}}
             className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
           />
         </div>
       </div>
        {/* Display error message on the page if there's one */}
     {errorMessage && (
-      <div className=" text-red-600 font-bold p-4 rounded-md mb-4">
+      <div className="p-4 mb-4 font-bold text-red-600 rounded-md ">
         {errorMessage}
       </div>
     )}
       <div className="grid w-full grid-cols-2 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
-        {rollNumbers.map((rollNumber, index) => (
-          <div
-            key={index}
-            onClick={() => toggleSelection(index)}
-            className={`flex items-center justify-center p-6 text-white transition-transform transform text-xl font-semibold rounded-lg cursor-pointer shadow-md
-              ${
-                rollNumber.isSelected ? "bg-blue-600" : "bg-gray-700"
-              } hover:scale-110`}
-          >
-            {rollNumber.rollNo}
-          </div>
-        ))}
+      {rollNumbers.map((rollNumber, index) => (
+  <RollNumberCard
+    key={index}
+    rollNumber={rollNumber.rollNo}
+    isSelected={rollNumber.isSelected}
+    onClick={() => toggleSelection(index)}
+  />
+))}
+
       </div>
       {selectedRollNos.length > 0 && (
         <div className="w-full p-4 mt-6 text-lg text-black">
@@ -315,25 +375,31 @@ function Absentees() {
           </div>
         </div>
       )}
+           <div className="flex flex-col gap-4 mt-8 md:w-1/4 lg:w-1/5">
 
-      <div className="flex flex-col gap-4 mt-8 md:w-1/4 lg:w-1/5">
+
+{!markabsentbutton && (
         <button
           onClick={handleConfirm}
-          className="w-full px-8 py-4 text-xl font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700"
+          className="w-full px-8 py-4 text-xl font-semibold text-white transition-all duration-500 bg-red-600 rounded-lg hover:scale-110 hover:bg-red-700"
         >
-          Mark Absentees
+        Mark Absentees
         </button>
+)}
 
-        {yearOfStudy === "III" && markPresentVisible && (
+        {(yearOfStudy === "III" && markPresentVisible) && (
           <button
             onClick={() => {
-              setShowMarkPresentPopup(true);
+              setShowMarkSuperPaccPopup(true);
+              setPopupMessage("Are you sure you want to mark SuperPacc students as OnDuty?");
+              setShowMarkSuperPaccPopup(true);
             }}
             disabled={isMarkingLoading}
-            className={`w-full px-8 py-4 text-xl font-semibold rounded-lg transition-all ${
+            
+            className={`w-full px-8 py-4 text-xl duration-500 hover:scale-110 font-semibold rounded-lg transition-all ${
               isMarkingLoading
                 ? "bg-gray-400 cursor-not-allowed"
-                : "bg-green-600 hover:bg-green-700 text-white"
+                : "bg-blue-600 hover:bg-blue-800 text-white"
             }`}
           >
             {isMarkingLoading ? "Marking SuperPacc OD..." : "Mark SuperPacc OD"}
@@ -346,7 +412,7 @@ function Absentees() {
               setShowMarkPresentPopup(true);
             }}
             disabled={isMarkingLoading}
-            className={`w-full px-8 py-4 text-xl font-semibold rounded-lg transition-all ${
+            className={`w-full px-8 py-4 text-xl transition-all duration-500 font-semibold rounded-lg hover:scale-110 ${
               isMarkingLoading
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-green-600 hover:bg-green-700 text-white"
@@ -366,30 +432,33 @@ function Absentees() {
       </div>
 
       {/* Confirmation Pop-ups */}
-      <ReusablePopup
-        show={showMarkPresentPopup}
-        message={`All the remaining students will be marked as present.`} // Updated message to show number of students selected
-        color="bg-green-600" // Popup with green theme for mark present
-        onConfirm={handleMarkPresentConfirm}
-        onCancel={() => setShowMarkPresentPopup(false)}
-      />
+
 
       <ReusablePopup
         show={showConfirmationPopup}
-        message={`${selectedRollNos.length} students will be marked absent.`} // Updated message to show number of students selected
+        message={`${selectedRollNos.length} students will be marked as absent.`} // Updated message to show number of students selected
         color="bg-red-600" // Popup with red theme for absentees
         onConfirm={handleConfirmationPopupOk}
         onCancel={() => setShowConfirmationPopup(false)}
       />
+<ReusablePopup
+  show={showMarkSuperPaccPopup} // Use the correct state
+  message={popupMessage} // Dynamic message
+  color={popupColor} // Dynamic color
+  onConfirm={handleMarkSuperPaccConfirm} // Trigger the confirm function
+  onCancel={() => setShowMarkSuperPaccPopup(false)} // Close popup on cancel
+  confirmText="Confirm"
+  cancelText="Cancel"
+/>
 
       <ReusablePopup
         show={showMarkPresentPopup}
-        message={`all the remaining students will be marked as present`} // Updated message to show number of students selected
+        message={`Are you sure mark remaining students as Present`} // Updated message to show number of students selected
         color="bg-green-600" // Popup with green theme for mark present
         onConfirm={handleMarkPresentConfirm}
         onCancel={() => setShowMarkPresentPopup(false)}
       />
-      <ToastContainer />
+      
     </div>
   );
 }

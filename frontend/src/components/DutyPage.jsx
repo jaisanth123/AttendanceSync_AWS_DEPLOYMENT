@@ -269,13 +269,13 @@ function DutyPage() {
         </div>
       )}
 
-      <button
-        onClick={() => setIsConfirmed(true)}
-        className="px-6 py-3 mt-10 text-white transition-all duration-500 transform bg-gray-800 rounded-lg hover:bg-gray-600 hover:scale-110"
-      >
-        MARK OD
-      </button>
-      {showGenerateMessageButton && (
+<button
+  onClick={() => setIsConfirmed(true)}
+  className="w-full px-6 py-3 mt-10 text-white transition-all duration-500 transform bg-gray-800 rounded-lg lg:w-1/4 md:w-1/5 sm:w-1/2 hover:bg-gray-600 hover:scale-110"
+>
+  MARK OD
+</button>
+{showGenerateMessageButton && (
   <button
     onClick={() =>
       navigate("/message", {
@@ -284,15 +284,16 @@ function DutyPage() {
           branch, 
           section, 
           selectedDate: date, 
-          selectedCourse  // Include the selected course here
+          selectedCourse 
         },
       })
     }
-    className="px-6 py-3 mt-4 text-white transition-all duration-500 transform bg-gray-800 rounded-lg hover:bg-gray-600 hover:scale-110"
+    className="w-full px-6 py-3 mt-4 text-white transition-all duration-500 transform bg-gray-800 rounded-lg lg:w-1/4 md:w-1/5 sm:w-1/2 hover:bg-gray-600 hover:scale-110"
   >
     Generate Message
   </button>
 )}
+
 
 
       {isConfirmed && (
@@ -324,7 +325,6 @@ function DutyPage() {
         </div>
       )}
 
-      <ToastContainer position="top-right" />
     </div>
   );
 }

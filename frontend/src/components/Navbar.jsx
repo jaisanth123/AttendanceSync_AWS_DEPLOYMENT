@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 function Navbar({ toggleSidebar }) {
-  const navigate = useNavigate();  // To navigate programmatically
+  const navigate = useNavigate(); // To navigate programmatically
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
@@ -10,12 +10,9 @@ function Navbar({ toggleSidebar }) {
     day: "numeric",
   });
 
-  // Logout handler function
+  // Logout handler function (removed from Navbar, moved to Sidebar)
   const logoutHandler = () => {
-    // Remove the token from sessionStorage
     sessionStorage.removeItem("authToken");
-    
-    // Redirect to the login page
     navigate("/signin");
   };
 
@@ -41,14 +38,6 @@ function Navbar({ toggleSidebar }) {
         <div className="text-lg sm:block lg:text-xl sm:mt-2">
           {today}
         </div>
-
-        {/* Logout Button */}
-        <button
-          onClick={logoutHandler}
-          className="ml-4 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded hover:bg-red-700"
-        >
-          Logout
-        </button>
       </div>
 
       {/* For small screens */}
@@ -74,14 +63,6 @@ function Navbar({ toggleSidebar }) {
         <div className="mt-1 text-sm text-center">
           {today}
         </div>
-
-        {/* Logout Button for small screens */}
-        <button
-          onClick={logoutHandler}
-          className="mt-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded hover:bg-red-700"
-        >
-          Logout
-        </button>
       </div>
     </nav>
   );

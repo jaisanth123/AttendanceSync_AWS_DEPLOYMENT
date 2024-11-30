@@ -64,13 +64,12 @@ function App() {
     window.location.href = "/signin";
   };
 
-  const isAuthenticated = sessionStorage.getItem("authToken");
 
   return (
     <Router>
       <div className="flex flex-col h-screen">
         {/* Render Navbar only if authenticated */}
-        {isAuthenticated && <Navbar toggleSidebar={toggleSidebar} logoutHandler={logoutHandler} />}
+        { <Navbar toggleSidebar={toggleSidebar} logoutHandler={logoutHandler} />}
 
         {/* Sidebar Overlay for Mobile */}
         {isSidebarOpen && (

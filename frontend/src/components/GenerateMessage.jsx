@@ -243,7 +243,7 @@ const GenerateMessage = () => {
       )}
 </div>
       {/* ToastContainer to render toast notifications */}
-      <ToastContainer />
+    
     </div>
   );
 };
