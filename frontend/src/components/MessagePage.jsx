@@ -109,6 +109,16 @@ const MessagePage = ({ toggleSidebar }) => {
     };
   }, []);
 
+  const navigateToAttendance = () => {
+    setShowCard(false); // Close the card before navigating
+    toggleSidebar(); // If it's related to sidebar toggle
+  };
+
+  const navigateToHome = () => {
+    setShowCard(false); // Close the card before navigating
+    navigate("/homePage"); // Navigate to home page
+  };
+
   return (
     <div className="p-4 text-center text-black">
       <h1 className="text-2xl font-semibold md:text-3xl lg:text-4xl">{selectedCourse}</h1>
@@ -121,10 +131,7 @@ const MessagePage = ({ toggleSidebar }) => {
               getAbsentStudents(selectedCourse, selectedDate);
               toggleCardVisibility();
             }} className="w-full max-w-xs p-6 mx-auto mt-6 text-white transition-all duration-500 bg-gray-800 rounded-lg shadow-lg hover:scale-110 hover:bg-gray-600">
-          <button
-
-            className="w-full py-2 text-2xl font-semibold text-whiterounded-lg "
-          >
+          <button className="w-full py-2 text-2xl font-semibold text-whiterounded-lg">
             Get Absentees
           </button>
         </div>
@@ -172,22 +179,16 @@ const MessagePage = ({ toggleSidebar }) => {
           </div>
         )}
 
-        {/* Attendancee Button */}
-        <div onClick={toggleSidebar} className="w-full max-w-xs p-6 mx-auto mt-6 text-white transition-all duration-500 bg-gray-800 rounded-lg shadow-lg hover:scale-110 hover:bg-gray-600">
-          <button
-            
-            className="w-full py-2 text-2xl font-semibold text-white"
-          >
+        {/* Attendance Button */}
+        <div onClick={navigateToAttendance} className="w-full max-w-xs p-6 mx-auto mt-6 text-white transition-all duration-500 bg-gray-800 rounded-lg shadow-lg hover:scale-110 hover:bg-gray-600">
+          <button className="w-full py-2 text-2xl font-semibold text-white">
             Attendance
           </button>
         </div>
 
         {/* Home Button */}
-        <div  onClick={() => navigate("/homePage")} className="w-full max-w-xs p-6 mx-auto mt-6 text-white transition-all duration-500 bg-gray-800 rounded-lg shadow-lg hover:bg-gray-600 hover:scale-110">
-          <button
-            
-            className="w-full py-2 text-2xl font-semibold text-white"
-          >
+        <div onClick={navigateToHome} className="w-full max-w-xs p-6 mx-auto mt-6 text-white transition-all duration-500 bg-gray-800 rounded-lg shadow-lg hover:bg-gray-600 hover:scale-110">
+          <button className="w-full py-2 text-2xl font-semibold text-white">
             Home
           </button>
         </div>

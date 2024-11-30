@@ -58,7 +58,7 @@ const GenerateReport = () => {
           setIsLoading(false);
           toast.info(
             `No absent students found for specified criteria on ${formattedDate}.`,
-            { autoClose: 2000 }
+            { autoClose: 800 }
           );
         } else if (response.status === 200) {
           const blob = response.data;
@@ -67,7 +67,7 @@ const GenerateReport = () => {
           link.download = "Absent_Students_Report.xlsx";
           link.click();
           setIsLoading(false);
-          toast.success("Report downloaded successfully!", { autoClose: 2000 });
+          toast.success("Report downloaded successfully!", { autoClose: 800 });
         }
       })
       .catch((error) => {
@@ -81,12 +81,12 @@ const GenerateReport = () => {
           console.log("Error Response:", error.response); // Log the full error response to the console
           const errorMessage = error.response.data.message || "You are not authorized to access this page.";
           toast.error(`Error: ${errorMessage}`, {
-          autoClose: 2000,
+          autoClose: 800,
           });
         }
          else {
           toast.error("An error occurred while generating the report.", {
-            autoClose: 2000,
+            autoClose:800,
           });
         }
     

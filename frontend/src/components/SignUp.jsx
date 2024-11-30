@@ -17,13 +17,13 @@ function SignUp() {
     
     // Show success toast
     toast.success("Sign up successful!", {
-        autoClose: 2000, // Timeout duration set to 2 seconds
+        autoClose: 800, // Timeout duration set to 2 seconds
       });
 
     // Wait for 2 seconds, then navigate to the SignIn page
     setTimeout(() => {
       navigate("/signin");
-    }, 2000); // 2-second delay before redirecting
+    }, 800); // 2-second delay before redirecting
   };
 
   return (
