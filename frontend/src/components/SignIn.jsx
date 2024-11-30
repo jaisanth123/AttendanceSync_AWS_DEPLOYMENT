@@ -24,6 +24,8 @@ function SignIn() {
         username,
         password,
       };
+      const backendURL = import.meta.env.VITE_BACKEND_URL;
+      console.log("Backend URL:", backendURL);
 
       // Send login request based on role
       let response;
