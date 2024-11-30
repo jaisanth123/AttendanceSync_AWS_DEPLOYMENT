@@ -117,13 +117,13 @@ const MessagePage = ({ toggleSidebar }) => {
 
       <div className="flex flex-col items-center gap-y-4">
         {/* Get Absentees Button */}
-        <div className="w-full max-w-xs p-6 mx-auto mt-6 text-white bg-gray-800 rounded-lg shadow-lg">
-          <button
-            onClick={() => {
+        <div onClick={() => {
               getAbsentStudents(selectedCourse, selectedDate);
               toggleCardVisibility();
-            }}
-            className="w-full py-2 text-2xl font-semibold text-white bg-gray-800 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+            }} className="w-full max-w-xs p-6 mx-auto mt-6 text-white transition-all duration-500 bg-gray-800 rounded-lg shadow-lg hover:scale-110 hover:bg-gray-600">
+          <button
+
+            className="w-full py-2 text-2xl font-semibold text-whiterounded-lg "
           >
             Get Absentees
           </button>
@@ -165,7 +165,7 @@ const MessagePage = ({ toggleSidebar }) => {
 
             <button
               onClick={copyCardContent}
-              className="px-6 py-2 mt-4 font-semibold text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-800 focus:outline-none focus:ring focus:ring-blue-300"
+              className="px-6 py-2 mt-4 font-semibold text-white transition-all duration-500 bg-blue-800 rounded-lg shadow-lg hover:bg-blue-600 hover:scale-110"
             >
               Copy Content
             </button>
@@ -173,20 +173,20 @@ const MessagePage = ({ toggleSidebar }) => {
         )}
 
         {/* Attendancee Button */}
-        <div className="w-full max-w-xs p-6 mx-auto mt-6 text-white bg-gray-800 rounded-lg shadow-lg">
+        <div onClick={toggleSidebar} className="w-full max-w-xs p-6 mx-auto mt-6 text-white transition-all duration-500 bg-gray-800 rounded-lg shadow-lg hover:scale-110 hover:bg-gray-600">
           <button
-            onClick={toggleSidebar}
-            className="w-full py-2 text-2xl font-semibold text-white bg-gray-800 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+            
+            className="w-full py-2 text-2xl font-semibold text-white"
           >
             Attendance
           </button>
         </div>
 
         {/* Home Button */}
-        <div className="w-full max-w-xs p-6 mx-auto mt-6 text-white bg-gray-800 rounded-lg shadow-lg">
+        <div  onClick={() => navigate("/homePage")} className="w-full max-w-xs p-6 mx-auto mt-6 text-white transition-all duration-500 bg-gray-800 rounded-lg shadow-lg hover:bg-gray-600 hover:scale-110">
           <button
-            onClick={() => navigate("/homePage")}
-            className="w-full py-2 text-2xl font-semibold text-white bg-gray-800 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+            
+            className="w-full py-2 text-2xl font-semibold text-white"
           >
             Home
           </button>
