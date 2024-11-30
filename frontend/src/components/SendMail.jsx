@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify"; // Importing toast and ToastContainer
+import 'react-toastify/dist/ReactToastify.css'; // Importing styles for toast notifications
 
 const SendEmail = () => {
   const [emailStatus, setEmailStatus] = useState("");
@@ -14,7 +16,9 @@ const SendEmail = () => {
 
   const sendEmail = async () => {
     if (!file) {
-      setEmailStatus("Please upload a file.");
+      toast.error("You have not uploaded a file.", {
+        autoClose: 800,
+      }); // Show error toast notification
       return;
     }
 
@@ -39,62 +43,82 @@ const SendEmail = () => {
       if (response.ok) {
         const data = await response.json();
         setEmailStatus(data.message);
+        toast.success("Email sent successfully!"); // Show success toast notification
       } else {
         setEmailStatus("Failed to send email.");
+        toast.error("Failed to send email."); // Show error toast notification
       }
     } catch (error) {
       console.log(error);
       setEmailStatus("Error sending email.");
+      toast.error("Error sending email."); // Show error toast notification
     } finally {
       setIsButtonClicked(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center h-full flex-col">
-      <h1 className="text-2xl font-bold mb-4">Send Email with Excel File</h1>
-      <input
-        type="file"
-        onChange={handleFileChange}
-        accept=".xls,.xlsx"
-        className="mb-4"
-      />
-      <input
-        type="text"
-        placeholder="Enter additional email addresses separated by commas"
-        value={toEmails}
-        onChange={(e) => setToEmails(e.target.value)} // Update state when the user adds more emails
-        className="mb-4 px-4 py-2 border rounded w-full max-w-md"
-      />
-      <button
-        onClick={sendEmail}
-        className={`px-4 py-2 rounded text-white ${
-          isButtonClicked ? "bg-blue-800" : "bg-blue-500"
-        }`}
-      >
-        Send Email
-      </button>
-      {emailStatus && <p className="mt-4 text-sm">{emailStatus}</p>}
+    <div className="flex items-center justify-center h-screen">
+      <div className="w-full max-w-lg p-8 bg-gray-800 rounded-lg shadow-3xl">
+        <h1 className="mb-6 text-3xl font-semibold text-center text-white">Send Email with Excel File</h1>
 
-      {/* Back Button */}
-      <div className="w-full max-w-md mt-4">
-        <button
-          onClick={() => navigate(-1)} // Navigate to the previous page
-          className="w-full px-4 py-2 font-semibold text-white bg-gray-500 rounded-md hover:bg-gray-700 transition-transform transform hover:scale-105"
-        >
-          Back
-        </button>
+        <div className="space-y-6">
+          <div>
+            <label htmlFor="file" className="block font-medium text-white text-md">Upload Excel File</label>
+            <input
+              id="file"
+              type="file"
+              onChange={handleFileChange}
+              accept=".xls,.xlsx"
+              className="w-full p-2 mt-2 text-white border border-gray-300 rounded-lg"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="emails" className="block font-medium text-white text-md ">To (Default: Absentees)</label>
+            <input
+              id="emails"
+              type="text"
+              value={toEmails}
+              onChange={(e) => setToEmails(e.target.value)} // Update state when the user adds more emails
+              placeholder="Enter additional email addresses separated by commas"
+              className="w-full p-2 mt-2 border border-gray-300 rounded-lg"
+            />
+          </div>
+
+          <div className="flex justify-center">
+            <button
+              onClick={sendEmail}
+              className={`w-full py-3 px-6 rounded-lg transition-all text-2xl duration-500 hover:bg-gray-600 hover:scale-110 text-white font-semibold ${
+                isButtonClicked ? "bg-gray-600" : "bg-gray-700"
+              }`}
+              disabled={isButtonClicked}
+            >
+              {isButtonClicked ? "Sending..." : "Send Email"}
+            </button>
+          </div>
+
+        </div>
+
+        <div className="flex justify-center mt-6 space-x-4">
+          <button
+            onClick={() => navigate(-1)} // Navigate to the previous page
+            className="w-1/2 px-4 py-2 text-xl font-semibold text-white transition-transform duration-500 transform rounded-md bg-slate-700 hover:bg-slate-600 hover:scale-110"
+          >
+            Back
+          </button>
+
+          <button
+            onClick={() => navigate("/")} // Navigate to the home page
+            className="w-1/2 px-4 py-2 text-xl font-semibold text-white transition-transform duration-500 transform rounded-md bg-slate-700 hover:bg-slate-600 hover:scale-110"
+          >
+            Home
+          </button>
+        </div>
       </div>
 
-      {/* Home Button */}
-      <div className="w-full max-w-md mt-4">
-        <button
-          onClick={() => navigate("/")} // Navigate to the home page
-          className="w-full px-4 py-2 font-semibold text-white bg-gray-500 rounded-md hover:bg-gray-700 transition-transform transform hover:scale-105"
-        >
-          Home
-        </button>
-      </div>
+      {/* Toast notifications container */}
+      <ToastContainer />
     </div>
   );
 };

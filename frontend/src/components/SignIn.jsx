@@ -49,7 +49,7 @@ function SignIn() {
     } catch (error) {
       // Show error toast if authentication fails
       toast.error(error.response?.data?.message || "Login failed. Please try again.", {
-        autoClose: 2000,
+        autoClose: 800,
       });
     }
   };
