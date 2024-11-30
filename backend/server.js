@@ -12,12 +12,11 @@ connectDB();
 require('dotenv').config(); // Load environment variables from .env file
 // Middleware
 app.options('*', cors({
-  origin: 'https://ai-attendance-client.vercel.app',
+  origin: '*',  // Allow all origins (for debugging only)
   methods: ['GET', 'POST'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-
  // Enable CORS for all routes
 app.use(cookieParser());
 app.use(express.json());
