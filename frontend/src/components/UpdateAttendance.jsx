@@ -144,6 +144,7 @@ function UpdateAttendance() {
             value={yearOfStudy}
             options={["IV", "III", "II"]}
             onChange={(e) => {setYearOfStudy(e.target.value);fetchStudentData();}}
+            
           />
           <Dropdown
             label="Branch"
@@ -170,11 +171,13 @@ function UpdateAttendance() {
               id="date"
               value={date}
               onChange={(e) => {setDate(e.target.value);fetchStudentData();}}
+              max={new Date().toISOString().split("T")[0]} // Restrict future dates
               className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
             />
           </div>
         </div>
       </div>
+
 
       {/* Roll Numbers */}
       {rollNumbers.length > 0 && (
@@ -234,7 +237,7 @@ function UpdateAttendance() {
             </h2>
             <p className="mt-4 text-lg text-white text-center">
               {rollNumbers.length > 0
-                ? `${rollNumbers.length} students' attendance will be updated.`
+                ? `Students Attendance will be updated as specified.`
                 : "No students to update."}
             </p>
             <div className="flex justify-between">
