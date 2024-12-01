@@ -11,13 +11,12 @@ import MessagePage from "./components/MessagePage";
 import ViewAttendance from "./components/ViewAttendance";
 import GenerateMessage from "./components/GenerateMessage";
 import SignIn from "./components/SignIn";
-import Dashboard from "./components/Dashboard";
 import GenerateExcel from "./components/GenerateExcel";
 import GenerateReport from "./components/GenerateReport";
 import SendEmail from "./components/SendMail";
 import ProtectedRoute from "./components/ProtectedRoute"; // Import ProtectedRoute
 import NotFound from "./components/NotFound"; // Import the NotFound component
-
+import UpdateAttendace from "./components/UpdateAttendance";
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -94,7 +93,7 @@ function App() {
               <Route path="/absentees" element={<Absentees selectedCourse={selectedItem} />} />
               <Route path="/message" element={<MessagePage selectedCourse={selectedItem} toggleSidebar={toggleSidebar} />} />
               <Route path="/viewattendance" element={<ViewAttendance />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/update-attendance" element={<UpdateAttendace />} />
               <Route path="/generateMessage" element={<GenerateMessage toggleSidebar={toggleSidebar} />} />
               <Route path="/generateExcel" element={<GenerateExcel />} />
               <Route path="/send-email" element={<SendEmail />} />

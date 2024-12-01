@@ -8,6 +8,7 @@ function Absentees() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMarkingLoading, setIsMarkingLoading] = useState(false);
+  const [isSuperMarkingLoading, setIsSuperMarkingLoading] = useState(false);
 
   // State variables
   const [date, setDate] = useState(
@@ -54,9 +55,7 @@ function Absentees() {
   
     try {
       const { data } = await axios.get(url);
-      setMarkPresentDisabled(true);
-      setMarkPresentVisible(false);
-      setMarkabsentButton(false);
+
   
       if (data?.message) {
         if (data.message === "Attendance has already been marked for all students.") {
@@ -210,10 +209,12 @@ function Absentees() {
           autoClose: 800,
         });
         setMarkPresentVisible(false); // Hide Mark Present button
+        
       } else {
         toast.success("Successfully marked remaining students as present.", {
           autoClose: 800,
         });
+        setMarkPresentVisible(false);
         setShowGenerateMessageButton(true); // Show Generate Message button
       }
     } catch (error) {
@@ -232,10 +233,10 @@ function Absentees() {
 
 
   const handleMarkSuperPaccConfirm = async () => {
-    setIsMarkingLoading(true); // Show loading indicator
+    setIsSuperMarkingLoading(true); // Show loading indicator
     const [yearOfStudy, branch, section] = selectedCourse.split(" - "); // Parse selected course
     const data = { yearOfStudy, branch, section, date }; // Prepare payload
-  
+    setShowMarkSuperPaccPopup(false); 
     try {
       // Make the POST request to the backend API
       const response = await axios.post("http://localhost:5000/api/attendance/mark-SuperPacc", data);
@@ -244,7 +245,7 @@ function Absentees() {
       toast.success(`Successfully marked ${response.data.recordsAdded} students as SuperPacc!`, {
         autoClose: 800,
       });
-      setShowMarkSuperPaccPopup(false); // Close the popup
+      // Close the popup
       await fetchRollNumbers(selectedCourse, date);
       setmarksuperpacc(false); // Reset the flag
     } catch (error) {
@@ -255,7 +256,7 @@ function Absentees() {
         { autoClose: 800 }
       );
     } finally {
-      setIsMarkingLoading(false); // Hide loading indicator
+      setIsSuperMarkingLoading(false); // Hide loading indicator
     }
   };
   
@@ -387,15 +388,15 @@ function Absentees() {
               setShowMarkSuperPaccPopup(true);
               setPopupMessage("Are you sure you want to mark SuperPacc students as OnDuty?");
             }}
-            disabled={isMarkingLoading}
+            disabled={isSuperMarkingLoading}
             
             className={`w-full px-8 py-4 text-xl duration-500 hover:scale-110 font-semibold rounded-lg transition-all ${
-              isMarkingLoading
+              isSuperMarkingLoading
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-600 hover:bg-blue-800 text-white"
             }`}
           >
-            {isMarkingLoading ? "Marking SuperPacc OD..." : "Mark SuperPacc OD"}
+            {isSuperMarkingLoading ? "Marking SuperPacc OD..." : "Mark SuperPacc OD"}
           </button>
         )}
 
@@ -413,7 +414,7 @@ function Absentees() {
           >
             {isMarkingLoading ? "Marking Present..." : "Mark Present"}
           </button>
-        )}
+        )}  
         <div className="h-10 mb-4">
           <button
             onClick={() => navigate("/homePage")} // Navigate to the home page

@@ -42,7 +42,7 @@ function HomePage({ toggleSidebar }) {
             />
             <ActionCard
               label="Dashboard"
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/update-attendance")}
             />
           </>
         )}

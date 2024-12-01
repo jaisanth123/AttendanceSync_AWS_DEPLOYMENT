@@ -326,3 +326,109 @@ exports.markSuperPaccAttendance = async (req, res) => {
     res.status(500).json({ message: 'Error marking SuperPacc attendance.' });
   }
 };
+
+
+
+exports.updateAttendanceStatus = async (req, res) => {
+  const { yearOfStudy, date, batch, section, state, rollNumberStateMapping } = req.body;
+
+  console.log(yearOfStudy, date, batch, section, state, rollNumberStateMapping);
+
+  try {
+    // Iterate over the rollNumberStateMapping to update each roll number with its corresponding state
+    for (let [rollNo, attendanceState] of Object.entries(rollNumberStateMapping)) {
+      // Ensure that the state provided is valid (Present, Absent, On Duty)
+      if (!['Present', 'Absent', 'On Duty'].includes(attendanceState)) {
+        return res.status(400).json({ message: `Invalid state for roll number ${rollNo}` });
+      }
+
+      // Update the attendance status for the specific roll number
+      const result = await Attendance.updateMany(
+        {
+          rollNo,                     // Match the roll number
+          date,                        // Match the specified date
+          yearOfStudy,                 // Match the year of study
+          batch,                       // Match the batch
+          section,                     // Match the section
+        },
+        {
+          $set: { status: attendanceState }, // Set the status to the corresponding state
+        }
+      );
+
+      if (result.nModified === 0) {
+        console.log(`No attendance records updated for roll number ${rollNo}`);
+      } else {
+        console.log(`Attendance for roll number ${rollNo} updated to ${attendanceState}`);
+      }
+    }
+
+    res.json({ message: 'Attendance updated successfully' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error updating attendance status' });
+  }
+};
+
+
+exports.getAttendanceStates = async (req, res) => {
+  const { yearOfStudy, branch, section, date } = req.query;
+
+  // Ensure all required query parameters are provided
+  if (!yearOfStudy || !branch || !section || !date) {
+      return res.status(400).json({ message: "Please provide yearOfStudy, branch, section, and date" });
+  }
+
+  console.log("Query Parameters:", { yearOfStudy, branch, section, date });
+
+  try {
+      // Fetch all students in the specified year, branch, and section
+      const allStudents = await Student.find({
+          yearOfStudy,
+          branch,
+          section
+      }).select('rollNo name -_id'); // Retrieve rollNo and name fields, excluding _id
+
+      console.log("All Students Found:", allStudents);
+
+      // Fetch attendance records for the specified date
+      const attendanceRecords = await Attendance.find({
+          date,
+          yearOfStudy,
+          branch,
+          section
+      }).select('rollNo status'); // Retrieve rollNo and attendance status fields
+
+      console.log("Attendance Records Found:", attendanceRecords);
+
+      // Map the attendance states for each student
+      const attendanceMap = attendanceRecords.reduce((acc, record) => {
+          acc[record.rollNo] = record.status; // Map rollNo to its attendance status (e.g., "Present", "Absent", "On Duty")
+          return acc;
+      }, {});
+
+      // For each student, get their attendance state from the attendance map, defaulting to "Absent" if no record exists
+      const attendanceStates = allStudents.map(student => ({
+          rollNo: student.rollNo,
+          name: student.name,
+          state: attendanceMap[student.rollNo] || 'Absent' // Default state is "Absent" if no record exists
+      }));
+
+      // Sort the attendance states by roll number (numeric part only)
+      attendanceStates.sort((a, b) => {
+          const numA = parseInt(a.rollNo.replace(/[^0-9]/g, ''), 10);
+          const numB = parseInt(b.rollNo.replace(/[^0-9]/g, ''), 10);
+          return numA - numB;
+      });
+
+      // Send the attendance states and the total count of all students
+      res.json({
+          attendanceStates, // Send the roll numbers with their mapped attendance states
+          totalStudents: allStudents.length // Send the total count of students found
+      });
+  } catch (error) {
+      console.error("Error retrieving attendance states:", error);
+      res.status(500).json({ message: "Server error" });
+  }
+};
