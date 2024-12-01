@@ -167,7 +167,7 @@ function DutyPage() {
     <h1 className="text-4xl font-semibold text-center text-white">ON DUTY</h1>
 
     {/* Dropdowns Row */}
-    <div className="flex flex-wrap justify-center w-full mt-4 gap-x-2 gap-y-4">
+    <div className="flex flex-wrap justify-center w-full mt-4 gap-x-4 gap-y-4">
       <div className="flex-1 min-w-[100px] max-w-[150px]">
         <label htmlFor="yearOfStudy" className="block text-lg font-medium text-white">Year:</label>
         <select
