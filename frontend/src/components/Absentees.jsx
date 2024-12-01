@@ -44,13 +44,10 @@ function Absentees() {
       setErrorMessage("");
     }
   }, [selectedCourse, date]);
-
-  // Fetch roll numbers sds selectedCoursor date changes
-  // Fetch roll numbers when selectedCourse or date changes
+  const backendURL = import.meta.env.VITE_BACKEND_URL; 
   const fetchRollNumbers = async (course, selectedDate) => {
     const [yearOfStudy, branch, section] = course.split(" - ");
     setYearOfStudy(yearOfStudy);
-  const backendURL = import.meta.env.VITE_BACKEND_URL; 
     
   const url = `${backendURL}/api/attendance/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
     
