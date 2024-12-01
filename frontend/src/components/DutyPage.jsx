@@ -214,7 +214,7 @@ function DutyPage() {
     </div>
 
     {/* Date Selection */}
-    <div className="flex items-center justify-center mt-8">
+    <div className="flex items-center justify-center pb-5 mt-8">
       <div className="w-full max-w-sm">
         <label htmlFor="date" className="block mb-2 text-lg font-medium text-center text-white">
           Select Date:
