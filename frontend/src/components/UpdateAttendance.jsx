@@ -8,7 +8,9 @@ function UpdateAttendance() {
   const [section, setSection] = useState("nan");
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]); // Set default to current date
   const [rollNumbers, setRollNumbers] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false); // New state for updating attendance
+  const [isConfirmed, setIsConfirmed] = useState(false);
+
 
   const fetchStudentData = async () => {
     if (yearOfStudy === "nan" || branch === "nan" || section === "nan" || !date) {
@@ -46,6 +48,9 @@ function UpdateAttendance() {
     fetchStudentData();
   }, [yearOfStudy, branch, section, date]); // Trigger fetch on field change
 
+  const handleClosePopup = () => {
+    setIsConfirmed(false);
+  };
   const updateAttendanceStatus = async () => {
     try {
       const rollNumberStateMapping = rollNumbers.reduce((acc, student) => {
@@ -61,7 +66,10 @@ function UpdateAttendance() {
         rollNumberStateMapping,
       });
 
-      toast.success(response.data.message || "Attendance updated successfully!");
+      toast.success(response.data.message || "Attendance updated successfully!", {
+        autoClose: 800,
+      });
+      setIsConfirmed(false);
       await fetchStudentData();
     } catch (error) {
       console.error("Error updating attendance status:", error);
@@ -158,11 +166,39 @@ function UpdateAttendance() {
       {/* Update Button */}
       {rollNumbers.length > 0 && (
         <button
-          onClick={updateAttendanceStatus}
+          onClick={() => setIsConfirmed(true)}
           className="w-full px-6 py-3 mt-6 text-lg text-white transition-all duration-500 bg-gray-800 rounded-lg lg:w-1/4 md:w-1/5 sm:w-1/2 hover:scale-110 hover:bg-gray-600"
         >
           Update Attendance
         </button>
+      )}
+      {isConfirmed && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fadeIn">
+          <div className="p-8 transition-all duration-500 transform scale-110 bg-gray-800 rounded-lg shadow-lg animate-slideDown w-96">
+            <h2 className="mb-4 text-2xl font-semibold text-center text-white">
+              Confirm Action
+            </h2>
+            <p className="mb-6 text-center text-white">
+              {rollNumbers.length > 0
+                ? ` ${rollNumbers.length} students are marked with the updates as specified`
+                : "0 Students Attendance modified"}
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={updateAttendanceStatus}
+                className="w-32 px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              >
+                Yes
+              </button>
+              <button
+                onClick={handleClosePopup}
+                className="w-32 px-6 py-3 text-white bg-gray-500 rounded-lg hover:bg-gray-600"
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
