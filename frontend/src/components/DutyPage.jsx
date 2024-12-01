@@ -162,61 +162,63 @@ function DutyPage() {
   };
 
   return (
-    <div className="flex flex-col items-center flex-1 p-6 md:p-8 lg:p-12">
-      <div className="p-4 text-center text-black">
-        <h1 className="text-4xl font-semibold">ON DUTY</h1>
+<div className="flex flex-col items-center flex-1 p-6 md:p-8 lg:p-12">
+  <div className="w-full max-w-4xl p-6 bg-gray-800 rounded-lg shadow-lg">
+    <h1 className="text-4xl font-semibold text-center text-white">ON DUTY</h1>
+
+    {/* Dropdowns Row */}
+    <div className="flex flex-wrap justify-center w-full mt-4 gap-x-2 gap-y-4">
+      <div className="flex-1 min-w-[100px] max-w-[150px]">
+        <label htmlFor="yearOfStudy" className="block text-lg font-medium text-white">Year:</label>
+        <select
+          id="yearOfStudy"
+          value={yearOfStudy}
+          onChange={(e) => setYearOfStudy(e.target.value)}
+          className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
+        >
+          <option value="nan">Year</option>
+          <option value="IV">IV</option>
+          <option value="III">III</option>
+          <option value="II">II</option>
+        </select>
       </div>
 
-      {/* Dropdowns Row */}
-      <div className="flex flex-wrap justify-center w-full mt-4 gap-x-2 gap-y-4">
-        <div className="flex-1 min-w-[100px] max-w-[150px]">
-          <label htmlFor="yearOfStudy" className="block font-medium text-md">Year:</label>
-          <select
-            id="yearOfStudy"
-            value={yearOfStudy}
-            onChange={(e) => setYearOfStudy(e.target.value)}
-            className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
-          >
-            <option value="nan"> Year</option>
-            <option value="IV">IV</option>
-            <option value="III">III</option>
-            <option value="II">II</option>
-          </select>
-        </div>
-
-        <div className="flex-1 min-w-[100px] max-w-[150px]">
-          <label htmlFor="branch" className="block font-medium text-md">Branch:</label>
-          <select
-            id="branch"
-            value={branch}
-            onChange={(e) => setBranch(e.target.value)}
-            className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
-          >
-            <option value="nan">Branch</option>
-            <option value="AIDS">AIDS</option>
-            <option value="AIML">AIML</option>
-          </select>
-        </div>
-
-        <div className="flex-1 min-w-[100px] max-w-[150px]">
-          <label htmlFor="section" className="block font-medium text-md">Section:</label>
-          <select
-            id="section"
-            value={section}
-            onChange={(e) => setSection(e.target.value)}
-            className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
-          >
-            <option value="nan">Section</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-          </select>
-        </div>
+      <div className="flex-1 min-w-[100px] max-w-[150px]">
+        <label htmlFor="branch" className="block text-lg font-medium text-white">Branch:</label>
+        <select
+          id="branch"
+          value={branch}
+          onChange={(e) => setBranch(e.target.value)}
+          className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
+        >
+          <option value="nan">Branch</option>
+          <option value="AIDS">AIDS</option>
+          <option value="AIML">AIML</option>
+        </select>
       </div>
 
-      {/* Date Selection */}
-      <div className="w-full max-w-sm mt-6">
-        <label htmlFor="date" className="block mb-2 text-lg font-medium">Select Date:</label>
+      <div className="flex-1 min-w-[100px] max-w-[150px]">
+        <label htmlFor="section" className="block text-lg font-medium text-white">Section:</label>
+        <select
+          id="section"
+          value={section}
+          onChange={(e) => setSection(e.target.value)}
+          className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
+        >
+          <option value="nan">Section</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+        </select>
+      </div>
+    </div>
+
+    {/* Date Selection */}
+    <div className="flex items-center justify-center mt-8">
+      <div className="w-full max-w-sm">
+        <label htmlFor="date" className="block mb-2 text-lg font-medium text-center text-white">
+          Select Date:
+        </label>
         <input
           type="date"
           id="date"
@@ -225,6 +227,10 @@ function DutyPage() {
           className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
         />
       </div>
+    </div>
+  </div>
+
+
 
       {/* Message Display */}
       {message && (
