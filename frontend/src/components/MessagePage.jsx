@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify"; // Import react-toastify
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
+const backendURL = import.meta.env.VITE_BACKEND_URL;
 
 const MessagePage = ({ toggleSidebar }) => {
   const navigate = useNavigate();
@@ -63,7 +64,6 @@ const MessagePage = ({ toggleSidebar }) => {
 
     console.log(yearOfStudy, branch, section);
     try {
-      const backendURL = import.meta.env.VITE_BACKEND_URL;
       const response = await axios.get(
         `${backendURL}/api/report/absentStudents?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${date}`
       );

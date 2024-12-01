@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios"; // Import axios
 import "react-toastify/dist/ReactToastify.css"; // Import the toast CSS
+const backendURL = import.meta.env.VITE_BACKEND_URL;
 
 const GenerateReport = () => {
   const [isLoading, setIsLoading] = useState(false); // State to track loading status
@@ -41,7 +42,6 @@ const GenerateReport = () => {
 
     setIsLoading(true);
     setMessage("");
-    const backendURL = import.meta.env.VITE_BACKEND_URL;
     const url = `${backendURL}/api/report/download-absent-report?gender=${gender}&date=${date}&hostellerDayScholar=${hostellerDayScholar}&yearOfStudy=${yearOfStudy}&section=${section}&branch=${branch}`;
 
     // Using axios to handle the request

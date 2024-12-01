@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from "react-router-dom";
+const backendURL = import.meta.env.VITE_BACKEND_URL;
 
 const GenerateMessage = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -65,7 +66,6 @@ const GenerateMessage = () => {
     setDetails([]);
     setMissingStudents([]);
     setErrorMessage('');
-    const backendURL = import.meta.env.VITE_BACKEND_URL;
     const url = `${backendURL}/api/report/absentStudentsCustom?gender=${gender}&date=${date}&hostellerDayScholar=${hostellerDayScholar}&yearOfStudy=${yearOfStudy}&section=${section}&branch=${branch}`;
 
     fetch(url)
