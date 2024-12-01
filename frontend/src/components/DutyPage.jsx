@@ -39,10 +39,10 @@ function DutyPage() {
       setRollNumbers([]);
     }
   }, [yearOfStudy, branch, section, date]);
+  const backendURL = import.meta.env.VITE_BACKEND_URL;
 
   const fetchRollNumbers = async (yearOfStudy, branch, section, selectedDate) => {
     setSelectedCourse(`${yearOfStudy}-${branch}-${section}`)
-    const backendURL = import.meta.env.VITE_BACKEND_URL;
     const url = `${backendURL}/api/students/remaining?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
 
     try {
