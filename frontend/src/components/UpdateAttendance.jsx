@@ -11,6 +11,7 @@ function UpdateAttendance() {
   const [isLoading, setIsLoading] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false); // New state for updating attendance
+  const [attendanceLogs, setAttendanceLogs] = useState([]); // New state for attendance change logs
 
   const fetchStudentData = async () => {
     if (yearOfStudy === "nan" || branch === "nan" || section === "nan" || !date) {
@@ -32,6 +33,7 @@ function UpdateAttendance() {
       setRollNumbers(
         attendanceStates.map((student) => ({
           rollNo: student.rollNo,
+          name: student.name, // Assuming student name is part of the response
           state: student.state,
         }))
       );
@@ -85,7 +87,8 @@ function UpdateAttendance() {
   const toggleState = (index) => {
     const updatedRollNumbers = [...rollNumbers];
     const currentState = updatedRollNumbers[index].state;
-  
+    const previousState = currentState;
+
     const newState =
       currentState === "Present"
         ? "On Duty"
@@ -94,9 +97,38 @@ function UpdateAttendance() {
         : currentState === "SuperPacc"
         ? "Absent"
         : "Present"; // Default to "Present" if it's "Absent"
-  
+
     updatedRollNumbers[index].state = newState;
     setRollNumbers(updatedRollNumbers);
+
+    // Add log entry for the state change
+    const { rollNo, name } = updatedRollNumbers[index];
+
+    // Check if a log already exists for this student and update it
+    const existingLogIndex = attendanceLogs.findIndex(
+      (log) => log.rollNo === rollNo
+    );
+
+    if (existingLogIndex !== -1) {
+      // Update the existing log if the student already has a log entry
+      const updatedLogs = [...attendanceLogs];
+      updatedLogs[existingLogIndex] = {
+        rollNo,
+        name,
+        previousState,
+        newState,
+      };
+      setAttendanceLogs(updatedLogs);
+    } else {
+      // Add a new log if no log exists for the student
+      const newLog = {
+        rollNo,
+        name,
+        previousState,
+        newState,
+      };
+      setAttendanceLogs((prevLogs) => [newLog, ...prevLogs]);
+    }
   };
 
   return (
@@ -177,30 +209,45 @@ function UpdateAttendance() {
         </button>
       )}
 
+      {/* Attendance Logs */}
+      {attendanceLogs.length > 0 && (
+        <div className="w-full max-w-3xl mt-8 bg-gray-800 p-6 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-semibold text-center text-white">Attendance Change Logs</h2>
+          <div className="mt-4">
+            {attendanceLogs.map((log, index) => (
+              <div key={index} className="flex justify-between mb-3 text-white">
+                <span>{log.rollNo} - {log.name}</span>
+                <span>{log.previousState} → {log.newState}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Confirmation Popup */}
       {isConfirmed && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fadeIn">
-          <div className="p-8 transition-all duration-500 transform scale-110 bg-gray-800 rounded-lg shadow-lg animate-slideDown w-96">
-            <h2 className="mb-4 text-2xl font-semibold text-center text-white">
-              Confirm Action
+          <div className="bg-gray-800 p-8 rounded-lg w-full max-w-md">
+            <h2 className="text-3xl font-semibold text-center text-white">
+              Are you sure you want to update attendance?
             </h2>
-            <p className="mb-6 text-center text-white">
+            <p className="mt-4 text-lg text-white text-center">
               {rollNumbers.length > 0
-                ? ` ${rollNumbers.length} students are marked with the updates as specified`
-                : "0 Students Attendance modified"}
+                ? `${rollNumbers.length} students' attendance will be updated.`
+                : "No students to update."}
             </p>
-            <div className="flex justify-center space-x-4">
-              <button
-                onClick={updateAttendanceStatus}
-                className="w-32 px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-              >
-                Yes
-              </button>
+            <div className="flex justify-between">
               <button
                 onClick={handleClosePopup}
-                className="w-32 px-6 py-3 text-white bg-gray-500 rounded-lg hover:bg-gray-600"
+                className="px-6 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700"
               >
-                No
+                Cancel
+              </button>
+              <button
+                onClick={updateAttendanceStatus}
+                className="px-6 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700"
+              >
+                Confirm
               </button>
             </div>
           </div>
@@ -212,21 +259,16 @@ function UpdateAttendance() {
 
 function Dropdown({ label, value, options, onChange }) {
   return (
-    <div className="flex-1 min-w-[100px] max-w-[150px]">
-      <label htmlFor={label} className="block text-lg font-medium text-white">
-        {label}:
-      </label>
+    <div className="w-full max-w-[250px]">
+      <label htmlFor={label} className="block mb-2 text-white">{label}</label>
       <select
-        id={label}
         value={value}
         onChange={onChange}
-        className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
+        className="w-full px-4 py-2 text-white bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
       >
-        <option value="nan">{label}</option>
-        {options.map((option, index) => (
-          <option key={index} value={option}>
-            {option}
-          </option>
+        <option value="nan">Select {label}</option>
+        {options.map((option, idx) => (
+          <option key={idx} value={option}>{option}</option>
         ))}
       </select>
     </div>
