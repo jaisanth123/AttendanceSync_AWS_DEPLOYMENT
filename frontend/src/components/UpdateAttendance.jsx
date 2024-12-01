@@ -8,13 +8,12 @@ function UpdateAttendance() {
   const [section, setSection] = useState("nan");
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]); // Set default to current date
   const [rollNumbers, setRollNumbers] = useState([]);
-  const [isUpdating, setIsUpdating] = useState(false); // New state for updating attendance
+  const [isLoading, setIsLoading] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
-
+  const [isUpdating, setIsUpdating] = useState(false); // New state for updating attendance
 
   const fetchStudentData = async () => {
     if (yearOfStudy === "nan" || branch === "nan" || section === "nan" || !date) {
-   
       return;
     }
 
@@ -51,7 +50,11 @@ function UpdateAttendance() {
   const handleClosePopup = () => {
     setIsConfirmed(false);
   };
+
   const updateAttendanceStatus = async () => {
+    handleClosePopup();
+    setIsUpdating(true); // Set isUpdating to true when starting the update process
+
     try {
       const rollNumberStateMapping = rollNumbers.reduce((acc, student) => {
         acc[student.rollNo] = student.state;
@@ -74,6 +77,8 @@ function UpdateAttendance() {
     } catch (error) {
       console.error("Error updating attendance status:", error);
       toast.error("Failed to update attendance status.");
+    } finally {
+      setIsUpdating(false); // Reset isUpdating after the process is done
     }
   };
 
@@ -93,7 +98,6 @@ function UpdateAttendance() {
     updatedRollNumbers[index].state = newState;
     setRollNumbers(updatedRollNumbers);
   };
-  
 
   return (
     <div className="flex flex-col items-center flex-1 p-6 md:p-8 lg:p-12">
@@ -107,7 +111,6 @@ function UpdateAttendance() {
             value={yearOfStudy}
             options={["IV", "III", "II"]}
             onChange={(e) => {setYearOfStudy(e.target.value);fetchStudentData();}}
-            
           />
           <Dropdown
             label="Branch"
@@ -167,11 +170,14 @@ function UpdateAttendance() {
       {rollNumbers.length > 0 && (
         <button
           onClick={() => setIsConfirmed(true)}
-          className="w-full px-6 py-3 mt-6 text-lg text-white transition-all duration-500 bg-gray-800 rounded-lg lg:w-1/4 md:w-1/5 sm:w-1/2 hover:scale-110 hover:bg-gray-600"
+          disabled={isUpdating} // Disable button when updating
+          className={`w-full px-6 py-3 mt-6 text-lg text-white transition-all duration-500 ${isUpdating ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-800'} rounded-lg lg:w-1/4 md:w-1/5 sm:w-1/2 hover:scale-110 hover:bg-gray-600`}
         >
-          Update Attendance
+          {isUpdating ? "Updating Attendance..." : "Update Attendance"} {/* Update button text */}
         </button>
       )}
+
+      {/* Confirmation Popup */}
       {isConfirmed && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fadeIn">
           <div className="p-8 transition-all duration-500 transform scale-110 bg-gray-800 rounded-lg shadow-lg animate-slideDown w-96">
