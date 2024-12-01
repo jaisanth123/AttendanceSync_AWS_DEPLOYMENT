@@ -83,6 +83,7 @@ function UpdateAttendance() {
       setIsUpdating(false); // Reset isUpdating after the process is done
     }
   };
+  const [changedStudents, setChangedStudents] = useState([]); // Track students who have changed their attendance
 
   const toggleState = (index) => {
     const updatedRollNumbers = [...rollNumbers];
@@ -162,7 +163,7 @@ function UpdateAttendance() {
         <div className="flex items-center justify-center pb-5 mt-8">
           <div className="w-full max-w-sm">
             <label htmlFor="date" className="block mb-2 text-lg font-medium text-center text-white">
-              Select Date:
+            Date:
             </label>
             <input
               type="date"
@@ -211,11 +212,11 @@ function UpdateAttendance() {
 
       {/* Attendance Logs */}
       {attendanceLogs.length > 0 && (
-        <div className="w-full max-w-3xl mt-8 bg-gray-800 p-6 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-semibold text-center text-white">Attendance Change Logs</h2>
+        <div className="w-full max-w-3xl mt-8 p-6 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-bold text-center ">Attendance Change Logs</h2>
           <div className="mt-4">
             {attendanceLogs.map((log, index) => (
-              <div key={index} className="flex justify-between mb-3 text-white">
+              <div key={index} className="flex justify-between mb-3 font-semibold ">
                 <span>{log.rollNo} - {log.name}</span>
                 <span>{log.previousState} → {log.newState}</span>
               </div>
