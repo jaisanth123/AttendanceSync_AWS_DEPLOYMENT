@@ -62,6 +62,7 @@ function UpdateAttendance() {
       });
 
       toast.success(response.data.message || "Attendance updated successfully!");
+      await fetchStudentData();
     } catch (error) {
       console.error("Error updating attendance status:", error);
       toast.error("Failed to update attendance status.");
@@ -71,19 +72,20 @@ function UpdateAttendance() {
   const toggleState = (index) => {
     const updatedRollNumbers = [...rollNumbers];
     const currentState = updatedRollNumbers[index].state;
-
+  
     const newState =
-      currentState === "SuperPacc"
-        ? "Absent"
-        : currentState === "Absent"
-        ? "Present"
-        : currentState === "Present"
+      currentState === "Present"
         ? "On Duty"
-        : "SuperPacc";
-
+        : currentState === "On Duty"
+        ? "SuperPacc"
+        : currentState === "SuperPacc"
+        ? "Absent"
+        : "Present"; // Default to "Present" if it's "Absent"
+  
     updatedRollNumbers[index].state = newState;
     setRollNumbers(updatedRollNumbers);
   };
+  
 
   return (
     <div className="flex flex-col items-center flex-1 p-6 md:p-8 lg:p-12">

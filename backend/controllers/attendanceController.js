@@ -329,49 +329,6 @@ exports.markSuperPaccAttendance = async (req, res) => {
 
 
 
-exports.updateAttendanceStatus = async (req, res) => {
-  const { yearOfStudy, date, batch, section, state, rollNumberStateMapping } = req.body;
-
-  console.log(yearOfStudy, date, batch, section, state, rollNumberStateMapping);
-
-  try {
-    // Iterate over the rollNumberStateMapping to update each roll number with its corresponding state
-    for (let [rollNo, attendanceState] of Object.entries(rollNumberStateMapping)) {
-      // Ensure that the state provided is valid (Present, Absent, On Duty)
-      if (!['Present', 'Absent', 'On Duty'].includes(attendanceState)) {
-        return res.status(400).json({ message: `Invalid state for roll number ${rollNo}` });
-      }
-
-      // Update the attendance status for the specific roll number
-      const result = await Attendance.updateMany(
-        {
-          rollNo,                     // Match the roll number
-          date,                        // Match the specified date
-          yearOfStudy,                 // Match the year of study
-          batch,                       // Match the batch
-          section,                     // Match the section
-        },
-        {
-          $set: { status: attendanceState }, // Set the status to the corresponding state
-        }
-      );
-
-      if (result.nModified === 0) {
-        console.log(`No attendance records updated for roll number ${rollNo}`);
-      } else {
-        console.log(`Attendance for roll number ${rollNo} updated to ${attendanceState}`);
-      }
-    }
-
-    res.json({ message: 'Attendance updated successfully' });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error updating attendance status' });
-  }
-};
-
-
 exports.getAttendanceStates = async (req, res) => {
   const { yearOfStudy, branch, section, date } = req.query;
 
@@ -432,3 +389,47 @@ exports.getAttendanceStates = async (req, res) => {
       res.status(500).json({ message: "Server error" });
   }
 };
+
+
+exports.updateAttendanceStatus = async (req, res) => {
+  const { yearOfStudy, date, batch, section, rollNumberStateMapping } = req.body;
+
+  console.log(yearOfStudy, date, batch, section, rollNumberStateMapping);
+
+  try {
+    // Iterate over the rollNumberStateMapping to update each roll number with its corresponding state
+    for (let [rollNo, attendanceState] of Object.entries(rollNumberStateMapping)) {
+      // Ensure that the state provided is valid (Present, Absent, On Duty, or SuperPacc)
+      if (!['Present', 'Absent', 'On Duty', 'SuperPacc'].includes(attendanceState)) {
+        return res.status(400).json({ message: `Invalid state for roll number ${rollNo}` });
+      }
+
+      // Update the attendance status for the specific roll number
+      const result = await Attendance.updateMany(
+        {
+          rollNo,                     // Match the roll number
+          date,                        // Match the specified date
+          yearOfStudy,                 // Match the year of study
+          batch,                       // Match the batch
+          section,                     // Match the section
+        },
+        {
+          $set: { status: attendanceState }, // Set the status to the corresponding state
+        }
+      );
+
+      if (result.nModified === 0) {
+        console.log(`No attendance records updated for roll number ${rollNo}`);
+      } else {
+        console.log(`Attendance for roll number ${rollNo} updated to ${attendanceState}`);
+      }
+    }
+
+    res.json({ message: 'Attendance updated successfully' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error updating attendance status' });
+  }
+};
+

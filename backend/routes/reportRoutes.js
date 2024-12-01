@@ -15,10 +15,10 @@ const { authenticateAdmin } = require('../middleware/auth');
 const router = express.Router();
 
 // Route to generate absent students' message
-router.get('/absentStudents', generateAbsentStudentsMessage);
+router.get('/absentStudents',authenticateAdmin, generateAbsentStudentsMessage);
 
 // Route to generate custom absent students' message
-router.get('/absentStudentsCustom', handleCustomAbsentMessage);
+router.get('/absentStudentsCustom', authenticateAdmin,handleCustomAbsentMessage);
 
 // Route to handle downloading the absent report for male students
 router.get('/downloadreport/male', (req, res) => {
