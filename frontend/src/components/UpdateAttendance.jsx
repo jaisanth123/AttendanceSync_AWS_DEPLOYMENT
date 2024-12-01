@@ -17,9 +17,9 @@ function UpdateAttendance() {
     if (yearOfStudy === "nan" || branch === "nan" || section === "nan" || !date) {
       return;
     }
-
     setIsLoading(true);
-    try {
+    try {    
+      setRollNumbers([]);
       const response = await axios.get("http://localhost:5000/api/attendance/get-attendancestatus", {
         params: {
           yearOfStudy,
@@ -39,8 +39,13 @@ function UpdateAttendance() {
       );
     } catch (error) {
       console.error("Error fetching student data:", error);
-      toast.error("Failed to fetch student data. Please try again.");
-    } finally {
+      if (error.response && error.response.status === 404) {
+        toast.info("Attendance has not been marked yet for this date.", {
+          autoClose: 800,
+        });
+      } else {
+        toast.error("Failed to fetch student data. Please try again.");
+      }    } finally {
       setIsLoading(false);
     }
   };
@@ -171,7 +176,8 @@ function UpdateAttendance() {
               id="date"
               value={date}
               onChange={(e) => {setDate(e.target.value);fetchStudentData();}}
-              max={new Date().toISOString().split("T")[0]} // Restrict future dates
+                    max={new Date().toISOString().split("T")[0]} // Restrict future dates
+
               className="w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-600"
             />
           </div>
