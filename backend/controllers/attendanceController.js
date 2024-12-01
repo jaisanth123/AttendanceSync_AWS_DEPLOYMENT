@@ -149,7 +149,7 @@ exports.markRemainingPresent = async (req, res) => {
       yearOfStudy,
       branch,
       section,
-      status: { $in: ['Absent', 'On Duty', 'Present'] }
+      status: { $in: ['Absent', 'On Duty', 'Present','SuperPacc'] }
     }).select('rollNo');
 
     // Extract roll numbers from marked attendance records
@@ -231,5 +231,98 @@ exports.sendEmail = async (req, res) => {
   } catch (error) {
     console.error("Error sending email:", error);
     res.status(500).send({ message: "Failed to send email" });
+  }
+};
+
+
+exports.markSuperPaccAttendance = async (req, res) => {
+  const { yearOfStudy, branch, section, date } = req.body;
+
+  try {
+    // Validate input
+    if (!yearOfStudy || !branch || !section || !date) {
+      return res.status(400).json({ message: 'All fields are required: yearOfStudy, branch, section, and date.' });
+    }
+
+    // Fetch students with superPacc set to 'YES' for the specified yearOfStudy, branch, and section
+    const studentsWithSuperPacc = await Student.find({
+      yearOfStudy,
+      branch,
+      section,
+      superPacc: 'YES',
+    }).select('rollNo');
+
+    if (studentsWithSuperPacc.length === 0) {
+      return res.status(404).json({ message: 'No students with SuperPacc found for the given criteria.' });
+    }
+
+    // Prepare attendance records
+    const superPaccAttendanceRecords = studentsWithSuperPacc.map(student => ({
+      rollNo: student.rollNo,
+      date,
+      status: 'SuperPacc',
+      yearOfStudy,
+      branch,
+      section,
+      locked: false,
+    }));
+
+    // Check if any attendance records already exist for the given date, yearOfStudy, branch, and section
+    const existingRecords = await Attendance.find({
+      yearOfStudy,
+      branch,
+      section,
+      date,
+    });
+
+    // If existing records are found, update the status for absent students and insert for new students
+    if (existingRecords.length > 0) {
+      // Go through each existing record and update status to 'SuperPacc' for those marked absent
+      const updatedRecords = [];
+      for (let student of studentsWithSuperPacc) {
+        const existingRecord = existingRecords.find(record => record.rollNo === student.rollNo);
+
+        if (existingRecord) {
+          // If the record exists but the status is not 'SuperPacc', update it
+          if (existingRecord.status !== 'SuperPacc') {
+            await Attendance.updateOne(
+              { _id: existingRecord._id },
+              { $set: { status: 'SuperPacc' } }
+            );
+            updatedRecords.push(existingRecord);
+          }
+        } else {
+          // If no record exists, insert a new one
+          await Attendance.create({
+            rollNo: student.rollNo,
+            date,
+            status: 'SuperPacc',
+            yearOfStudy,
+            branch,
+            section,
+            locked: false,
+          });
+        }
+      }
+
+      res.status(200).json({
+        message: 'Attendance updated successfully to SuperPacc.',
+        recordsUpdated: updatedRecords.length,
+        recordsAdded: superPaccAttendanceRecords.length - updatedRecords.length, // Records added
+      });
+
+    } else {
+      // If no records exist, insert all the SuperPacc attendance records
+      await Attendance.insertMany(superPaccAttendanceRecords);
+
+      res.status(201).json({
+        message: 'SuperPacc attendance marked successfully.',
+        recordsAdded: superPaccAttendanceRecords.length,
+      });
+    }
+
+  } catch (error) {
+    console.error('Error marking SuperPacc attendance:', error);
+    res.status(500).json({ message: 'Error marking SuperPacc attendance.' });
   }
 };

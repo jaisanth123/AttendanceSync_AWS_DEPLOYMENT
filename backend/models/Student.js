@@ -11,6 +11,7 @@ const studentSchema = new mongoose.Schema({
     section: String,
     parentMobileNo: String,
     studentMobileNo: String,
+    superPacc : String,
 });
 
 // Create and export the Student model
