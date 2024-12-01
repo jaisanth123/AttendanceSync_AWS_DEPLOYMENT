@@ -277,7 +277,12 @@ function DutyPage() {
 
 <button
   onClick={() => setIsConfirmed(true)}
-  className="w-full px-6 py-3 mt-10 text-white transition-all duration-500 transform bg-gray-800 rounded-lg lg:w-1/4 md:w-1/5 sm:w-1/2 hover:bg-gray-600 hover:scale-110"
+  disabled={yearOfStudy === "nan" || branch === "nan" || section === "nan"}
+  className={`w-full px-6 py-3 mt-10 text-white transition-all text-lg duration-500 transform rounded-lg lg:w-1/4 md:w-1/5 sm:w-1/2 ${
+    yearOfStudy === "nan" || branch === "nan" || section === "nan"
+      ? "bg-gray-400  cursor-not-allowed"
+      : "bg-gray-800 hover:bg-gray-600 hover:scale-110"
+  }`}
 >
   MARK OD
 </button>
@@ -304,7 +309,7 @@ function DutyPage() {
 
       {isConfirmed && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fadeIn">
-          <div className="p-8 transition-all duration-500 transform scale-90 bg-gray-800 rounded-lg shadow-lg animate-slideDown w-96">
+          <div className="p-8 transition-all duration-500 transform scale-110 bg-gray-800 rounded-lg shadow-lg animate-slideDown w-96">
             <h2 className="mb-4 text-2xl font-semibold text-center text-white">
               Confirm Action
             </h2>
