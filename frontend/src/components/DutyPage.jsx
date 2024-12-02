@@ -105,6 +105,11 @@ function DutyPage() {
     );
   };
 
+  const navigateToHome = () => {
+ // Close the card before navigating
+    navigate("/homePage"); // Navigate to home page
+  };
+
   const handleConfirm = async () => {
     if (selectedRollNumbers.length === 0) {
       toast.info("0 Students are Marked as On Duty", {
@@ -307,6 +312,11 @@ function DutyPage() {
     Generate Message
   </button>
 )}
+        
+          <button onClick={navigateToHome} className="w-full h-20 px-6 py-3 mt-5 text-2xl text-white transition-all duration-500 transform bg-gray-800 rounded-lg hover:bg-gray-600 hover:scale-110 lg:w-1/4 md:w-1/5 sm:w-1/2 ">
+            Home
+          </button>
+     
 
 
 
