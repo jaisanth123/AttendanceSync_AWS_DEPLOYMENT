@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 function UpdateAttendance() {
   const [yearOfStudy, setYearOfStudy] = useState("nan");
   const [branch, setBranch] = useState("nan");
   const [section, setSection] = useState("nan");
+  const location = useLocation();
+  const navigate = useNavigate();
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]); // Set default to current date
   const [rollNumbers, setRollNumbers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -93,7 +97,11 @@ function UpdateAttendance() {
   };
 
   const [changedStudents, setChangedStudents] = useState([]); // Track students who have changed their attendance
-
+  const navigateToHome = () => {
+    // Close the card before navigating
+       navigate("/homePage"); // Navigate to home page
+     };
+   
   const toggleState = (index) => {
     const updatedRollNumbers = [...rollNumbers];
     const currentState = updatedRollNumbers[index].state;
@@ -187,6 +195,20 @@ function UpdateAttendance() {
           </div>
         </div>
       </div>
+      <div className="flex justify-center gap-4 my-6">
+          <button className="px-6 py-3 text-white rounded-lg shadow bg-amber-600 hover:bg-amber-700">
+            SuperPacc
+          </button>
+          <button className="px-6 py-3 text-white bg-red-600 rounded-lg shadow hover:bg-red-700">
+            Absent
+          </button>
+          <button className="px-6 py-3 text-white bg-green-900 rounded-lg shadow hover:bg-green-800">
+            Present
+          </button>
+          <button className="px-6 py-3 text-white rounded-lg shadow bg-sky-700 hover:bg-sky-600">
+            On Duty
+          </button>
+        </div>
 
 
       {/* Roll Numbers */}
@@ -234,11 +256,17 @@ function UpdateAttendance() {
         <button
           onClick={() => setIsConfirmed(true)}
           disabled={isUpdating} // Disable button when updating
-          className={`w-full px-6 py-3 mt-6 text-lg text-white transition-all duration-500 ${isUpdating ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-800'} rounded-lg lg:w-1/4 md:w-1/5 sm:w-1/2 hover:scale-110 hover:bg-gray-600`}
+          className={`w-full px-6 py-3 mt-6  h-20 text-white text-2xl transition-all duration-500 ${isUpdating ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-800'} rounded-lg lg:w-1/4 md:w-1/5 sm:w-1/2 hover:scale-110 hover:bg-gray-600`}
         >
           {isUpdating ? "Updating Attendance..." : "Update Attendance"} {/* Update button text */}
         </button>
       )}
+
+
+<button onClick={navigateToHome} className="w-full h-20 px-6 py-3 mt-5 text-2xl text-white transition-all duration-500 transform bg-gray-800 rounded-lg hover:bg-gray-600 hover:scale-110 lg:w-1/4 md:w-1/5 sm:w-1/2 ">
+            Home
+          </button>
+     
 
 
       {/* Confirmation Popup */}
