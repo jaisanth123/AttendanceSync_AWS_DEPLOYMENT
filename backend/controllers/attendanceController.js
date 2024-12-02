@@ -395,6 +395,73 @@ exports.getAttendanceStates = async (req, res) => {
   }
 };
 
-
 exports.updateAttendanceStatus = async (req, res) => {
+  const { yearOfStudy, branch, section, date, rollNumberStateMapping } = req.body;
+
+  // Check for missing required fields
+  if (!yearOfStudy || !branch || !section || !date || !rollNumberStateMapping) {
+    return res.status(400).json({ message: "Missing required fields." });
+  }
+
+  try {
+    // Fetch all students in the specified year, branch, and section
+    const allStudents = await Student.find({ yearOfStudy, branch, section }).select('rollNo');
+
+    // Iterate over the rollNumberStateMapping to update the state for each roll number
+    for (const [rollNo, state] of Object.entries(rollNumberStateMapping)) {
+      // Validate the provided state
+      if (!['Present', 'Absent', 'On Duty', 'SuperPacc'].includes(state)) {
+        return res.status(400).json({ message: `Invalid state for roll number ${rollNo}` });
+      }
+
+      // Check if the attendance record exists for the given rollNo and date
+      const existingAttendance = await Attendance.findOne({
+        rollNo, 
+        yearOfStudy, 
+        branch, 
+        section, 
+        date
+      });
+
+      if (existingAttendance) {
+        // If the record exists, update the attendance status
+        const updateResult = await Attendance.findOneAndUpdate(
+          {
+            rollNo,      // Match roll number
+            yearOfStudy, // Match year of study
+            branch,      // Match branch
+            section,     // Match section
+            date,        // Match date
+          },
+          {
+            $set: { status: state }, // Update the state
+          },
+          { new: true, upsert: false } // Only update, don't create new records
+        );
+
+        console.log(`Attendance updated for roll number ${rollNo} to ${state}`);
+      } else {
+        // If the attendance record doesn't exist, create a new one with the given state
+        const newAttendance = new Attendance({
+          rollNo,
+          date,
+          status: state,
+          yearOfStudy,
+          branch,
+          section,
+          locked: false, // Assuming "locked" is required
+        });
+
+        await newAttendance.save();
+        console.log(`New attendance created for roll number ${rollNo} with state ${state}`);
+      }
+    }
+
+    // Return a success response after updating attendance
+    res.status(200).json({ message: "Attendance updated successfully!" });
+  } catch (error) {
+    // Handle any errors that occur during the process
+    console.error("Error updating attendance status:", error);
+    res.status(500).json({ message: "Server error while updating attendance." });
+  }
 };

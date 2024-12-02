@@ -278,7 +278,7 @@ function DutyPage() {
 <button
   onClick={() => setIsConfirmed(true)}
   disabled={yearOfStudy === "nan" || branch === "nan" || section === "nan"}
-  className={`w-full px-6 py-3 mt-10 text-white transition-all text-lg duration-500 transform rounded-lg lg:w-1/4 md:w-1/5 sm:w-1/2 ${
+  className={`w-full px-6 py-3 mt-10 h-20 text-white transition-all text-2xl duration-500 transform rounded-lg lg:w-1/4 md:w-1/5 sm:w-1/2 ${
     yearOfStudy === "nan" || branch === "nan" || section === "nan"
       ? "bg-gray-400  cursor-not-allowed"
       : "bg-gray-800 hover:bg-gray-600 hover:scale-110"
@@ -286,7 +286,7 @@ function DutyPage() {
 >
   MARK OD
 </button>
-{showGenerateMessageButton && (
+{ (
   <button
     onClick={() =>
       navigate("/message", {
@@ -299,8 +299,11 @@ function DutyPage() {
         },
       })
     }
-    className="w-full px-6 py-3 mt-4 text-white transition-all duration-500 transform bg-gray-800 rounded-lg lg:w-1/4 md:w-1/5 sm:w-1/2 hover:bg-gray-600 hover:scale-110"
-  >
+    className={`w-full px-6 py-3 mt-5 h-20 text-white transition-all text-2xl duration-500 transform rounded-lg lg:w-1/4 md:w-1/5 sm:w-1/2 ${
+      yearOfStudy === "nan" || branch === "nan" || section === "nan"
+        ? "bg-gray-400  cursor-not-allowed"
+        : "bg-gray-800 hover:bg-gray-600 hover:scale-110"
+    }`}  >
     Generate Message
   </button>
 )}

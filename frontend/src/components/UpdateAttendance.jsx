@@ -81,6 +81,9 @@ function UpdateAttendance() {
       });
       setIsConfirmed(false);
       await fetchStudentData();
+
+      // Reset attendance logs after update
+      setAttendanceLogs([]);  // Reset logs after successful update
     } catch (error) {
       console.error("Error updating attendance status:", error);
       toast.error("Failed to update attendance status.");
@@ -88,6 +91,7 @@ function UpdateAttendance() {
       setIsUpdating(false); // Reset isUpdating after the process is done
     }
   };
+
   const [changedStudents, setChangedStudents] = useState([]); // Track students who have changed their attendance
 
   const toggleState = (index) => {
@@ -209,7 +213,24 @@ function UpdateAttendance() {
       )}
 
       {/* Update Button */}
-      {rollNumbers.length > 0 && (
+
+      {/* Attendance Logs */}
+{/* Attendance Logs */}
+{attendanceLogs.length > 0 && (
+  <div className="w-full max-w-3xl p-6 mt-8 rounded-lg shadow-lg">
+    <h2 className="text-2xl font-bold text-center ">Attendance Change Logs</h2>
+    <div className="mt-4">
+      {attendanceLogs.map((log, index) => (
+        <div key={index} className="flex justify-between mb-3 font-semibold ">
+          <span>{log.rollNo} - {log.name}</span>
+          <span>{log.previousState} → {log.newState}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
+            {rollNumbers.length > 0 && (
         <button
           onClick={() => setIsConfirmed(true)}
           disabled={isUpdating} // Disable button when updating
@@ -219,50 +240,54 @@ function UpdateAttendance() {
         </button>
       )}
 
-      {/* Attendance Logs */}
-      {attendanceLogs.length > 0 && (
-        <div className="w-full max-w-3xl mt-8 p-6 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold text-center ">Attendance Change Logs</h2>
-          <div className="mt-4">
-            {attendanceLogs.map((log, index) => (
-              <div key={index} className="flex justify-between mb-3 font-semibold ">
-                <span>{log.rollNo} - {log.name}</span>
-                <span>{log.previousState} → {log.newState}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Confirmation Popup */}
       {isConfirmed && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-gray-800 p-8 rounded-lg w-full max-w-md">
-            <h2 className="text-3xl font-semibold text-center text-white">
-              Are you sure you want to update attendance?
-            </h2>
-            <p className="mt-4 text-lg text-white text-center">
-              {rollNumbers.length > 0
-                ? `Students Attendance will be updated as specified.`
-                : "No students to update."}
-            </p>
-            <div className="flex justify-between">
-              <button
-                onClick={handleClosePopup}
-                className="px-6 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={updateAttendanceStatus}
-                className="px-6 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700"
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-md animate-fadeIn">
+    <div className="relative w-full max-w-lg p-8 border border-gray-600 shadow-lg bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 rounded-xl">
+      <div className="absolute flex items-center justify-center w-16 h-16 transform -translate-x-1/2 bg-green-600 rounded-full shadow-md -top-6 left-1/2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={2}
+          stroke="white"
+          className="w-8 h-8"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M5 13l4 4L19 7"
+          />
+        </svg>
+      </div>
+      <h2 className="mt-8 text-2xl font-bold text-center text-white">
+        Confirm Update Attendance
+      </h2>
+      <p className="mt-4 text-lg text-center text-gray-300">
+        {rollNumbers.length > 0
+          ? `Students' attendance will be updated as specified.`
+          : "No students to update."}
+      </p>
+      <div className="flex justify-between mt-6">
+      <button
+          onClick={updateAttendanceStatus}
+          className="w-1/2 py-2 mr-3 font-medium text-white bg-green-500 rounded-lg shadow-md x-4 hover:bg-green-600 focus:ring-4 focus:ring-green-300"
+        >
+          Confirm
+        </button>
+        <button
+          onClick={handleClosePopup}
+          className="w-1/2 px-4 py-2 font-medium text-white bg-red-500 rounded-lg shadow-md hover:bg-red-600 focus:ring-4 focus:ring-red-300"
+        >
+          Cancel
+        </button>
+
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
