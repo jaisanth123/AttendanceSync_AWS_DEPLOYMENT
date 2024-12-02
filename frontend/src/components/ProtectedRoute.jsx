@@ -7,6 +7,7 @@ const ProtectedRoute = () => {
   const [showError, setShowError] = useState(false);
   const [redirect, setRedirect] = useState(false);
   const token = sessionStorage.getItem("authToken"); // Get token from sessionStorage
+  console.log('Token from sessionStorage:', token); // Log token to verify if it's retrieved
 
   useEffect(() => {
     if (!token) {
@@ -33,7 +34,7 @@ const ProtectedRoute = () => {
     return (
       <div>
         {showError && (
-          <div className="text-red-600 text-center font-bold text-2xl">
+          <div className="text-2xl font-bold text-center text-red-600">
             You must be logged in to access this page.
           </div>
         )}

@@ -67,9 +67,10 @@ const MessagePage = ({ toggleSidebar }) => {
     console.log(yearOfStudy, branch, section);
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/report/absentStudents?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${date}`
+        `http://localhost:5000/api/report/absentStudents?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${date}`,
+        { withCredentials: true } // Add withCredentials in the configuration object
       );
-
+    
       if (response.data.message) {
         setMessage(response.data.message);
 

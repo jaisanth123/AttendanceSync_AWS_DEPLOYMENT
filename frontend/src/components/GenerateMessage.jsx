@@ -59,35 +59,51 @@ const GenerateMessage = () => {
       toast.info('Please select a date.', { autoClose: 800 });
       return;
     }
-
+  
     setIsLoading(true);
     setMessage('');
     setDetails([]);
     setMissingStudents([]);
     setErrorMessage('');
-
+  
+    const authToken = sessionStorage.getItem('authToken');
+  
+    if (!authToken) {
+      setErrorMessage('Authorization token is missing. Please log in again.');
+      setIsLoading(false);
+      return;
+    }
+  
+    // Construct the URL for the report
     const url = `http://localhost:5000/api/report/absentStudentsCustom?gender=${gender}&date=${date}&hostellerDayScholar=${hostellerDayScholar}&yearOfStudy=${yearOfStudy}&section=${section}&branch=${branch}`;
 
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.message) {
-          setMessage(data.message);
-          const detailsArray = data.details ? data.details.split('\n') : [];
-          setDetails(detailsArray);
-          setMissingStudents(data.missingStudents || []);
-          setErrorMessage('');
-        }
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        setErrorMessage('An error occurred. Please try again later.');
-        setIsLoading(false);
-      });
-  };
+  
+    // Add the Authorization header to the fetch request
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${authToken}`, // Include the token in the Authorization header
+      },
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.message) {
+        setMessage(data.message);
+        const detailsArray = data.details ? data.details.split('\n') : [];
+        setDetails(detailsArray);
+        setMissingStudents(data.missingStudents || []);
+        setErrorMessage('');
+      }
+      setIsLoading(false);
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      setErrorMessage('An error occurred. Please try again later.');
+      setIsLoading(false);
+    });
+};
 
-  return (
+return (
 <div className="flex items-start justify-center min-h-screen p-6">
   <div className="w-full p-6 bg-gray-800 rounded-lg shadow-lg sm:w-96 md:w-80 lg:w-96 xl:w-1/3">
     <h2 className="mb-2 text-2xl font-semibold text-center text-white">Generate Absentee Message</h2>
