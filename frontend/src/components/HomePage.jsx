@@ -41,7 +41,7 @@ function HomePage({ toggleSidebar }) {
               onClick={() => navigate("/viewattendance")}
             />
             <ActionCard
-              label="Dashboard"
+              label="Update Attendance"
               onClick={() => navigate("/update-attendance")}
             />
           </>
