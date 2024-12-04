@@ -46,13 +46,13 @@ function Absentees() {
     }
   }, [selectedCourse, date]);
 
-  // Fetch roll numbers sds selectedCoursor date changes
-  // Fetch roll numbers when selectedCourse or date changes
+  const backendURL = import.meta.env.VITE_BACKEND_URL; 
+
   const fetchRollNumbers = async (course, selectedDate) => {
     let [yearOfStudy, branch, section] = course.split(" - ");
     section =  yearOfStudy ==="IV"?"-" : section
     setYearOfStudy(yearOfStudy);
-    const url = `http://localhost:5000/api/attendance/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
+    const url = `${backendURL}/api/attendance/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
     console.log(url);
   
     try {
@@ -161,7 +161,7 @@ function Absentees() {
       setYearOfStudy(yearOfStudy);
   
       // Make sure the server endpoint and data are correct
-      const response = await axios.post("http://localhost:5000/api/attendance/absent", {
+      const response = await axios.post(`${backendURL}/api/attendance/absent`, {
         rollNumbers: selectedRollNos,
         date,
         yearOfStudy,
@@ -202,7 +202,7 @@ function Absentees() {
   
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/attendance/mark-remaining-present",
+        `${backendURL}/api/attendance/mark-remaining-present`,
         data
       );
   
@@ -241,7 +241,7 @@ function Absentees() {
     setShowMarkSuperPaccPopup(false); 
     try {
       // Make the POST request to the backend API
-      const response = await axios.post("http://localhost:5000/api/attendance/mark-SuperPacc", data);
+      const response = await axios.post(`${backendURL}/api/attendance/mark-SuperPacc`, data);
   
       // Handle the success response
       toast.success(`Successfully marked ${response.data.recordsAdded} students as SuperPacc!`, {
