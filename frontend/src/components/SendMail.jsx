@@ -30,13 +30,24 @@ const SendEmail = () => {
     formData.append("subject", `${currentDate} - Absentees Report`);
     formData.append("content", "Please find the attached Excel report.");
     formData.append("toEmails", toEmails); // Use the toEmails state
-
+    const authToken = sessionStorage.getItem("authToken");
+  
+    if (!authToken) {
+      toast.error("Authorization token is missing. Please log in again.", {
+        autoClose: 800,
+      });
+      setIsLoading(false);
+      return;
+    }
     try {
       const response = await fetch(
         "http://localhost:5000/api/attendance/send-email",
         {
           method: "POST",
           body: formData,
+          // headers: {
+          //   'Authorization': `Bearer ${authToken}`, // Include the token in the Authorization header
+          // },
         }
       );
 

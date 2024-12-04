@@ -33,7 +33,7 @@ function HomePage({ toggleSidebar }) {
         {/* Mark On Duty Card */}
         <ActionCard label="Mark On Duty" onClick={() => navigate("/duty")} />
 
-        {/* Conditionally render View Attendance and Dashboard based on role */}
+        {/* Conditionally render View Attendance and UpdateAttendance based on role */}
         {role === "admin" && (
           <>
             <ActionCard

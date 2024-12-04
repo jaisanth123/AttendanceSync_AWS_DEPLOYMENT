@@ -17,14 +17,26 @@ function UpdateAttendance() {
   const [isUpdating, setIsUpdating] = useState(false); // New state for updating attendance
   const [attendanceLogs, setAttendanceLogs] = useState([]); // New state for attendance change logs
 
+  const authToken = sessionStorage.getItem("authToken");
+  
+    if (!authToken) {
+      toast.error("Authorization token is missing. Please log in again.", {
+        autoClose: 800,
+      });
+      setIsLoading(false);
+      return;
+    }
   const fetchStudentData = async () => {
     if (yearOfStudy === "nan" || branch === "nan" || section === "nan" || !date) {
       return;
     }
     setIsLoading(true);
-    try {    
+    try{
       setRollNumbers([]);
       const response = await axios.get("http://localhost:5000/api/attendance/get-attendancestatus", {
+        headers: {
+          Authorization: `Bearer ${authToken}`, // Add the token to the header
+        },
         params: {
           yearOfStudy,
           branch,
@@ -78,8 +90,11 @@ function UpdateAttendance() {
         section,
         date,
         rollNumberStateMapping,
+      }, {
+        headers: {
+          Authorization: `Bearer ${authToken}`, // Add the token to the header
+        },
       });
-
       toast.success(response.data.message || "Attendance updated successfully!", {
         autoClose: 800,
       });

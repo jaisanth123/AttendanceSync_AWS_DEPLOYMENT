@@ -304,6 +304,7 @@ function DutyPage() {
         },
       })
     }
+    disabled={yearOfStudy === "nan" || branch === "nan" || section === "nan"}
     className={`w-full px-6 py-3 mt-5 h-20 text-white transition-all text-2xl duration-500 transform rounded-lg lg:w-1/4 md:w-1/5 sm:w-1/2 ${
       yearOfStudy === "nan" || branch === "nan" || section === "nan"
         ? "bg-gray-400  cursor-not-allowed"
