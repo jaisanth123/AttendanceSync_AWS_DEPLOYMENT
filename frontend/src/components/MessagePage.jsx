@@ -138,7 +138,7 @@ const MessagePage = ({ toggleSidebar }) => {
 
       <div className="flex flex-col items-center gap-y-4">
         {/* Conditionally render Get Absentees Button based on role */}
-        {role === "admin" && (
+        
           <div
             onClick={() => {
               getAbsentStudents(selectedCourse, selectedDate);
@@ -150,7 +150,7 @@ const MessagePage = ({ toggleSidebar }) => {
               Get Absentees
             </button>
           </div>
-        )}
+        
 
         {showCard && (message || details.length > 0 || missingStudents.length > 0 || errorMessage) && (
           <div

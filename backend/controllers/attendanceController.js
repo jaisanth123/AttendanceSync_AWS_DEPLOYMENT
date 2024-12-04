@@ -208,7 +208,7 @@ exports.sendEmail = async (req, res) => {
     service: "gmail",
     auth: {
       user: "vijayakanthm.23aim@kongu.edu", // Replace with your email
-      pass: "bebg srbb qojy nydn", // Replace with your app-specific password
+      pass: "ueqf sakc aeaw hchl", // Replace with your app-specific password
     },
   });
 

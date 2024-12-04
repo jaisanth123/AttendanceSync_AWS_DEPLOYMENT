@@ -16,6 +16,7 @@ function UpdateAttendance() {
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false); // New state for updating attendance
   const [attendanceLogs, setAttendanceLogs] = useState([]); // New state for attendance change logs
+  const [initialStates, setInitialStates] = useState([]);
 
   const authToken = sessionStorage.getItem("authToken");
   
@@ -52,6 +53,12 @@ function UpdateAttendance() {
           name: student.name, // Assuming student name is part of the response
           state: student.state,
         }))
+      );
+      setInitialStates(
+        attendanceStates.reduce((acc, student) => {
+          acc[student.rollNo] = student.state;
+          return acc;
+        }, {})
       );
     } catch (error) {
       console.error("Error fetching student data:", error);
@@ -119,8 +126,9 @@ function UpdateAttendance() {
    
   const toggleState = (index) => {
     const updatedRollNumbers = [...rollNumbers];
+  
     const currentState = updatedRollNumbers[index].state;
-    const previousState = currentState;
+ const previousState = currentState;
 
     const newState =
       currentState === "Present"
@@ -137,6 +145,7 @@ function UpdateAttendance() {
     // Add log entry for the state change
     const { rollNo, name } = updatedRollNumbers[index];
 
+    const initialState = initialStates[rollNo] 
     // Check if a log already exists for this student and update it
     const existingLogIndex = attendanceLogs.findIndex(
       (log) => log.rollNo === rollNo
@@ -148,7 +157,7 @@ function UpdateAttendance() {
       updatedLogs[existingLogIndex] = {
         rollNo,
         name,
-        previousState,
+        initialState,
         newState,
       };
       setAttendanceLogs(updatedLogs);
@@ -157,7 +166,7 @@ function UpdateAttendance() {
       const newLog = {
         rollNo,
         name,
-        previousState,
+        initialState,
         newState,
       };
       setAttendanceLogs((prevLogs) => [newLog, ...prevLogs]);
@@ -235,12 +244,12 @@ function UpdateAttendance() {
               onClick={() => toggleState(index)}
               className={`flex items-center justify-center p-6 text-white transition-all transform duration-500 text-xl font-semibold rounded-lg cursor-pointer shadow-md ${
                 rollNumber.state === "SuperPacc"
-                  ? "bg-gray-600"
+                  ? "bg-amber-600  rounded-lg shadow   hover:scale-110"
                   : rollNumber.state === "Absent"
-                  ? "bg-red-600"
+                  ? "bg-red-600 rounded-lg shadow   hover:scale-110"
                   : rollNumber.state === "Present"
-                  ? "bg-green-600"
-                  : "bg-yellow-600"
+                  ? "bg-green-900 rounded-lg shadow  hover:scale-110 "
+                  : "bg-sky-700  rounded-lg shadow  hover:scale-110"
               } hover:scale-110`}
             >
               {rollNumber.rollNo}
@@ -260,7 +269,7 @@ function UpdateAttendance() {
       {attendanceLogs.map((log, index) => (
         <div key={index} className="flex justify-between mb-3 font-semibold ">
           <span>{log.rollNo} - {log.name}</span>
-          <span>{log.previousState} → {log.newState}</span>
+          <span>{log.initialState} → {log.newState}</span>
         </div>
       ))}
     </div>
