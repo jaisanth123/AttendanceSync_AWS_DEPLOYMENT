@@ -196,11 +196,7 @@ const MessagePage = ({ toggleSidebar }) => {
         )}
 
         {/* Attendance Button */}
-        <div onClick={navigateToAttendance} className="w-full max-w-xs p-6 mx-auto mt-6 text-white transition-all duration-500 bg-gray-800 rounded-lg shadow-lg hover:scale-110 hover:bg-gray-600">
-          <button className="w-full py-2 text-2xl font-semibold text-white">
-            Attendance
-          </button>
-        </div>
+
 
         {/* Home Button */}
         <div onClick={navigateToHome} className="w-full max-w-xs p-6 mx-auto mt-6 text-white transition-all duration-500 bg-gray-800 rounded-lg shadow-lg hover:bg-gray-600 hover:scale-110">
