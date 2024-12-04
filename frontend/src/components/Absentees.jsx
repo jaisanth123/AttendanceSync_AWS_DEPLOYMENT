@@ -49,9 +49,11 @@ function Absentees() {
   // Fetch roll numbers sds selectedCoursor date changes
   // Fetch roll numbers when selectedCourse or date changes
   const fetchRollNumbers = async (course, selectedDate) => {
-    const [yearOfStudy, branch, section] = course.split(" - ");
+    let [yearOfStudy, branch, section] = course.split(" - ");
+    section =  yearOfStudy ==="IV"?"-" : section
     setYearOfStudy(yearOfStudy);
     const url = `http://localhost:5000/api/attendance/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
+    console.log(url);
   
     try {
       const { data } = await axios.get(url);
