@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios"; // Import axios
@@ -30,6 +30,11 @@ const GenerateReport = () => {
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   };
+
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    setDate(today);
+  }, []);
 
   // Handle the button click to download the report
   const handleDownload = () => {
@@ -230,15 +235,17 @@ const GenerateReport = () => {
         {/* Button to download report */}
         <button
           onClick={handleDownload}
-          className="w-full px-4 py-2 font-bold text-white transition duration-300 bg-blue-600 rounded-md shadow hover:bg-blue-700"
+          className={`w-full px-4 py-2 font-bold text-white transition duration-500 rounded-md shadow  ${isLoading? "bg-gray-600 hover:bg-gray-700 cursor-not-allowed":"bg-blue-600 hover:scale-110"}`}
         >
           {isLoading ? "Loading..." : "Download Report"}
         </button>
 
+
+
         {/* Back button */}
         <button
           onClick={() => navigate(-1)} // Replace with actual back navigation logic
-          className="w-full px-4 py-2 mt-4 font-bold text-white transition duration-300 bg-gray-600 rounded-md shadow hover:bg-gray-700"
+          className="w-full px-4 py-2 mt-4 font-bold text-white transition duration-500 bg-gray-600 rounded-md shadow hover:scale-110 hover:bg-gray-700"
         >
           Back
         </button>

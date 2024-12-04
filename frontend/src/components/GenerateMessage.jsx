@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from "react-router-dom";
@@ -33,6 +33,13 @@ const GenerateMessage = () => {
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   };
+
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    setDate(today);
+  }, []);
+
+  
 
   const copyCardContent = () => {
     const cardContent = document.getElementById('cardContent');
@@ -124,7 +131,8 @@ return (
         <select
           id="gender"
           value={gender}
-          onChange={handleGenderChange}
+          onChange={(e) => {handleGenderChange(e); setShowCard(false)}
+          }
           style={{ padding: '5px', margin: '10px 0' }}
           className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
         >
@@ -140,7 +148,7 @@ return (
         <select
           id="hostellerDayScholar"
           value={hostellerDayScholar}
-          onChange={handleHostellerDayScholarChange}
+          onChange={(e) => {handleHostellerDayScholarChange(e); setShowCard(false)}}
           style={{ padding: '5px', margin: '10px 0' }}
           className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
         >
@@ -156,7 +164,7 @@ return (
         <select
           id="yearOfStudy"
           value={yearOfStudy}
-          onChange={handleYearOfStudyChange}
+          onChange={(e)=>{handleYearOfStudyChange(e);setShowCard(false)}}
           style={{ padding: '5px', margin: '10px 0' }}
           className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
         >
@@ -173,7 +181,7 @@ return (
         <select
           id="branch"
           value={branch}
-          onChange={handleBranchChange}
+          onChange={(e)=>{handleBranchChange(e);setShowCard(false)}}
           style={{ padding: '5px', margin: '10px 0' }}
           className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
         >
@@ -189,7 +197,7 @@ return (
         <select
           id="section"
           value={section}
-          onChange={handleSectionChange}
+          onChange={(e) => {handleSectionChange(e);setShowCard(false)}}
           style={{ padding: '5px', margin: '10px 0' }}
           className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
         >
@@ -206,13 +214,13 @@ return (
           handleDownload();
           toggleCardVisibility();
         }}
-        className="w-full px-4 py-2 mt-2 font-bold text-white transition duration-300 bg-blue-600 rounded-md shadow hover:bg-blue-700"
+        className="w-full px-4 py-2 mt-2 font-bold text-white transition duration-500 bg-blue-600 rounded-md shadow hover:scale-110 hover:bg-blue-700"
       >
         {isLoading ? 'Generating Report...' : 'Get Absent Students'}
       </button>
       <button
           onClick={() => navigate(-1)} // Replace with actual back navigation logic
-          className="w-full px-4 py-2 mt-4 font-bold text-white transition duration-300 bg-gray-600 rounded-md shadow hover:bg-gray-700"
+          className="w-full px-4 py-2 mt-4 font-bold text-white transition duration-500 bg-gray-600 rounded-md shadow hover:scale-110 hover:bg-gray-700"
         >
           Back
         </button>
