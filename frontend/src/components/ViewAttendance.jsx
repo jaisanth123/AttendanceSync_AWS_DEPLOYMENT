@@ -33,7 +33,7 @@ function ViewAttendance({ toggleSidebar }) {
         />
                 <ActionCard
           label="Generate Email"
-          onClick={() => navigate("/generateEmail")}
+          onClick={() => navigate("/send-email")}
         />
         
 

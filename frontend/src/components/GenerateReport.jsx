@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios"; // Import axios
@@ -33,66 +33,79 @@ const GenerateReport = () => {
   };
 
   // Handle the button click to download the report
+  
+  // Handle the button click to download the report
   const handleDownload = () => {
     if (!date) {
-      // Show toast message for missing date selection
-      toast.info('Please select a date.', { autoClose: 800 });
+      toast.info("Please select a date.", { autoClose: 800 });
       return;
     }
-
+  
     setIsLoading(true);
     setMessage("");
+    const authToken = sessionStorage.getItem("authToken");
+  
+    if (!authToken) {
+      toast.error("Authorization token is missing. Please log in again.", {
+        autoClose: 800,
+      });
+      setIsLoading(false);
+      return;
+    }
+  
     const url = `${backendURL}/api/report/download-absent-report?gender=${gender}&date=${date}&hostellerDayScholar=${hostellerDayScholar}&yearOfStudy=${yearOfStudy}&section=${section}&branch=${branch}`;
-
-    // Using axios to handle the request
+  
     axios
-      .get(url, { responseType: "blob",
-        withCredentials: true // Include credentials (cookies) with the request
-       }) // Set the responseType to 'blob' for file downloads
+      .get(url, {
+        responseType: "blob",
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      })
       .then((response) => {
-        if (response.status === 404) {
-          const formattedDate = formatDate(date);
-          setMessage(
-            `No absent students found for specified criteria on ${formattedDate}.`
-          );
-          setIsLoading(false);
-          toast.info(
-            `No absent students found for specified criteria on ${formattedDate}.`,
-            { autoClose: 2000 }
-          );
-        } else if (response.status === 200) {
+        if (response.status === 200) {
           const blob = response.data;
           const link = document.createElement("a");
           link.href = URL.createObjectURL(blob);
           link.download = "Absent_Students_Report.xlsx";
           link.click();
           setIsLoading(false);
-          toast.success("Report downloaded successfully!", { autoClose: 2000 });
+          toast.success("Report downloaded successfully!", { autoClose: 800 });
         }
       })
       .catch((error) => {
-        console.error("Error generating report:", error);
-        if (error.response) {
-          console.log("Error Response Data:", error.response.data);
-        }
-        
-        // Check for specific error responses
-        if (error.response && error.response.status === 403) {
-          console.log("Error Response:", error.response); // Log the full error response to the console
-          const errorMessage = error.response.data.message || "You are not authorized to access this page.";
-          toast.error(`Error: ${errorMessage}`, {
-          autoClose: 2000,
-          });
-        }
-         else {
-          toast.error("An error occurred while generating the report.", {
-            autoClose: 2000,
-          });
-        }
-    
         setIsLoading(false);
+  
+        if (error.response) {
+          const { status, data } = error.response;
+  
+          if (status === 404) {
+            const formattedDate = formatDate(date);
+            setMessage(
+              `No absent students found for specified criteria on ${formattedDate}.`
+            );
+            toast.info(
+              `No absent students found for specified criteria on ${formattedDate}.`,
+              { autoClose: 800 }
+            );
+          } else if (status === 403) {
+            const errorMessage =
+              data.message || "You are not authorized to access this page.";
+            toast.error(`Error: ${errorMessage}`, { autoClose: 800 });
+          } else {
+            toast.error("An error occurred while generating the report.", {
+              autoClose: 800,
+            });
+          }
+        } else {
+          toast.error("A network error occurred. Please try again later.", {
+            autoClose: 800,
+          });
+        }
       });
   };
+  
   return (
 <div className="flex items-start justify-center min-h-screen p-6">
   <div className="w-full p-6 bg-gray-800 rounded-lg shadow-lg sm:w-96 md:w-80 lg:w-96 xl:w-1/3">
@@ -214,21 +227,24 @@ const GenerateReport = () => {
             <option value="A">A</option>
             <option value="B">B</option>
             <option value="C">C</option>
+          <option value="-">NA</option>
           </select>
         </div>
 
         {/* Button to download report */}
         <button
           onClick={handleDownload}
-          className="w-full px-4 py-2 font-bold text-white transition duration-300 bg-blue-600 rounded-md shadow hover:bg-blue-700"
+          className={`w-full px-4 py-2 font-bold text-white transition duration-500 rounded-md shadow  ${isLoading? "bg-gray-600 hover:bg-gray-700 cursor-not-allowed":"bg-blue-600 hover:scale-110"}`}
         >
           {isLoading ? "Loading..." : "Download Report"}
         </button>
 
+
+
         {/* Back button */}
         <button
           onClick={() => navigate(-1)} // Replace with actual back navigation logic
-          className="w-full px-4 py-2 mt-4 font-bold text-white transition duration-300 bg-gray-600 rounded-md shadow hover:bg-gray-700"
+          className="w-full px-4 py-2 mt-4 font-bold text-white transition duration-500 bg-gray-600 rounded-md shadow hover:scale-110 hover:bg-gray-700"
         >
           Back
         </button>

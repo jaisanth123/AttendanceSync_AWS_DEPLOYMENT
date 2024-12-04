@@ -35,6 +35,13 @@ const GenerateMessage = () => {
     return `${day}-${month}-${year}`;
   };
 
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    setDate(today);
+  }, []);
+
+  
+
   const copyCardContent = () => {
     const cardContent = document.getElementById('cardContent');
     const range = document.createRange();
@@ -60,34 +67,52 @@ const GenerateMessage = () => {
       toast.info('Please select a date.', { autoClose: 800 });
       return;
     }
-
+  
     setIsLoading(true);
     setMessage('');
     setDetails([]);
     setMissingStudents([]);
     setErrorMessage('');
+    
+
+    const authToken = sessionStorage.getItem('authToken');
+  
+    if (!authToken) {
+      setErrorMessage('Authorization token is missing. Please log in again.');
+      setIsLoading(false);
+      return;
+    }
+  
+    // Construct the URL for the report
     const url = `${backendURL}/api/report/absentStudentsCustom?gender=${gender}&date=${date}&hostellerDayScholar=${hostellerDayScholar}&yearOfStudy=${yearOfStudy}&section=${section}&branch=${branch}`;
 
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.message) {
-          setMessage(data.message);
-          const detailsArray = data.details ? data.details.split('\n') : [];
-          setDetails(detailsArray);
-          setMissingStudents(data.missingStudents || []);
-          setErrorMessage('');
-        }
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        setErrorMessage('An error occurred. Please try again later.');
-        setIsLoading(false);
-      });
-  };
+  
+    // Add the Authorization header to the fetch request
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${authToken}`, // Include the token in the Authorization header
+      },
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.message) {
+        setMessage(data.message);
+        const detailsArray = data.details ? data.details.split('\n') : [];
+        setDetails(detailsArray);
+        setMissingStudents(data.missingStudents || []);
+        setErrorMessage('');
+      }
+      setIsLoading(false);
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      setErrorMessage('An error occurred. Please try again later.');
+      setIsLoading(false);
+    });
+};
 
-  return (
+return (
 <div className="flex items-start justify-center min-h-screen p-6">
   <div className="w-full p-6 bg-gray-800 rounded-lg shadow-lg sm:w-96 md:w-80 lg:w-96 xl:w-1/3">
     <h2 className="mb-2 text-2xl font-semibold text-center text-white">Generate Absentee Message</h2>
@@ -108,7 +133,8 @@ const GenerateMessage = () => {
         <select
           id="gender"
           value={gender}
-          onChange={handleGenderChange}
+          onChange={(e) => {handleGenderChange(e); setShowCard(false)}
+          }
           style={{ padding: '5px', margin: '10px 0' }}
           className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
         >
@@ -124,7 +150,7 @@ const GenerateMessage = () => {
         <select
           id="hostellerDayScholar"
           value={hostellerDayScholar}
-          onChange={handleHostellerDayScholarChange}
+          onChange={(e) => {handleHostellerDayScholarChange(e); setShowCard(false)}}
           style={{ padding: '5px', margin: '10px 0' }}
           className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
         >
@@ -140,7 +166,7 @@ const GenerateMessage = () => {
         <select
           id="yearOfStudy"
           value={yearOfStudy}
-          onChange={handleYearOfStudyChange}
+          onChange={(e)=>{handleYearOfStudyChange(e);setShowCard(false)}}
           style={{ padding: '5px', margin: '10px 0' }}
           className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
         >
@@ -157,7 +183,7 @@ const GenerateMessage = () => {
         <select
           id="branch"
           value={branch}
-          onChange={handleBranchChange}
+          onChange={(e)=>{handleBranchChange(e);setShowCard(false)}}
           style={{ padding: '5px', margin: '10px 0' }}
           className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
         >
@@ -173,7 +199,7 @@ const GenerateMessage = () => {
         <select
           id="section"
           value={section}
-          onChange={handleSectionChange}
+          onChange={(e) => {handleSectionChange(e);setShowCard(false)}}
           style={{ padding: '5px', margin: '10px 0' }}
           className="block w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
         >
@@ -181,6 +207,7 @@ const GenerateMessage = () => {
           <option value="A">A</option>
           <option value="B">B</option>
           <option value="C">C</option>
+          <option value="-">NA</option>
         </select>
       </div>
 
@@ -190,13 +217,13 @@ const GenerateMessage = () => {
           handleDownload();
           toggleCardVisibility();
         }}
-        className="w-full px-4 py-2 mt-2 font-bold text-white transition duration-300 bg-blue-600 rounded-md shadow hover:bg-blue-700"
+        className="w-full px-4 py-2 mt-2 font-bold text-white transition duration-500 bg-blue-600 rounded-md shadow hover:scale-110 hover:bg-blue-700"
       >
         {isLoading ? 'Generating Report...' : 'Get Absent Students'}
       </button>
       <button
           onClick={() => navigate(-1)} // Replace with actual back navigation logic
-          className="w-full px-4 py-2 mt-4 font-bold text-white transition duration-300 bg-gray-600 rounded-md shadow hover:bg-gray-700"
+          className="w-full px-4 py-2 mt-4 font-bold text-white transition duration-500 bg-gray-600 rounded-md shadow hover:scale-110 hover:bg-gray-700"
         >
           Back
         </button>

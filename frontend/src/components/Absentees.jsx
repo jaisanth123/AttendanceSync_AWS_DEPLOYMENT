@@ -8,6 +8,7 @@ function Absentees() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMarkingLoading, setIsMarkingLoading] = useState(false);
+  const [isSuperMarkingLoading, setIsSuperMarkingLoading] = useState(false);
 
   // State variables
   const [date, setDate] = useState(
@@ -29,7 +30,7 @@ function Absentees() {
   const [showGenerateMessageButton, setShowGenerateMessageButton] =useState(false);
   const[markabsentbutton , setMarkabsentButton] = useState(false)
   const [errorMessage, setErrorMessage] = useState(""); // State to store the error message
-    
+  const[marksuperpacc, setmarksuperpacc] = useState(false)
   const [yearOfStudy, setYearOfStudy] = useState();
   const formatDate = (dateString) => {
     const dateObj = new Date(dateString);
@@ -44,15 +45,19 @@ function Absentees() {
       setErrorMessage("");
     }
   }, [selectedCourse, date]);
-  const backendURL = import.meta.env.VITE_BACKEND_URL; 
+
+  // Fetch roll numbers sds selectedCoursor date changes
+  // Fetch roll numbers when selectedCourse or date changes
   const fetchRollNumbers = async (course, selectedDate) => {
-    const [yearOfStudy, branch, section] = course.split(" - ");
+    let [yearOfStudy, branch, section] = course.split(" - ");
+    section =  yearOfStudy ==="IV"?"-" : section
     setYearOfStudy(yearOfStudy);
-    
-  const url = `${backendURL}/api/attendance/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
-    
+    const url = `http://localhost:5000/api/attendance/rollnumbers?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${selectedDate}`;
+    console.log(url);
+  
     try {
       const { data } = await axios.get(url);
+
   
       if (data?.message) {
         if (data.message === "Attendance has already been marked for all students.") {
@@ -146,6 +151,7 @@ function Absentees() {
       });
       setShowConfirmationPopup(false);
       setMarkPresentVisible(true);
+      setmarksuperpacc(true)
    
       return; // Early return to prevent further execution
     } 
@@ -153,9 +159,9 @@ function Absentees() {
     try {
       const [yearOfStudy, branch, section] = selectedCourse.split(" - ");
       setYearOfStudy(yearOfStudy);
-      
+  
       // Make sure the server endpoint and data are correct
-      const response = await axios.post(`${backendURL}/api/attendance/absent`, {
+      const response = await axios.post("http://localhost:5000/api/attendance/absent", {
         rollNumbers: selectedRollNos,
         date,
         yearOfStudy,
@@ -176,6 +182,7 @@ function Absentees() {
       setSelectedRollNos([]);
       await fetchRollNumbers(selectedCourse, date);
       setMarkPresentVisible(true);
+      setmarksuperpacc(true)
     } catch (error) {
       console.error("Error marking absentees:", error);
   
@@ -195,7 +202,7 @@ function Absentees() {
   
     try {
       const response = await axios.post(
-        `${backendURL}/api/attendance/mark-remaining-present`,
+        "http://localhost:5000/api/attendance/mark-remaining-present",
         data
       );
   
@@ -204,10 +211,12 @@ function Absentees() {
           autoClose: 800,
         });
         setMarkPresentVisible(false); // Hide Mark Present button
+        
       } else {
         toast.success("Successfully marked remaining students as present.", {
           autoClose: 800,
         });
+        setMarkPresentVisible(false);
         setShowGenerateMessageButton(true); // Show Generate Message button
       }
     } catch (error) {
@@ -218,53 +227,43 @@ function Absentees() {
     } finally {
       setIsMarkingLoading(false);
       setShowMarkPresentPopup(false); // Close the popup
+      setShowMarkSuperPaccPopup(false)
       setSelectedRollNos([]); // Reset selectedRollNos array
       await fetchRollNumbers(selectedCourse, date);  // Refresh the roll numbers after marking present
     }
   };
-
-
 
 
   const handleMarkSuperPaccConfirm = async () => {
-    setIsMarkingLoading(true);
-    const [yearOfStudy, branch, section] = selectedCourse.split(" - ");
-    const data = { yearOfStudy, branch, section, date };
-  
+    setIsSuperMarkingLoading(true); // Show loading indicator
+    const [yearOfStudy, branch, section] = selectedCourse.split(" - "); // Parse selected course
+    const data = { yearOfStudy, branch, section, date }; // Prepare payload
+    setShowMarkSuperPaccPopup(false); 
     try {
-      const response = await axios.post(
-        `${backendURL}/api/attendance/mark-remaining-present`,
-        data
-      );
+      // Make the POST request to the backend API
+      const response = await axios.post("http://localhost:5000/api/attendance/mark-SuperPacc", data);
   
-      if (response.data.markedAsPresent === 0) {
-        toast.info("Onduty for Superpacc students have alredy marked.", {
-          autoClose: 800,
-        });
-        setMarkPresentVisible(false); // Hide Mark Present button
-      } else {
-        toast.success("Successfully marked SuperPacc Students ad OnDuty", {
-          autoClose: 800,
-        });
-        setShowGenerateMessageButton(true); // Show Generate Message button
-      }
-    } catch (error) {
-      console.error("Error marking SuperPacc students as OnDuty:", error);
-      toast.error("Error marking SuperPacc students as On Duty. Please try again.", {
+      // Handle the success response
+      toast.success(`Successfully marked ${response.data.recordsAdded} students as SuperPacc!`, {
         autoClose: 800,
       });
+      // Close the popup
+      await fetchRollNumbers(selectedCourse, date);
+      setmarksuperpacc(false); // Reset the flag
+    } catch (error) {
+      // Handle error
+      console.error("Error marking SuperPacc attendance:", error);
+      toast.error(
+        "An error occurred while marking SuperPacc attendance. Please try again.",
+        { autoClose: 800 }
+      );
     } finally {
-      setIsMarkingLoading(false);
-      setShowMarkSuperPaccPopup(false); // Close the popup
-      setSelectedRollNos([]); // Reset selectedRollNos array
-      await fetchRollNumbers(selectedCourse, date);  // Refresh the roll numbers after marking present
+      setIsSuperMarkingLoading(false); // Hide loading indicator
     }
   };
   
-
   
 
- 
 
   // Reusable Popup Component
   const ReusablePopup = ({
@@ -356,23 +355,22 @@ function Absentees() {
       </div>
       {selectedRollNos.length > 0 && (
         <div className="w-full p-4 mt-6 text-lg text-black">
-          <h4 className="mb-10 text-3xl font-semibold text-center">
-            Selected Roll Numbers:
-          </h4>
-          <div className="flex flex-col items-center space-y-4">
-            {selectedRollNos.map((rollNo, index) => {
-              const student = rollNumbers.find(
-                (student) => student.rollNo === rollNo
-              );
-              return (
-                <span key={index} className="text-xl font-bold text-center">
-                  {" "}
-                  {student ? `${student.rollNo} - ${student.name}` : rollNo}
-                </span>
-              );
-            })}
-          </div>
-        </div>
+  <h4 className="mb-10 text-3xl font-semibold text-center">
+    Selected Roll Numbers:
+  </h4>
+  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    {selectedRollNos.map((rollNo, index) => {
+      const student = rollNumbers.find(
+        (student) => student.rollNo === rollNo
+      );
+      return (
+        <span key={index} className="text-xl font-bold ">
+          {student ? `${student.rollNo} - ${student.name}` : rollNo}
+        </span>
+      );
+    })}
+  </div>
+</div>
       )}
            <div className="flex flex-col gap-4 mt-8 md:w-1/4 lg:w-1/5">
 
@@ -386,22 +384,21 @@ function Absentees() {
         </button>
 )}
 
-        {(yearOfStudy === "III" && markPresentVisible) && (
+        {(yearOfStudy === "III" && markPresentVisible && marksuperpacc) && (
           <button
             onClick={() => {
               setShowMarkSuperPaccPopup(true);
               setPopupMessage("Are you sure you want to mark SuperPacc students as OnDuty?");
-              setShowMarkSuperPaccPopup(true);
             }}
-            disabled={isMarkingLoading}
+            disabled={isSuperMarkingLoading}
             
             className={`w-full px-8 py-4 text-xl duration-500 hover:scale-110 font-semibold rounded-lg transition-all ${
-              isMarkingLoading
+              isSuperMarkingLoading
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-600 hover:bg-blue-800 text-white"
             }`}
           >
-            {isMarkingLoading ? "Marking SuperPacc OD..." : "Mark SuperPacc OD"}
+            {isSuperMarkingLoading ? "Marking SuperPacc OD..." : "Mark SuperPacc OD"}
           </button>
         )}
 
@@ -419,7 +416,7 @@ function Absentees() {
           >
             {isMarkingLoading ? "Marking Present..." : "Mark Present"}
           </button>
-        )}
+        )}  
         <div className="h-10 mb-4">
           <button
             onClick={() => navigate("/homePage")} // Navigate to the home page

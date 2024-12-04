@@ -25,7 +25,7 @@ function SignIn() {
         password,
       };
       const backendURL = import.meta.env.VITE_BACKEND_URL;
-      console.log("Backend URL:", backendURL);
+      //console.log("Backend URL:", backendURL);
 
       // Send login request based on role
       let response;
@@ -55,7 +55,7 @@ function SignIn() {
     } catch (error) {
       // Show error toast if authentication fails
       toast.error(error.response?.data?.message || "Login failed. Please try again.", {
-        autoClose: 2000,
+        autoClose: 800,
       });
     }
   };

@@ -90,9 +90,9 @@ function Sidebar({ closeSidebar, handleItemSelection }) {
             <MdClose onClick={closeSidebar} className="text-2xl cursor-pointer hover:text-gray-300" />
           </div>
 
-          <YearSection year="2nd" expandedYear={expandedYear} toggleYear={toggleYear} courses={["II - AIDS - A", "II - AIDS - B", "II - AIDS - C", "II - AIML - A", "II - AIML - B"]} handleItemSelection={handleCourseSelection} />
-          <YearSection year="3rd" expandedYear={expandedYear} toggleYear={toggleYear} courses={["III - AIDS - A", "III - AIDS - B", "III - AIML - A", "III - AIML - B"]} handleItemSelection={handleCourseSelection} />
-          <YearSection year="4th" expandedYear={expandedYear} toggleYear={toggleYear} courses={["IV - AIDS", "IV - AIML"]} handleItemSelection={handleCourseSelection} />
+           <YearSection year="2nd" expandedYear={expandedYear} toggleYear={toggleYear} courses={["II - AIDS - A", "II - AIDS - B", "II - AIDS - C", "II - AIML - A", "II - AIML - B"]} handleItemSelection={handleCourseSelection} />
+           <YearSection year="3rd" expandedYear={expandedYear} toggleYear={toggleYear} courses={["III - AIDS - A", "III - AIDS - B", "III - AIML - A", "III - AIML - B"]} handleItemSelection={handleCourseSelection} />
+           <YearSection year="4th" expandedYear={expandedYear} toggleYear={toggleYear} courses={["IV - AIDS", "IV - AIML"]} handleItemSelection={handleCourseSelection} />
         </div>
 
         {/* Modal Trigger Button */}

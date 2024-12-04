@@ -33,7 +33,7 @@ const ProtectedRoute = () => {
     return (
       <div>
         {showError && (
-          <div className="text-red-600 text-center font-bold text-2xl">
+          <div className="text-2xl font-bold text-center text-red-600">
             You must be logged in to access this page.
           </div>
         )}

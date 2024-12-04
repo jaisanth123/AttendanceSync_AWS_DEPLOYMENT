@@ -38,15 +38,14 @@ const GenerateExcel = () => {
       .then((response) => {
         if (response.status === 404) {
           return response.json().then((data) => {
-            const formattedDate = formatDate(
-              date);
+            const formattedDate = formatDate(date);
             setMessage(
               `No absent ${gender.toLowerCase()} students found for ${formattedDate}.`
             );
             setIsLoading(false);
             toast.info(
               `No absent ${gender.toLowerCase()} students found for ${formattedDate}.`,
-              { autoClose: 2000 }
+              { autoClose: 800 }
             );
           });
         } else if (response.ok) {
@@ -57,7 +56,7 @@ const GenerateExcel = () => {
             link.click();
             setIsLoading(false);
             toast.success("Report downloaded successfully!", {
-              autoClose: 2000,
+              autoClose: 800,
             });
           });
         } else {
@@ -67,7 +66,7 @@ const GenerateExcel = () => {
       .catch((error) => {
         console.error("Error generating report:", error);
         toast.error("An error occurred while generating the report.", {
-          autoClose: 2000,
+          autoClose: 800,
         });
         setIsLoading(false);
       });

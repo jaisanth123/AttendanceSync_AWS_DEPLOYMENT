@@ -3,11 +3,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify"; // Import react-toastify
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
-const backendURL = import.meta.env.VITE_BACKEND_URL;
+import RoleFromToken from "./RoleFromToken"; // Import the function to get the role from token
 
 const MessagePage = ({ toggleSidebar }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [role, setRole] = useState(null);  // Store the role state
+
   const [yearOfStudy, setYearOfStudy] = useState("");
   const [section, setSection] = useState("");
   const [branch, setBranch] = useState("");
@@ -65,9 +67,10 @@ const MessagePage = ({ toggleSidebar }) => {
     console.log(yearOfStudy, branch, section);
     try {
       const response = await axios.get(
-        `${backendURL}/api/report/absentStudents?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${date}`
+        `http://localhost:5000/api/report/absentStudents?yearOfStudy=${yearOfStudy}&branch=${branch}&section=${section}&date=${date}`,
+        { withCredentials: true } // Add withCredentials in the configuration object
       );
-
+    
       if (response.data.message) {
         setMessage(response.data.message);
 
@@ -110,6 +113,23 @@ const MessagePage = ({ toggleSidebar }) => {
     };
   }, []);
 
+  const navigateToAttendance = () => {
+    setShowCard(false); // Close the card before navigating
+    toggleSidebar(); // If it's related to sidebar toggle
+  };
+
+  const navigateToHome = () => {
+    setShowCard(false); // Close the card before navigating
+    navigate("/homePage"); // Navigate to home page
+  };
+
+  useEffect(() => {
+    // Get the role from the token when the component mounts
+    const userRole = RoleFromToken();
+    console.log("User Role:", userRole); // Log the role to check its value
+    setRole(userRole);
+  }, []);
+
   return (
     <div className="p-4 text-center text-black">
       <h1 className="text-2xl font-semibold md:text-3xl lg:text-4xl">{selectedCourse}</h1>
@@ -117,18 +137,20 @@ const MessagePage = ({ toggleSidebar }) => {
       <h3 className="mt-2 mb-4 text-base font-semibold md:text-lg lg:text-xl">{formatDate(selectedDate)}</h3>
 
       <div className="flex flex-col items-center gap-y-4">
-        {/* Get Absentees Button */}
-        <div className="w-full max-w-xs p-6 mx-auto mt-6 text-white bg-gray-800 rounded-lg shadow-lg">
-          <button
+        {/* Conditionally render Get Absentees Button based on role */}
+        
+          <div
             onClick={() => {
               getAbsentStudents(selectedCourse, selectedDate);
               toggleCardVisibility();
             }}
-            className="w-full py-2 text-2xl font-semibold text-white bg-gray-800 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full max-w-xs p-6 mx-auto mt-6 text-white transition-all duration-500 bg-gray-800 rounded-lg shadow-lg hover:scale-110 hover:bg-gray-600"
           >
-            Get Absentees
-          </button>
-        </div>
+            <button className="w-full py-2 text-2xl font-semibold text-whiterounded-lg">
+              Get Absentees
+            </button>
+          </div>
+        
 
         {showCard && (message || details.length > 0 || missingStudents.length > 0 || errorMessage) && (
           <div
@@ -166,29 +188,19 @@ const MessagePage = ({ toggleSidebar }) => {
 
             <button
               onClick={copyCardContent}
-              className="px-6 py-2 mt-4 font-semibold text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-800 focus:outline-none focus:ring focus:ring-blue-300"
+              className="px-6 py-2 mt-4 font-semibold text-white transition-all duration-500 bg-blue-800 rounded-lg shadow-lg hover:bg-blue-600 hover:scale-110"
             >
               Copy Content
             </button>
           </div>
         )}
 
-        {/* Attendancee Button */}
-        <div className="w-full max-w-xs p-6 mx-auto mt-6 text-white bg-gray-800 rounded-lg shadow-lg">
-          <button
-            onClick={toggleSidebar}
-            className="w-full py-2 text-2xl font-semibold text-white bg-gray-800 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-          >
-            Attendance
-          </button>
-        </div>
+        {/* Attendance Button */}
+
 
         {/* Home Button */}
-        <div className="w-full max-w-xs p-6 mx-auto mt-6 text-white bg-gray-800 rounded-lg shadow-lg">
-          <button
-            onClick={() => navigate("/homePage")}
-            className="w-full py-2 text-2xl font-semibold text-white bg-gray-800 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-          >
+        <div onClick={navigateToHome} className="w-full max-w-xs p-6 mx-auto mt-6 text-white transition-all duration-500 bg-gray-800 rounded-lg shadow-lg hover:bg-gray-600 hover:scale-110">
+          <button className="w-full py-2 text-2xl font-semibold text-white">
             Home
           </button>
         </div>

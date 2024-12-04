@@ -31,12 +31,20 @@ const verifyTokenAndRole = async (authToken, roleType) => {
   }
 };
 
+// Extract token from headers
+const getTokenFromHeaders = (req) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.split(' ')[1]; // Return the token part
+  }
+  return null;
+};
+
 // User authentication middleware
 const authenticateUser = async (req, res, next) => {
-  console.log(req.cookies);
-  const { authToken } = req.cookies;
+  const authToken = getTokenFromHeaders(req);
 
-  // First, check if token is available
+  // Check if token is available
   if (!authToken) {
     return res.status(401).json({ message: 'No token found. You are not authorized to access this page.' });
   }
@@ -52,10 +60,10 @@ const authenticateUser = async (req, res, next) => {
 
 // Admin authentication middleware
 const authenticateAdmin = async (req, res, next) => {
-  console.log(req.cookies);
-  const { authToken } = req.cookies;
+  const authToken = getTokenFromHeaders(req);
+  console.log(authToken);
 
-  // First, check if token is available
+  // Check if token is available
   if (!authToken) {
     return res.status(401).json({ message: 'No token found. You are not authorized to access this page.' });
   }
