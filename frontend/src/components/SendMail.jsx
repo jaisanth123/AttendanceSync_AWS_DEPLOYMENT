@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify"; // Importing toast and ToastContainer
 import 'react-toastify/dist/ReactToastify.css'; // Importing styles for toast notifications
-  const backendURL = import.meta.env.VITE_BACKEND_URL; 
 const SendEmail = () => {
+  const backendURL = import.meta.env.VITE_BACKEND_URL; 
   const [emailStatus, setEmailStatus] = useState("");
   const [file, setFile] = useState(null);
   const [isButtonClicked, setIsButtonClicked] = useState(false);
