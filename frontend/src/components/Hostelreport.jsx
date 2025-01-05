@@ -57,8 +57,9 @@ const Hostelreport = () => {
       setIsLoading(false);
       return;
     }
-  
-    const url = `http://localhost:5000/api/report/download-absent-report?gender=${gender}&date=${date}&hostellerDayScholar=HOSTELLER&yearOfStudy=${yearOfStudy}&section=${section}&branch=${branch}`;
+    const backendURL = import.meta.env.VITE_BACKEND_URL; 
+
+    const url = `${backendURL}/api/report/download-absent-report?gender=${gender}&date=${date}&hostellerDayScholar=HOSTELLER&yearOfStudy=${yearOfStudy}&section=${section}&branch=${branch}`;
   
     axios
       .get(url, {
