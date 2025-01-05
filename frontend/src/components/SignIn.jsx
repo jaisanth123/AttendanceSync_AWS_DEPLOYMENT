@@ -4,6 +4,7 @@ import axios from "axios"; // Import axios for API requests
 import { ToastContainer, toast } from "react-toastify"; // Import toastify
 import "react-toastify/dist/ReactToastify.css"; // Import toastify CSS
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
+const backendURL = import.meta.env.VITE_BACKEND_URL; 
 
 function SignIn() {
   const navigate = useNavigate();
@@ -24,20 +25,14 @@ function SignIn() {
         username,
         password,
       };
-      const backendURL = import.meta.env.VITE_BACKEND_URL;
-      //console.log("Backend URL:", backendURL);
 
       // Send login request based on role
       let response;
       if (role === "user") {
-        response = await axios.post(`${backendURL}/api/auth/login/user`, payload, {
-          withCredentials: true, // Make sure credentials (cookies) are sent
-        });
-      } else {
-        response = await axios.post(`${backendURL}/api/auth/login/admin`, payload, {
-          withCredentials: true, // Make sure credentials (cookies) are sent
-        });
-      }
+        response = await axios.post(`${backendURL}/api/auth/login/user`, payload);
+        } else {
+          response = await axios.post(`${backendURL}/api/auth/login/admin`, payload);
+          }
 
       // Save the token in sessionStorage
       const token = response.data.token;
@@ -48,7 +43,7 @@ function SignIn() {
         autoClose: 800, // Timeout for toast to disappear after 2 seconds
       });
 
-      // Wait for 2 seconds, then navigate to the homepage
+    // Wait for 2 seconds, then navigate to the homepage
       setTimeout(() => {
         navigate("/homePage"); // Redirect to homepage after sign-in
       }, 800);
@@ -60,7 +55,7 @@ function SignIn() {
     }
   };
 
-  // Toggle password visibility
+  // Toggle password visibilit1
   const togglePassword = () => {
     setShowPassword(!showPassword);
   };
@@ -68,25 +63,50 @@ function SignIn() {
   return (
     <div>
       {/* Navbar without logout and sidebar toggle */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-800 shadow-md">
-        <div className="items-center justify-between px-4 py-4 text-white sm:flex sm:py-6">
-          {/* Title centered for large screens */}
-          <div className="flex-1 ml-40 text-xl font-semibold text-center whitespace-nowrap">
-            ATTENDANCE AI DEPARTMENT
-          </div>
+<nav className="fixed top-0 left-0 right-0 z-50 mt-2 bg-gray-800 shadow-md ">
+{/* For large screens */}
+<div className="items-center justify-between hidden px-4 py-4 text-white sm:flex sm:py-6">
+  {/* Sidebar Toggle Button */}
 
-          {/* Date */}
-          <div className="text-lg sm:block lg:text-xl sm:mt-2">
-            {new Date().toLocaleDateString("en-US", {
+
+  {/* Title centered for large screens */}
+  <div className="flex-1 ml-40 text-xl font-semibold text-center whitespace-nowrap">
+    ATTENDANCE AI DEPARTMENT
+  </div>
+
+  {/* Date */}
+  <div className="text-lg sm:block lg:text-xl sm:mt-2">
+  {new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}  </div>
+</div>
+
+{/* For small screens */}
+<div className="px-4 py-2 text-white sm:hidden">
+  {/* Icon and Title in one row */}
+  <div className="flex items-center">
+    {/* Sidebar Toggle Icon (positioned in the middle of the left side) */}
+
+    {/* Title centered in one line */}
+    <div className="flex-grow text-lg font-semibold text-center">
+      ATTENDANCE AI DEPARTMENT
+    </div>
+  </div>
+
+  {/* Date on a separate row below */}
+  <div className="mt-1 text-sm text-center">
+  {new Date().toLocaleDateString("en-US", {
               weekday: "long",
               year: "numeric",
               month: "long",
               day: "numeric",
             })}
-          </div>
-        </div>
-      </nav>
-
+  </div>
+</div>
+</nav>
       {/* Sign In Form */}
       <div className="flex items-center justify-center h-screen transition-transform duration-1000">
         <div className="w-full max-w-md p-6 space-y-8 bg-gray-900 rounded-lg shadow-lg">
@@ -147,3 +167,5 @@ function SignIn() {
 }
 
 export default SignIn;
+
+

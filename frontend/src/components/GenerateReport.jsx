@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios"; // Import axios
 import "react-toastify/dist/ReactToastify.css"; // Import the toast CSS
-const backendURL = import.meta.env.VITE_BACKEND_URL;
+const backendURL = import.meta.env.VITE_BACKEND_URL; 
 
 const GenerateReport = () => {
   const [isLoading, setIsLoading] = useState(false); // State to track loading status
   const [message, setMessage] = useState(""); // State to hold message when no students are absent
   const [date, setDate] = useState(""); // State to store selected date
   const [gender, setGender] = useState("ALL"); // State to store selected gender
-  const [hostellerDayScholar, setHostellerDayScholar] = useState("ALL"); // Hosteller/Day Scholar selection
+  const [hostellerDayScholar, setHostellerDayScholar] = useState("HOSTELLER"); // Hosteller/Day Scholar selection
   const [yearOfStudy, setYearOfStudy] = useState("ALL"); // Selected year of study
   const [section, setSection] = useState("ALL"); // Selected section
   const [branch, setBranch] = useState("ALL"); // Selected branch
@@ -32,8 +32,11 @@ const GenerateReport = () => {
     return `${day}-${month}-${year}`;
   };
 
-  // Handle the button click to download the report
-  
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    setDate(today);
+  }, []);
+
   // Handle the button click to download the report
   const handleDownload = () => {
     if (!date) {
@@ -234,7 +237,7 @@ const GenerateReport = () => {
         {/* Button to download report */}
         <button
           onClick={handleDownload}
-          className={`w-full px-4 py-2 font-bold text-white transition duration-500 rounded-md shadow  ${isLoading? "bg-gray-600 hover:bg-gray-700 cursor-not-allowed":"bg-blue-600 hover:scale-110"}`}
+          className={`w-full px-4 py-2 font-bold text-white transition duration-500 rounded-md shadow  ${isLoading? "bg-gray-600 hover:bg-gray-700 cursor-not-allowed":"bg-blue-600 hover:scale-105"}`}
         >
           {isLoading ? "Loading..." : "Download Report"}
         </button>
@@ -244,7 +247,7 @@ const GenerateReport = () => {
         {/* Back button */}
         <button
           onClick={() => navigate(-1)} // Replace with actual back navigation logic
-          className="w-full px-4 py-2 mt-4 font-bold text-white transition duration-500 bg-gray-600 rounded-md shadow hover:scale-110 hover:bg-gray-700"
+          className="w-full px-4 py-2 mt-4 font-bold text-white transition duration-500 bg-gray-600 rounded-md shadow hover:scale-105 hover:bg-gray-700"
         >
           Back
         </button>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import the toast CSS
 import { useNavigate } from "react-router-dom"; // Make sure you import the `useNavigate` hook from react-router-dom
-const backendURL = import.meta.env.VITE_BACKEND_URL;
+const backendURL = import.meta.env.VITE_BACKEND_URL; 
 
 const GenerateExcel = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -32,8 +32,8 @@ const GenerateExcel = () => {
 
     setIsLoading(true);
     setMessage("");
-    const url = `${backendURL}/api/report/downloadreport/${gender.toLowerCase()}?date=${date}`;
 
+    const url = `${backendURL}/api/report/downloadreport/${gender.toLowerCase()}?date=${date}`;
     fetch(url)
       .then((response) => {
         if (response.status === 404) {
@@ -120,14 +120,25 @@ const GenerateExcel = () => {
           </button>
         </div>
         {/* Navigate to Send Email Page */}
+
+
+        //! ------------------------ updated -------------------------------------
 <div className="mb-4">
+  <button
+    onClick={() => navigate("/hostelreport")} // Adjust this path based on your route setup
+    className="w-full px-6 py-2 font-semibold text-white transition-all duration-500 transform bg-blue-600 rounded-md hover:scale-105 hover:bg-blue-700"
+  >
+    Go to Send Email Page
+  </button>
+</div>
+{/* <div className="mb-4">
   <button
     onClick={() => navigate("/send-email")} // Adjust this path based on your route setup
     className="w-full px-6 py-2 font-semibold text-white transition-all duration-500 transform bg-blue-600 rounded-md hover:scale-105 hover:bg-blue-700"
   >
     Go to Send Email Page
   </button>
-</div>
+</div> */}
 
 
         {/* Back Button */}

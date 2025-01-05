@@ -7,6 +7,7 @@ const ProtectedRoute = () => {
   const [showError, setShowError] = useState(false);
   const [redirect, setRedirect] = useState(false);
   const token = sessionStorage.getItem("authToken"); // Get token from sessionStorage
+  console.log('Token from sessionStorage:', token); // Log token to verify if it's retrieved
 
   useEffect(() => {
     if (!token) {

@@ -2,6 +2,7 @@ import {jwtDecode} from 'jwt-decode'; // Correct import for jwt-decode
  // Correct import for jwt-decode
 
 const RoleFromToken = () => {
+  // Log all session storage items to inspect them
   //console.log('SessionStorage Contents:', { ...sessionStorage });
 
   const token = sessionStorage.getItem('authToken'); // Retrieve the token from sessionStorage
@@ -27,7 +28,7 @@ const RoleFromToken = () => {
     }
   } else {
     //console.log('No token found in sessionStorage');
-  }
+  }//
 
   // If no valid token found or role is missing, return null
   return null;

@@ -3,7 +3,6 @@ import axios from "axios";
 
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-const backendURL = import.meta.env.VITE_BACKEND_URL; 
 
 function UpdateAttendance() {
   const [yearOfStudy, setYearOfStudy] = useState("nan");
@@ -18,6 +17,7 @@ function UpdateAttendance() {
   const [isUpdating, setIsUpdating] = useState(false); // New state for updating attendance
   const [attendanceLogs, setAttendanceLogs] = useState([]); // New state for attendance change logs
   const [initialStates, setInitialStates] = useState([]);
+  const backendURL = import.meta.env.VITE_BACKEND_URL; 
 
   const authToken = sessionStorage.getItem("authToken");
   
@@ -25,6 +25,7 @@ function UpdateAttendance() {
       toast.error("Authorization token is missing. Please log in again.", {
         autoClose: 800,
       });
+
       setIsLoading(false);
       return;
     }
@@ -33,6 +34,13 @@ function UpdateAttendance() {
       return;
     }
     setIsLoading(true);
+    
+    console.log("Fetching data with:", {
+      yearOfStudy:yearOfStudy,
+      class: branch,
+      section:section,
+      date,
+    });
     try{
       setRollNumbers([]);
       const response = await axios.get(`${backendURL}/api/attendance/get-attendancestatus`, {

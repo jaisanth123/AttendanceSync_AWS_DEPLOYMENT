@@ -1,8 +1,8 @@
-import React { useState,useEffect } from 'react';
+import React, { useState ,useEffect} from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from "react-router-dom";
-const backendURL = import.meta.env.VITE_BACKEND_URL;
+const backendURL = import.meta.env.VITE_BACKEND_URL; 
 
 const GenerateMessage = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -73,8 +73,7 @@ const GenerateMessage = () => {
     setDetails([]);
     setMissingStudents([]);
     setErrorMessage('');
-    
-
+  
     const authToken = sessionStorage.getItem('authToken');
   
     if (!authToken) {
