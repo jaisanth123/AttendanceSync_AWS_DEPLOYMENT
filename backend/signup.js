@@ -4,7 +4,7 @@ const Admin = require('./models/adminSchema.js');
 
 
 // Connect to your MongoDB database
-mongoose.connect('mongodb+srv://krrashmika2004:nhwUubZLhWrmu7Lr@cluster0.sfj4f.mongodb.net/AI_Attendence?retryWrites=true&w=majority', {
+mongoose.connect('mongodb+srv://hodai:K3k3sQgHf6AmPk1b@cluster0.uyo1b.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
