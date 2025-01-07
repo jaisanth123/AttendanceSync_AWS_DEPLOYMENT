@@ -432,9 +432,10 @@ exports.handleCustomDownloadAbsentReport = async (req, res) => {
 
         // Dynamic title based on filters
         const titleParts = [
-            'Students Absentees List',
-            hostellerDayScholar !== 'ALL' ? `Resident Type: ${hostellerDayScholar}` : null,
-        ].filter(Boolean).join(', ');
+            'Students Absentees List'
+            // ,hostellerDayScholar !== 'ALL' ? `Only ${hostellerDayScholar}` : null,
+        ]
+        //.filter(Boolean).join(', ');
 
         const headers = hostellerDayScholar === 'ALL'
             ? ['S.No', 'Roll No', 'Student Name', 'Year', 'Branch', 'ResidentType']
