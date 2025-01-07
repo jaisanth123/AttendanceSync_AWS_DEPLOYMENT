@@ -444,7 +444,7 @@ exports.handleCustomDownloadAbsentReport = async (req, res) => {
         const reportData = [
             ['Kongu Engineering College'],
             ['Department of Artificial Intelligence'],
-            [titleParts],
+            [`Students Absentees List - ${formattedDate}`],
             headers,
         ];
 
