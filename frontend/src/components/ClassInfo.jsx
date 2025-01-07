@@ -40,8 +40,9 @@ const ClassInfo = () => {
     setError("");
 
     try {
+      const backendURL = import.meta.env.VITE_BACKEND_URL; 
       const response = await axios.get(
-        `http://localhost:5000/api/attendance/getAttendanceStatusCount`,
+        `${backendURL}/api/attendance/getAttendanceStatusCount`,
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
