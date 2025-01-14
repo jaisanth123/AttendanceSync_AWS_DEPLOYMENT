@@ -20,6 +20,8 @@ jobs:
         run: |
           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
           docker info
+      - name: List files in frontend
+        run: ls -la ./frontend
       - name: Build Docker Image
         run: docker build -t jaisanth123/attendancesync -f ./frontend/Dockerfile --build-arg VITE_BACKEND_URL='${{ secrets.VITE_BACKEND_URL }}' .
       - name: Publish Image to Docker Hub
